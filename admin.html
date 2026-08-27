@@ -222,58 +222,63 @@
     </style>
 
     <script type="module">
-        import { db } from './src/firebase.js';
+        import { db, auth } from './src/firebase.js';
         import { collection, onSnapshot, query, orderBy, limit } from 'firebase/firestore';
+        import { onAuthStateChanged } from 'firebase/auth';
 
         lucide.createIcons();
 
         // 1. Listen Total Pengungsi & Rentan
-        onSnapshot(collection(db, "anggota"), (snapshot) => {
-            let totalPengungsi = snapshot.size;
-            let totalRentan = 0;
-            
-            snapshot.forEach(doc => {
-                const data = doc.data();
-                if (data.umur < 5 || data.umur >= 60 || (data.statusRentan && data.statusRentan.length > 0)) {
-                    totalRentan++;
-                }
-            });
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                onSnapshot(collection(db, "anggota"), (snapshot) => {
+                    let totalPengungsi = snapshot.size;
+                    let totalRentan = 0;
+                    
+                    snapshot.forEach(doc => {
+                        const data = doc.data();
+                        if (data.umur < 5 || data.umur >= 60 || (data.statusRentan && data.statusRentan.length > 0)) {
+                            totalRentan++;
+                        }
+                    });
 
-            document.getElementById('stat-pengungsi').innerHTML = `${totalPengungsi}<span class="text-lg text-slate-500 font-normal ml-2">Orang</span>`;
-            document.getElementById('stat-rentan').innerHTML = `${totalRentan}<span class="text-lg text-slate-500 font-normal ml-2">Jiwa</span>`;
-        });
+                    document.getElementById('stat-pengungsi').innerHTML = `${totalPengungsi}<span class="text-lg text-slate-500 font-normal ml-2">Orang</span>`;
+                    document.getElementById('stat-rentan').innerHTML = `${totalRentan}<span class="text-lg text-slate-500 font-normal ml-2">Jiwa</span>`;
+                });
 
-        // 2. Listen Laporan Logistik (Live Feed)
-        const qLogistik = query(collection(db, "laporan_logistik"), orderBy("createdAt", "desc"), limit(5));
-        onSnapshot(qLogistik, (snapshot) => {
-            const feedContainer = document.getElementById('live-feed-container');
-            if(snapshot.empty) return;
-            
-            let html = '';
-            snapshot.forEach(doc => {
-                const data = doc.data();
-                const timeStr = data.createdAt ? data.createdAt.toDate().toLocaleTimeString('id-ID', {hour: '2-digit', minute:'2-digit'}) : 'Baru saja';
-                
-                // Cek kebutuhan (pilih salah satu yang paling banyak diminta)
-                let itemMendesak = 'Logistik';
-                let maxQty = 0;
-                for (const [key, value] of Object.entries(data.kebutuhan || {})) {
-                    if (value > maxQty) { maxQty = value; itemMendesak = key; }
-                }
+                // 2. Listen Laporan Logistik (Live Feed)
+                const qLogistik = query(collection(db, "laporan_logistik"), orderBy("createdAt", "desc"), limit(5));
+                onSnapshot(qLogistik, (snapshot) => {
+                    const feedContainer = document.getElementById('live-feed-container');
+                    if(snapshot.empty) return;
+                    
+                    let html = '';
+                    snapshot.forEach(doc => {
+                        const data = doc.data();
+                        const timeStr = data.createdAt ? data.createdAt.toDate().toLocaleTimeString('id-ID', {hour: '2-digit', minute:'2-digit'}) : 'Baru saja';
+                        
+                        // Cek kebutuhan (pilih salah satu yang paling banyak diminta)
+                        let itemMendesak = 'Logistik';
+                        let maxQty = 0;
+                        for (const [key, value] of Object.entries(data.kebutuhan || {})) {
+                            if (value > maxQty) { maxQty = value; itemMendesak = key; }
+                        }
 
-                html += `
-                <div class="flex border-b border-slate-800 pb-3">
-                    <div class="w-10 h-10 rounded-full bg-orange-900/50 flex justify-center items-center text-alert-500 shrink-0">
-                        <i data-lucide="package" class="w-5 h-5"></i>
-                    </div>
-                    <div class="ml-3">
-                        <p class="text-sm text-white font-medium">Laporan: Butuh ${maxQty} ${itemMendesak.toUpperCase()} di ${data.posko}</p>
-                        <p class="text-xs text-slate-500 mt-1">Oleh: ${data.pelapor} • ${timeStr}</p>
-                    </div>
-                </div>`;
-            });
-            feedContainer.innerHTML = html;
-            lucide.createIcons(); // refresh icons newly added
+                        html += `
+                        <div class="flex border-b border-slate-800 pb-3">
+                            <div class="w-10 h-10 rounded-full bg-orange-900/50 flex justify-center items-center text-alert-500 shrink-0">
+                                <i data-lucide="package" class="w-5 h-5"></i>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm text-white font-medium">Laporan: Butuh ${maxQty} ${itemMendesak.toUpperCase()} di ${data.posko}</p>
+                                <p class="text-xs text-slate-500 mt-1">Oleh: ${data.pelapor} • ${timeStr}</p>
+                            </div>
+                        </div>`;
+                    });
+                    feedContainer.innerHTML = html;
+                    lucide.createIcons(); // refresh icons newly added
+                });
+            }
         });
 
         // Chart.js Configuration

@@ -141,8 +141,9 @@
     </style>
 
     <script type="module">
-        import { db } from './src/firebase.js';
+        import { db, auth } from './src/firebase.js';
         import { collection, onSnapshot, query, orderBy, limit } from 'firebase/firestore';
+        import { onAuthStateChanged } from 'firebase/auth';
 
         lucide.createIcons();
 
@@ -162,29 +163,34 @@
         let allPhotos = [];
 
         // Fetch dari Firestore (collection 'dokumentasi')
-        const q = query(collection(db, "dokumentasi"), orderBy("createdAt", "desc"), limit(50));
-        
-        onSnapshot(q, (snapshot) => {
-            loading.classList.add('hidden');
-            
-            if (snapshot.empty) {
-                emptyState.classList.remove('hidden');
-                grid.classList.add('hidden');
-                return;
-            }
+        // Kita harus menunggu status login (token) dari Firebase siap sebelum menarik data
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                const q = query(collection(db, "dokumentasi"), orderBy("createdAt", "desc"), limit(50));
+                
+                onSnapshot(q, (snapshot) => {
+                    loading.classList.add('hidden');
+                    
+                    if (snapshot.empty) {
+                        emptyState.classList.remove('hidden');
+                        grid.classList.add('hidden');
+                        return;
+                    }
 
-            emptyState.classList.add('hidden');
-            grid.classList.remove('hidden');
-            
-            allPhotos = [];
-            snapshot.forEach(doc => {
-                allPhotos.push({ id: doc.id, ...doc.data() });
-            });
-            
-            renderGallery(allPhotos);
-        }, (error) => {
-            console.error("Error fetching photos:", error);
-            loading.innerHTML = `<p class="text-red-400">Gagal memuat foto: ${error.message}</p>`;
+                    emptyState.classList.add('hidden');
+                    grid.classList.remove('hidden');
+                    
+                    allPhotos = [];
+                    snapshot.forEach(doc => {
+                        allPhotos.push({ id: doc.id, ...doc.data() });
+                    });
+                    
+                    renderGallery(allPhotos);
+                }, (error) => {
+                    console.error("Error fetching photos:", error);
+                    loading.innerHTML = `<p class="text-red-400">Gagal memuat foto: ${error.message}</p>`;
+                });
+            }
         });
 
         function renderGallery(photos) {
