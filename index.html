@@ -15,6 +15,14 @@
             if (!user) {
                 // User is signed out, redirect to login
                 window.location.href = 'login.html';
+            } else {
+                // Set Avatar and Greeting dynamically
+                const email = user.email || "Relawan";
+                const name = email.split('@')[0];
+                const capitalizedName = name.charAt(0).toUpperCase() + name.slice(1);
+                
+                document.getElementById('user-greeting').innerText = `Halo, ${capitalizedName}!`;
+                document.getElementById('user-avatar').src = `https://api.dicebear.com/7.x/initials/svg?seed=${email}`;
             }
         });
 
@@ -45,8 +53,8 @@
                 </div>
             </div>
             
-            <button class="w-10 h-10 rounded-full border-2 border-white/40 overflow-hidden shadow-sm hover:scale-105 transition-transform">
-                <img src="https://i.pravatar.cc/150?img=32" alt="Profile" class="w-full h-full object-cover">
+            <button class="w-10 h-10 rounded-full border-2 border-white/40 overflow-hidden shadow-sm hover:scale-105 transition-transform bg-white/20">
+                <img id="user-avatar" src="https://api.dicebear.com/7.x/initials/svg?seed=Relawan" alt="Profile" class="w-full h-full object-cover">
             </button>
         </div>
     </header>
@@ -55,7 +63,7 @@
     <main class="pt-28 px-6">
         <!-- Greeting Section -->
         <div class="mb-8 animate-fade-in-up">
-            <h2 class="text-3xl font-extrabold text-white mb-1">Halo, Budi!</h2>
+            <h2 id="user-greeting" class="text-3xl font-extrabold text-white mb-1">Halo, Relawan!</h2>
             <p class="text-trust-100 text-sm">Tetap aman dan semangat bertugas di lapangan.</p>
         </div>
 
