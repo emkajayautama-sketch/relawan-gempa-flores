@@ -44,6 +44,7 @@ export default defineConfig({
         login: resolve(__dirname, 'login.html'),
         admin: resolve(__dirname, 'admin.html'),
         adminMap: resolve(__dirname, 'admin-map.html'),
+        adminGaleri: resolve(__dirname, 'admin-galeri.html'),
         formPengungsi: resolve(__dirname, 'form-pengungsi.html'),
         formAnggota: resolve(__dirname, 'form-anggota.html'),
         formLogistik: resolve(__dirname, 'form-logistik.html'),
