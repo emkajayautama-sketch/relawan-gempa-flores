@@ -65,9 +65,20 @@
 
     <script type="module">
         import { auth } from './src/firebase.js';
-        import { signInWithEmailAndPassword } from 'firebase/auth';
+        import { signInWithEmailAndPassword, onAuthStateChanged } from 'firebase/auth';
         
         lucide.createIcons();
+
+        // Jika sudah login, lempar langsung ke halaman utama
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                if(user.email && user.email.includes('admin')) {
+                    window.location.href = 'admin.html';
+                } else {
+                    window.location.href = 'index.html';
+                }
+            }
+        });
 
         const form = document.getElementById('loginForm');
         const btnLogin = document.getElementById('btnLogin');

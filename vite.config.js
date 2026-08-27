@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite'
 import tailwindcss from '@tailwindcss/vite'
 import { VitePWA } from 'vite-plugin-pwa'
+import { resolve } from 'path'
 
 export default defineConfig({
   plugins: [
@@ -35,5 +36,18 @@ export default defineConfig({
   server: {
     port: 3000,
     open: true
+  },
+  build: {
+    rollupOptions: {
+      input: {
+        main: resolve(__dirname, 'index.html'),
+        login: resolve(__dirname, 'login.html'),
+        admin: resolve(__dirname, 'admin.html'),
+        adminMap: resolve(__dirname, 'admin-map.html'),
+        formPengungsi: resolve(__dirname, 'form-pengungsi.html'),
+        formAnggota: resolve(__dirname, 'form-anggota.html'),
+        formLogistik: resolve(__dirname, 'form-logistik.html')
+      }
+    }
   }
 })
