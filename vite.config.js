@@ -47,6 +47,7 @@ export default defineConfig({
         formPengungsi: resolve(__dirname, 'form-pengungsi.html'),
         formAnggota: resolve(__dirname, 'form-anggota.html'),
         formLogistik: resolve(__dirname, 'form-logistik.html'),
+        formFoto: resolve(__dirname, 'form-foto.html'),
         profil: resolve(__dirname, 'profil.html'),
         riwayat: resolve(__dirname, 'riwayat.html')
       }

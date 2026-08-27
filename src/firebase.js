@@ -1,6 +1,7 @@
 import { initializeApp } from "firebase/app";
 import { getFirestore, enableIndexedDbPersistence } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
+import { getStorage } from "firebase/storage";
 
 const firebaseConfig = {
   apiKey: "AIzaSyA7qRxCzTQbVyXpbACb_b1uGBegOBL1i7k",
@@ -21,6 +22,9 @@ const db = getFirestore(app);
 // Initialize Firebase Authentication and get a reference to the service
 const auth = getAuth(app);
 
+// Initialize Cloud Storage and get a reference to the service
+const storage = getStorage(app);
+
 // Enable Offline Persistence (Sangat penting untuk aplikasi kebencanaan)
 enableIndexedDbPersistence(db)
   .catch((err) => {
@@ -31,4 +35,4 @@ enableIndexedDbPersistence(db)
     }
   });
 
-export { app, db, auth };
+export { app, db, auth, storage };

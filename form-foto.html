@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Foto Lapangan - Relawan Gempa</title>
+    <link href="/src/style.css" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
+    </style>
+</head>
+<body class="bg-slate-200 antialiased overflow-x-hidden selection:bg-slate-500 selection:text-white">
+    <div class="max-w-md mx-auto min-h-screen relative bg-slate-50 shadow-2xl pb-24 flex flex-col">
+        
+        <!-- Header -->
+        <header class="w-full bg-slate-800 z-50 border-b border-slate-900 shrink-0 shadow-md">
+            <div class="px-6 py-4 flex items-center text-white">
+                <a href="index.html" class="p-2 -ml-2 rounded-xl hover:bg-slate-700 transition-colors">
+                    <i data-lucide="arrow-left" class="w-6 h-6"></i>
+                </a>
+                <h1 class="font-bold text-lg ml-3">Dokumentasi Lapangan</h1>
+            </div>
+        </header>
+
+        <div class="bg-slate-700 px-6 py-3 flex items-start text-white border-b border-slate-800">
+            <i data-lucide="info" class="w-4 h-4 text-slate-300 mt-0.5 mr-2 shrink-0"></i>
+            <p class="text-xs text-slate-200 font-medium leading-relaxed">
+                Ambil foto kondisi di lapangan. Foto akan dilengkapi titik lokasi posko Anda secara otomatis.
+            </p>
+        </div>
+
+        <!-- Main Content -->
+        <main class="flex-1 overflow-y-auto px-4 py-6 space-y-6">
+            
+            <form id="formFoto">
+                
+                <!-- Image Picker Area -->
+                <div class="bg-white rounded-3xl p-4 shadow-sm border border-slate-200 mb-6">
+                    <label class="block text-sm font-semibold text-slate-700 mb-3">Foto Kondisi / Bukti Penyaluran</label>
+                    
+                    <input type="file" id="foto-input" accept="image/*" capture="environment" class="hidden">
+                    
+                    <div id="preview-container" class="w-full aspect-[4/3] bg-slate-100 border-2 border-dashed border-slate-300 rounded-2xl flex flex-col items-center justify-center cursor-pointer hover:bg-slate-200 transition-colors relative overflow-hidden group">
+                        <!-- Empty State -->
+                        <div id="empty-preview" class="flex flex-col items-center justify-center text-slate-400 group-hover:text-slate-600 transition-colors pointer-events-none">
+                            <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-sm mb-3">
+                                <i data-lucide="camera" class="w-8 h-8 text-slate-500"></i>
+                            </div>
+                            <p class="font-medium text-sm">Ketuk untuk Ambil Foto</p>
+                            <p class="text-xs mt-1">atau pilih dari galeri</p>
+                        </div>
+                        
+                        <!-- Image Preview -->
+                        <img id="image-preview" class="hidden absolute inset-0 w-full h-full object-cover" />
+                        
+                        <!-- Overlay when image is selected -->
+                        <div id="overlay-preview" class="hidden absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
+                            <span class="bg-white/90 text-slate-800 px-4 py-2 rounded-full font-semibold text-sm shadow-lg flex items-center">
+                                <i data-lucide="refresh-cw" class="w-4 h-4 mr-2"></i> Ganti Foto
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Caption Area -->
+                <div class="bg-white rounded-3xl p-5 shadow-sm border border-slate-200">
+                    <label class="block text-sm font-semibold text-slate-700 mb-2">Keterangan Singkat</label>
+                    <textarea id="caption" rows="3" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-500 resize-none" placeholder="Misal: Tenda warga di RT 02 rubuh karena angin kencang..."></textarea>
+                </div>
+            </form>
+        </main>
+
+        <!-- Bottom Footer Action -->
+        <div class="p-6 bg-white border-t border-slate-200 shrink-0">
+             <button id="btnUpload" disabled class="w-full bg-slate-300 text-white font-bold rounded-2xl py-4 flex justify-center items-center transition-all cursor-not-allowed">
+                Unggah Foto <i data-lucide="upload-cloud" class="w-5 h-5 ml-2"></i>
+            </button>
+            <div id="progress-container" class="hidden mt-3">
+                <div class="w-full bg-slate-100 rounded-full h-2.5">
+                    <div id="progress-bar" class="bg-slate-800 h-2.5 rounded-full" style="width: 0%"></div>
+                </div>
+                <p id="progress-text" class="text-xs text-center text-slate-500 mt-2 font-medium">0%</p>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { db, auth, storage } from './src/firebase.js';
+        import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+        import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
+
+        lucide.createIcons();
+
+        const fotoInput = document.getElementById('foto-input');
+        const previewContainer = document.getElementById('preview-container');
+        const emptyPreview = document.getElementById('empty-preview');
+        const imagePreview = document.getElementById('image-preview');
+        const overlayPreview = document.getElementById('overlay-preview');
+        const btnUpload = document.getElementById('btnUpload');
+        const captionInput = document.getElementById('caption');
+        const progressContainer = document.getElementById('progress-container');
+        const progressBar = document.getElementById('progress-bar');
+        const progressText = document.getElementById('progress-text');
+
+        let selectedFile = null;
+
+        // Buka file picker jika container di-klik
+        previewContainer.addEventListener('click', () => {
+            if (!btnUpload.disabled || selectedFile === null) {
+                fotoInput.click();
+            }
+        });
+
+        // Tangani pemilihan file
+        fotoInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                // Validasi gambar
+                if (!file.type.startsWith('image/')) {
+                    alert("Tolong pilih file gambar/foto.");
+                    return;
+                }
+                
+                selectedFile = file;
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    imagePreview.src = e.target.result;
+                    imagePreview.classList.remove('hidden');
+                    overlayPreview.classList.remove('hidden');
+                    emptyPreview.classList.add('hidden');
+                    
+                    // Enable button
+                    btnUpload.disabled = false;
+                    btnUpload.classList.remove('bg-slate-300', 'cursor-not-allowed');
+                    btnUpload.classList.add('bg-slate-800', 'hover:bg-slate-900', 'active:scale-95', 'shadow-lg', 'shadow-slate-800/30');
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Proses unggah
+        btnUpload.addEventListener('click', async () => {
+            if (!selectedFile) return;
+
+            const poskoName = localStorage.getItem('poskoName') || "Posko Nagekeo";
+            const caption = captionInput.value.trim();
+
+            // Kunci UI
+            btnUpload.disabled = true;
+            btnUpload.innerHTML = '<span class="animate-spin mr-2">⏳</span> Mengunggah...';
+            btnUpload.classList.add('opacity-75', 'cursor-not-allowed');
+            btnUpload.classList.remove('active:scale-95', 'hover:bg-slate-900');
+            fotoInput.disabled = true;
+            captionInput.disabled = true;
+            
+            // Tampilkan progress
+            progressContainer.classList.remove('hidden');
+
+            try {
+                // Buat path unik di Storage: dokumentasi/{posko}/{timestamp}_{namafile}
+                const timestamp = Date.now();
+                const safePoskoName = poskoName.replace(/[^a-zA-Z0-9]/g, '_');
+                const fileExtension = selectedFile.name.split('.').pop();
+                const fileName = `dokumentasi/${safePoskoName}/${timestamp}.${fileExtension}`;
+                
+                const storageRef = ref(storage, fileName);
+
+                // Mulai unggah
+                const uploadTask = uploadBytesResumable(storageRef, selectedFile);
+
+                uploadTask.on('state_changed', 
+                    (snapshot) => {
+                        // Pantau progress
+                        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                        progressBar.style.width = progress + '%';
+                        progressText.innerText = Math.round(progress) + '% Diunggah';
+                    }, 
+                    (error) => {
+                        // Gagal unggah file
+                        console.error("Upload error:", error);
+                        alert("Gagal mengunggah foto: " + error.message);
+                        resetUI();
+                    }, 
+                    async () => {
+                        // Selesai unggah, dapatkan URL
+                        progressText.innerText = "Menyimpan data...";
+                        const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+
+                        // Simpan ke Firestore
+                        try {
+                            await addDoc(collection(db, "dokumentasi"), {
+                                posko: poskoName,
+                                pelapor: auth.currentUser?.email || "Relawan",
+                                imageUrl: downloadURL,
+                                storagePath: fileName,
+                                caption: caption,
+                                createdAt: serverTimestamp()
+                            });
+
+                            alert("Foto berhasil diunggah!");
+                            window.location.href = 'index.html';
+                        } catch (dbError) {
+                            console.error("Firestore error:", dbError);
+                            alert("Foto tersimpan, tetapi gagal memperbarui database: " + dbError.message);
+                            resetUI();
+                        }
+                    }
+                );
+
+            } catch (error) {
+                console.error("Error:", error);
+                alert("Terjadi kesalahan: " + error.message);
+                resetUI();
+            }
+        });
+
+        function resetUI() {
+            btnUpload.disabled = false;
+            btnUpload.innerHTML = 'Unggah Foto <i data-lucide="upload-cloud" class="w-5 h-5 ml-2"></i>';
+            btnUpload.classList.remove('opacity-75', 'cursor-not-allowed');
+            btnUpload.classList.add('active:scale-95', 'hover:bg-slate-900');
+            fotoInput.disabled = false;
+            captionInput.disabled = false;
+            progressContainer.classList.add('hidden');
+            lucide.createIcons();
+        }
+    </script>
+</body>
+</html>
