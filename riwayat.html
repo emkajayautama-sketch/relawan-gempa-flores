@@ -129,12 +129,15 @@
             if (!user) {
                 window.location.href = 'login.html';
             } else {
-                fetchRiwayat();
+                // Ensure the function exists before calling
+                setTimeout(() => fetchRiwayatData(), 100);
             }
         });
 
         // Make it available globally for the refresh button
-        window.fetchRiwayat = async function() {
+        window.fetchRiwayat = fetchRiwayatData;
+
+        async function fetchRiwayatData() {
             loadingState.classList.remove('hidden');
             emptyState.classList.add('hidden');
             feedList.innerHTML = '';
@@ -218,7 +221,11 @@
             } catch (error) {
                 console.error("Error fetching riwayat:", error);
                 loadingState.classList.add('hidden');
-                alert("Gagal mengambil data: " + error.message);
+                
+                // Show empty state with error message instead of an alert
+                emptyState.classList.remove('hidden');
+                emptyState.querySelector('h3').innerText = "Gagal Memuat Data";
+                emptyState.querySelector('p').innerText = "Koneksi ke server terganggu atau hak akses ditolak. Silakan coba lagi nanti.";
             }
         }
     </script>
