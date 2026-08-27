@@ -215,16 +215,23 @@
                 progressText.innerText = "Tahap 3/3: Menyimpan ke Database...";
                 progressBar.style.width = '90%';
                 
-                // Simpan langsung ke Firestore (Bypass Firebase Storage yang meminta Upgrade Plan)
-                await addDoc(collection(db, "dokumentasi"), {
+                // Simpan langsung ke Firestore tanpa await (Fire-and-forget)
+                // Ini sangat penting untuk daerah bencana yang sinyalnya jelek.
+                // Firestore akan otomatis menyimpannya di HP dulu, lalu mengirimnya diam-diam di background.
+                addDoc(collection(db, "dokumentasi"), {
                     posko: poskoName,
                     pelapor: auth.currentUser?.email || "Relawan",
                     imageUrl: base64Image,
                     storagePath: fileName,
                     caption: caption,
                     createdAt: serverTimestamp()
+                }).catch(err => {
+                    console.error("Background save error:", err);
                 });
+
                 progressBar.style.width = '100%';
+                // Beri sedikit waktu agar bar 100% terlihat
+                await new Promise(r => setTimeout(r, 500)); 
             };
 
             try {
