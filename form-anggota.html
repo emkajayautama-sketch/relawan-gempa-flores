@@ -132,109 +132,117 @@
     <script type="module">
         import { db, auth } from './src/firebase.js';
         import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+        import { onAuthStateChanged } from 'firebase/auth';
 
         lucide.createIcons();
 
-        // Ambil kkId dari URL
-        const urlParams = new URLSearchParams(window.location.search);
-        const kkId = urlParams.get('kkId');
-
-        if (!kkId) {
-            alert("Sesi tidak valid! Harap isi data KK terlebih dahulu.");
-            window.location.href = 'form-pengungsi.html';
-        }
-
-        const inputUmur = document.getElementById('umur');
-        const badgeUmur = document.getElementById('kategoriUmurBadge');
-
-        // Logic Auto-Klasifikasi Umur
-        inputUmur.addEventListener('input', (e) => {
-            const umur = parseInt(e.target.value);
-            let kategori = 'Tidak diketahui';
-            let color = 'bg-slate-200 text-slate-600';
-
-            if (isNaN(umur)) {
-                badgeUmur.className = `text-xs font-bold px-3 py-2 rounded-lg block text-center bg-slate-200 text-slate-600`;
-                badgeUmur.innerText = 'Auto-Kategori';
+        onAuthStateChanged(auth, (user) => {
+            if (!user) {
+                window.location.href = 'login.html';
                 return;
             }
 
-            if (umur < 1) {
-                kategori = 'Bayi (<1 thn)'; color = 'bg-pink-100 text-pink-700';
-            } else if (umur >= 1 && umur <= 5) {
-                kategori = 'Balita (1-5 thn)'; color = 'bg-orange-100 text-orange-700';
-            } else if (umur >= 6 && umur <= 12) {
-                kategori = 'Anak (6-12 thn)'; color = 'bg-blue-100 text-blue-700';
-            } else if (umur >= 13 && umur <= 59) {
-                kategori = 'Dewasa (13-59 thn)'; color = 'bg-green-100 text-green-700';
-            } else if (umur >= 60) {
-                kategori = 'Lansia (≥60 thn)'; color = 'bg-purple-100 text-purple-700';
+            // Ambil kkId dari URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const kkId = urlParams.get('kkId');
+
+            if (!kkId) {
+                alert("Sesi tidak valid! Harap isi data KK terlebih dahulu.");
+                window.location.href = 'form-pengungsi.html';
             }
 
-            badgeUmur.className = `text-xs font-bold px-3 py-2 rounded-lg block text-center ${color}`;
-            badgeUmur.innerText = kategori;
-        });
-        
-        // Simpan Anggota ke Firestore
-        let counterAnggota = 0;
-        document.getElementById('formAnggota').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const btn = e.target.querySelector('button[type="submit"]');
-            btn.innerHTML = '<span class="animate-spin mr-2">⏳</span> Menyimpan...';
-            btn.disabled = true;
+            const inputUmur = document.getElementById('umur');
+            const badgeUmur = document.getElementById('kategoriUmurBadge');
 
-            const nama = document.getElementById('nama').value;
-            const nik = document.getElementById('nik').value;
-            const gender = document.getElementById('gender').value;
-            const umur = parseInt(document.getElementById('umur').value);
-            
-            // Ambil semua checkbox rentan yang dicentang
-            const rentanCheckboxes = document.querySelectorAll('input[type="checkbox"]:checked');
-            const statusRentan = Array.from(rentanCheckboxes).map(cb => cb.value);
+            // Logic Auto-Klasifikasi Umur
+            inputUmur.addEventListener('input', (e) => {
+                const umur = parseInt(e.target.value);
+                let kategori = 'Tidak diketahui';
+                let color = 'bg-slate-200 text-slate-600';
 
-            try {
-                await addDoc(collection(db, "anggota"), {
-                    kkId: kkId,
-                    nama: nama,
-                    nik: nik,
-                    gender: gender,
-                    pelapor: auth.currentUser?.email || "Relawan Anonim",
-                    poskoAktif: localStorage.getItem('poskoName') || "Posko Nagekeo",
-                    umur: umur,
-                    kategoriUmur: badgeUmur.innerText,
-                    statusRentan: statusRentan,
-                    createdAt: serverTimestamp()
-                });
-
-                counterAnggota++;
-                // Update badge jumlah anggota
-                document.querySelector('.bg-trust-100.text-trust-700').innerText = `${counterAnggota} Terdata`;
-
-                alert("Anggota berhasil disimpan!");
-                
-                // Reset form
-                e.target.reset();
-                badgeUmur.className = `text-xs font-bold px-3 py-2 rounded-lg block text-center bg-slate-200 text-slate-600`;
-                badgeUmur.innerText = 'Auto-Kategori';
-            } catch (error) {
-                console.error("Error adding anggota: ", error);
-                alert("Gagal menyimpan: " + error.message);
-            } finally {
-                btn.innerHTML = '<i data-lucide="plus" class="w-4 h-4 mr-1"></i> Simpan Anggota';
-                btn.disabled = false;
-                lucide.createIcons();
-            }
-        });
-
-        document.getElementById('btnSelesai').addEventListener('click', () => {
-            if(counterAnggota === 0) {
-                if(!confirm("Anda belum memasukkan anggota keluarga manapun (Termasuk Kepala Keluarga). Yakin ingin selesai?")) {
+                if (isNaN(umur)) {
+                    badgeUmur.className = `text-xs font-bold px-3 py-2 rounded-lg block text-center bg-slate-200 text-slate-600`;
+                    badgeUmur.innerText = 'Auto-Kategori';
                     return;
                 }
-            }
-            alert("Pendaftaran Keluarga Selesai!");
-            window.location.href = 'index.html';
+
+                if (umur < 1) {
+                    kategori = 'Bayi (<1 thn)'; color = 'bg-pink-100 text-pink-700';
+                } else if (umur >= 1 && umur <= 5) {
+                    kategori = 'Balita (1-5 thn)'; color = 'bg-orange-100 text-orange-700';
+                } else if (umur >= 6 && umur <= 12) {
+                    kategori = 'Anak (6-12 thn)'; color = 'bg-blue-100 text-blue-700';
+                } else if (umur >= 13 && umur <= 59) {
+                    kategori = 'Dewasa (13-59 thn)'; color = 'bg-green-100 text-green-700';
+                } else if (umur >= 60) {
+                    kategori = 'Lansia (≥60 thn)'; color = 'bg-purple-100 text-purple-700';
+                }
+
+                badgeUmur.className = `text-xs font-bold px-3 py-2 rounded-lg block text-center ${color}`;
+                badgeUmur.innerText = kategori;
+            });
+            
+            // Simpan Anggota ke Firestore
+            let counterAnggota = 0;
+            document.getElementById('formAnggota').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                const btn = e.target.querySelector('button[type="submit"]');
+                btn.innerHTML = '<span class="animate-spin mr-2">⏳</span> Menyimpan...';
+                btn.disabled = true;
+
+                const nama = document.getElementById('nama').value;
+                const nik = document.getElementById('nik').value;
+                const gender = document.getElementById('gender').value;
+                const umur = parseInt(document.getElementById('umur').value);
+                
+                // Ambil semua checkbox rentan yang dicentang
+                const rentanCheckboxes = document.querySelectorAll('input[type="checkbox"]:checked');
+                const statusRentan = Array.from(rentanCheckboxes).map(cb => cb.value);
+
+                try {
+                    await addDoc(collection(db, "anggota"), {
+                        kkId: kkId,
+                        nama: nama,
+                        nik: nik,
+                        gender: gender,
+                        pelapor: user.email || "Relawan Anonim",
+                        poskoAktif: localStorage.getItem('poskoName') || "Posko Nagekeo",
+                        umur: umur,
+                        kategoriUmur: badgeUmur.innerText,
+                        statusRentan: statusRentan,
+                        createdAt: serverTimestamp()
+                    });
+
+                    counterAnggota++;
+                    // Update badge jumlah anggota
+                    document.querySelector('.bg-trust-100.text-trust-700').innerText = `${counterAnggota} Terdata`;
+
+                    alert("Anggota berhasil disimpan!");
+                    
+                    // Reset form
+                    e.target.reset();
+                    badgeUmur.className = `text-xs font-bold px-3 py-2 rounded-lg block text-center bg-slate-200 text-slate-600`;
+                    badgeUmur.innerText = 'Auto-Kategori';
+                } catch (error) {
+                    console.error("Error adding anggota: ", error);
+                    alert("Gagal menyimpan: " + error.message);
+                } finally {
+                    btn.innerHTML = '<i data-lucide="plus" class="w-4 h-4 mr-1"></i> Simpan Anggota';
+                    btn.disabled = false;
+                    lucide.createIcons();
+                }
+            });
+
+            document.getElementById('btnSelesai').addEventListener('click', () => {
+                if(counterAnggota === 0) {
+                    if(!confirm("Anda belum memasukkan anggota keluarga manapun (Termasuk Kepala Keluarga). Yakin ingin selesai?")) {
+                        return;
+                    }
+                }
+                alert("Pendaftaran Keluarga Selesai!");
+                window.location.href = 'index.html';
+            });
         });
     </script>
 </body>

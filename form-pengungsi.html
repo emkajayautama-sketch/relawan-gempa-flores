@@ -95,56 +95,64 @@
     <script type="module">
         import { db, auth } from './src/firebase.js';
         import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+        import { onAuthStateChanged } from 'firebase/auth';
 
         lucide.createIcons();
 
-        document.getElementById('btnLanjut').addEventListener('click', async (e) => {
-            const btn = e.currentTarget;
-            btn.innerHTML = '<span class="animate-spin mr-2">⏳</span> Menyimpan...';
-            btn.classList.add('opacity-75', 'cursor-not-allowed');
-            btn.disabled = true;
-
-            const noKk = document.getElementById('noKk').value;
-            const namaKk = document.getElementById('namaKk').value;
-            const rtRw = document.getElementById('rtRw').value;
-            const desa = document.getElementById('desa').value;
-
-            // Validasi sederhana
-            if(!noKk || !namaKk || !desa) {
-                alert("Mohon isi Nomor KK, Nama Kepala Keluarga, dan Desa asal!");
-                btn.innerHTML = 'Lanjut Input Anggota Keluarga <i data-lucide="arrow-right" class="w-5 h-5 ml-2"></i>';
-                btn.classList.remove('opacity-75', 'cursor-not-allowed');
-                btn.disabled = false;
-                lucide.createIcons();
+        onAuthStateChanged(auth, (user) => {
+            if (!user) {
+                window.location.href = 'login.html';
                 return;
             }
 
-            try {
-                // Simpan ke Firestore koleksi "keluarga"
-                const docRef = await addDoc(collection(db, "keluarga"), {
-                    noKk: noKk,
-                    namaKepalaKeluarga: namaKk,
-                    rtRwAsal: rtRw,
-                    desaAsal: desa,
-                    createdAt: serverTimestamp(),
-                    pelapor: auth.currentUser?.email || "Relawan Anonim",
-                    poskoAktif: localStorage.getItem('poskoName') || "Posko Nagekeo"
-                });
-                console.log("Document written with ID: ", docRef.id);
-                
-                // Pindah ke step berikutnya (Form Input Anggota)
-                alert("Data KK berhasil disimpan (Offline Mode Aktif). Lanjut ke pengisian data anggota!");
-                window.location.href = 'form-anggota.html?kkId=' + docRef.id;
+            document.getElementById('btnLanjut').addEventListener('click', async (e) => {
+                const btn = e.currentTarget;
+                btn.innerHTML = '<span class="animate-spin mr-2">⏳</span> Menyimpan...';
+                btn.classList.add('opacity-75', 'cursor-not-allowed');
+                btn.disabled = true;
 
-            } catch (error) {
-                console.error("Error adding document: ", error);
-                alert("Terjadi kesalahan: " + error.message);
-            } finally {
-                btn.innerHTML = 'Lanjut Input Anggota Keluarga <i data-lucide="arrow-right" class="w-5 h-5 ml-2"></i>';
-                btn.classList.remove('opacity-75', 'cursor-not-allowed');
-                btn.disabled = false;
-                lucide.createIcons();
-            }
+                const noKk = document.getElementById('noKk').value;
+                const namaKk = document.getElementById('namaKk').value;
+                const rtRw = document.getElementById('rtRw').value;
+                const desa = document.getElementById('desa').value;
+
+                // Validasi sederhana
+                if(!noKk || !namaKk || !desa) {
+                    alert("Mohon isi Nomor KK, Nama Kepala Keluarga, dan Desa asal!");
+                    btn.innerHTML = 'Lanjut Input Anggota Keluarga <i data-lucide="arrow-right" class="w-5 h-5 ml-2"></i>';
+                    btn.classList.remove('opacity-75', 'cursor-not-allowed');
+                    btn.disabled = false;
+                    lucide.createIcons();
+                    return;
+                }
+
+                try {
+                    // Simpan ke Firestore koleksi "keluarga"
+                    const docRef = await addDoc(collection(db, "keluarga"), {
+                        noKk: noKk,
+                        namaKepalaKeluarga: namaKk,
+                        rtRwAsal: rtRw,
+                        desaAsal: desa,
+                        createdAt: serverTimestamp(),
+                        pelapor: user.email || "Relawan Anonim",
+                        poskoAktif: localStorage.getItem('poskoName') || "Posko Nagekeo"
+                    });
+                    console.log("Document written with ID: ", docRef.id);
+                    
+                    // Pindah ke step berikutnya (Form Input Anggota)
+                    alert("Data KK berhasil disimpan (Offline Mode Aktif). Lanjut ke pengisian data anggota!");
+                    window.location.href = 'form-anggota.html?kkId=' + docRef.id;
+
+                } catch (error) {
+                    console.error("Error adding document: ", error);
+                    alert("Terjadi kesalahan: " + error.message);
+                } finally {
+                    btn.innerHTML = 'Lanjut Input Anggota Keluarga <i data-lucide="arrow-right" class="w-5 h-5 ml-2"></i>';
+                    btn.classList.remove('opacity-75', 'cursor-not-allowed');
+                    btn.disabled = false;
+                    lucide.createIcons();
+                }
+            });
         });
     </script>
 </body>
