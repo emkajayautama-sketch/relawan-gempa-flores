@@ -215,18 +215,15 @@
                 progressText.innerText = "Tahap 3/3: Menyimpan ke Database...";
                 progressBar.style.width = '90%';
                 
-                // Simpan langsung ke Firestore tanpa await (Fire-and-forget)
-                // Ini sangat penting untuk daerah bencana yang sinyalnya jelek.
-                // Firestore akan otomatis menyimpannya di HP dulu, lalu mengirimnya diam-diam di background.
-                addDoc(collection(db, "dokumentasi"), {
+                // Kita gunakan await agar aplikasi benar-benar menunggu konfirmasi dari Firebase
+                // Jika gagal karena izin (belum login), error akan muncul di HP
+                await addDoc(collection(db, "dokumentasi"), {
                     posko: poskoName,
                     pelapor: auth.currentUser?.email || "Relawan",
                     imageUrl: base64Image,
                     storagePath: fileName,
                     caption: caption,
                     createdAt: serverTimestamp()
-                }).catch(err => {
-                    console.error("Background save error:", err);
                 });
 
                 progressBar.style.width = '100%';
