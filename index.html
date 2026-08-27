@@ -65,10 +65,8 @@
             <div class="flex items-center justify-between relative z-10">
                 <div>
                     <p class="text-slate-500 text-xs font-semibold uppercase tracking-wider mb-1">Posko Aktif Anda</p>
-                    <h3 class="text-2xl font-bold text-slate-800">Desa Wulanggitang</h3>
-                    <p class="text-slate-500 text-sm mt-1 flex items-center">
-                        <i data-lucide="map-pin" class="w-3 h-3 mr-1 text-trust-500"></i> Kab. Flores Timur
-                    </p>
+                    <h3 id="posko-name" class="text-2xl font-bold text-slate-800 cursor-pointer hover:text-trust-600 transition-colors" title="Klik untuk mengubah Posko">Posko Nagekeo</h3>
+                    <p id="posko-district" class="text-slate-500 text-sm mt-1 flex items-center cursor-pointer hover:text-trust-600 transition-colors"><i data-lucide="map-pin" class="w-4 h-4 mr-1"></i> Kab. Nagekeo</p>
                 </div>
                 <div class="bg-trust-50 p-3 rounded-2xl">
                     <i data-lucide="tent" class="w-8 h-8 text-trust-600"></i>
@@ -157,9 +155,40 @@
     </style>
 
     <!-- Initialize Icons -->
-    <script>
+    <script type="module">
+        import { auth } from './src/firebase.js';
+
         lucide.createIcons();
         
+        // Dynamic Posko Logic
+        const poskoNameEl = document.getElementById('posko-name');
+        const poskoDistrictEl = document.getElementById('posko-district');
+
+        // Load from Local Storage or default
+        const savedPosko = localStorage.getItem('poskoName') || 'Posko Nagekeo';
+        const savedDistrict = localStorage.getItem('poskoDistrict') || 'Kab. Nagekeo';
+        
+        poskoNameEl.innerText = savedPosko;
+        poskoDistrictEl.innerHTML = `<i data-lucide="map-pin" class="w-4 h-4 mr-1"></i> ${savedDistrict}`;
+        lucide.createIcons();
+
+        poskoNameEl.addEventListener('click', () => {
+            const newName = prompt("Ubah Nama Posko:", savedPosko);
+            if(newName) {
+                localStorage.setItem('poskoName', newName);
+                poskoNameEl.innerText = newName;
+            }
+        });
+
+        poskoDistrictEl.addEventListener('click', () => {
+            const newDistrict = prompt("Ubah Nama Kabupaten/Kota:", savedDistrict);
+            if(newDistrict) {
+                localStorage.setItem('poskoDistrict', newDistrict);
+                poskoDistrictEl.innerHTML = `<i data-lucide="map-pin" class="w-4 h-4 mr-1"></i> ${newDistrict}`;
+                lucide.createIcons();
+            }
+        });
+
         // Header scroll effect
         const header = document.querySelector('header');
         window.addEventListener('scroll', () => {

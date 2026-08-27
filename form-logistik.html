@@ -149,7 +149,7 @@
             try {
                 // Posko sementara hardcoded, nanti bisa diambil dari profil user
                 await addDoc(collection(db, "laporan_logistik"), {
-                    posko: "Posko Wulanggitang",
+                    posko: localStorage.getItem('poskoName') || "Posko Nagekeo",
                     pelapor: auth.currentUser?.email || "Relawan Anonim",
                     kebutuhan: {
                         beras: beras,

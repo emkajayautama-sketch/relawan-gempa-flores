@@ -127,7 +127,7 @@
                     rtRwAsal: rtRw,
                     desaAsal: desa,
                     createdAt: serverTimestamp(),
-                    poskoAktif: "Posko Wulanggitang" // Nanti didapat dari Auth user
+                    poskoAktif: localStorage.getItem('poskoName') || "Posko Nagekeo"
                 });
                 console.log("Document written with ID: ", docRef.id);
                 
