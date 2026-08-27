@@ -198,30 +198,48 @@
                         ? `<div class="w-12 h-12 rounded-2xl bg-trust-100 flex items-center justify-center shrink-0 border border-trust-200"><i data-lucide="users" class="w-6 h-6 text-trust-600"></i></div>`
                         : `<div class="w-12 h-12 rounded-2xl bg-alert-100 flex items-center justify-center shrink-0 border border-alert-200"><i data-lucide="package" class="w-6 h-6 text-alert-600"></i></div>`;
                     
-                    const onClickStr = item.type === 'keluarga'
-                        ? `onclick="window.location.href='form-anggota.html?kkId=${item.id}'" style="cursor: pointer;"`
-                        : ``;
-
                     const el = document.createElement('div');
-                    el.innerHTML = `
-                        <div ${onClickStr} class="bg-white rounded-3xl p-4 shadow-sm border border-slate-100 mb-4 transform hover:scale-[1.02] transition-transform relative">
-                            <div class="flex items-start">
-                                ${iconStr}
-                                <div class="ml-4 flex-1">
-                                    <div class="flex justify-between items-start mb-1">
-                                        <h3 class="font-bold text-slate-800 text-sm line-clamp-1 pr-2">${item.title}</h3>
-                                        <span class="text-[10px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full shrink-0">${dateString}, ${timeString}</span>
+                    
+                    if (item.type === 'keluarga') {
+                        el.innerHTML = `
+                            <a href="form-anggota.html?kkId=${item.id}" class="block bg-white rounded-3xl p-4 shadow-sm border border-slate-100 mb-4 transform hover:scale-[1.02] transition-transform relative cursor-pointer">
+                                <div class="flex items-start">
+                                    ${iconStr}
+                                    <div class="ml-4 flex-1">
+                                        <div class="flex justify-between items-start mb-1">
+                                            <h4 class="font-bold text-slate-800 text-sm line-clamp-1 pr-2">${item.title}</h4>
+                                            <span class="text-[10px] text-slate-400 bg-slate-50 px-2 py-1 rounded-lg shrink-0 border border-slate-100">${dateString}, ${timeString}</span>
+                                        </div>
+                                        <p class="text-xs text-slate-500 mb-2 leading-relaxed">${item.subtitle}</p>
+                                        <div class="flex items-center mt-2">
+                                            <i data-lucide="user" class="w-3 h-3 text-slate-400 mr-1"></i>
+                                            <span class="text-[10px] text-slate-400">Diinput oleh: ${item.pelapor}</span>
+                                        </div>
                                     </div>
-                                    <p class="text-xs text-slate-500 mb-2 leading-relaxed">${item.subtitle}</p>
-                                    <div class="flex items-center">
-                                        <i data-lucide="user" class="w-3 h-3 text-slate-400 mr-1"></i>
-                                        <span class="text-[10px] text-slate-400">Diinput oleh: ${item.pelapor}</span>
+                                </div>
+                                <div class="absolute right-4 bottom-4 bg-trust-50 text-trust-600 text-[10px] font-bold px-2 py-1 rounded-lg border border-trust-200">Klik untuk tambah anggota</div>
+                            </a>
+                        `;
+                    } else {
+                        el.innerHTML = `
+                            <div class="bg-white rounded-3xl p-4 shadow-sm border border-slate-100 mb-4 transform hover:scale-[1.02] transition-transform relative">
+                                <div class="flex items-start">
+                                    ${iconStr}
+                                    <div class="ml-4 flex-1">
+                                        <div class="flex justify-between items-start mb-1">
+                                            <h4 class="font-bold text-slate-800 text-sm line-clamp-1 pr-2">${item.title}</h4>
+                                            <span class="text-[10px] text-slate-400 bg-slate-50 px-2 py-1 rounded-lg shrink-0 border border-slate-100">${dateString}, ${timeString}</span>
+                                        </div>
+                                        <p class="text-xs text-slate-500 mb-2 leading-relaxed">${item.subtitle}</p>
+                                        <div class="flex items-center mt-2">
+                                            <i data-lucide="user" class="w-3 h-3 text-slate-400 mr-1"></i>
+                                            <span class="text-[10px] text-slate-400">Diinput oleh: ${item.pelapor}</span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                            ${item.type === 'keluarga' ? '<div class="absolute right-4 bottom-4 bg-trust-50 text-trust-600 text-[10px] font-bold px-2 py-1 rounded-lg border border-trust-200">Klik untuk tambah anggota</div>' : ''}
-                        </div>
-                    `;
+                        `;
+                    }
                     feedList.appendChild(el);
                 });
                 
