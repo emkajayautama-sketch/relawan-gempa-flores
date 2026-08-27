@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Peta Sebaran - Command Center</title>
+    <link href="/src/style.css" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Leaflet CSS & JS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+</head>
+<body class="bg-slate-900 text-slate-100 antialiased h-screen overflow-hidden flex selection:bg-trust-500 selection:text-white">
+    
+    <!-- Sidebar -->
+    <aside class="w-64 glass-dark h-full flex flex-col justify-between border-r border-slate-700/50 z-20 shrink-0">
+        <div>
+            <div class="h-20 flex items-center px-6 border-b border-slate-700/50 bg-slate-900/40">
+                <div class="bg-gradient-to-tr from-trust-600 to-trust-400 p-2 rounded-lg mr-3 shadow-lg shadow-trust-600/30">
+                    <i data-lucide="activity" class="text-white w-5 h-5"></i>
+                </div>
+                <h1 class="text-lg font-bold tracking-wide text-white">Relawan Gempa</h1>
+            </div>
+            
+            <nav class="p-4 space-y-2 mt-4">
+                <a href="admin.html" class="flex items-center px-4 py-3 text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 rounded-xl transition-all group">
+                    <i data-lucide="layout-dashboard" class="w-5 h-5 mr-3 group-hover:text-trust-400 transition-colors"></i>
+                    <span class="font-medium">Dashboard Utama</span>
+                </a>
+                <a href="admin-map.html" class="flex items-center px-4 py-3 bg-trust-600/20 text-trust-400 rounded-xl border border-trust-500/30 transition-all">
+                    <i data-lucide="map" class="w-5 h-5 mr-3"></i>
+                    <span class="font-medium">Peta Sebaran</span>
+                </a>
+                <a href="#" class="flex items-center px-4 py-3 text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 rounded-xl transition-all group">
+                    <i data-lucide="box" class="w-5 h-5 mr-3 group-hover:text-alert-500 transition-colors"></i>
+                    <span class="font-medium">Klaster Logistik</span>
+                </a>
+            </nav>
+        </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 flex flex-col h-full relative p-6">
+        
+        <header class="flex justify-between items-center mb-6">
+            <div>
+                <h2 class="text-2xl font-bold text-white tracking-wide">Peta Sebaran Posko</h2>
+                <p class="text-sm text-slate-400">Pemantauan lokasi posko aktif via GPS relawan</p>
+            </div>
+            <div class="bg-slate-800 rounded-lg p-1 flex shadow-inner">
+                <button class="px-4 py-1.5 rounded-md bg-slate-700 text-white font-medium text-sm">Mode Satelit</button>
+                <button class="px-4 py-1.5 rounded-md text-slate-400 hover:text-white font-medium text-sm">Mode Jalan</button>
+            </div>
+        </header>
+
+        <!-- Container Peta -->
+        <div class="flex-1 w-full bg-slate-800 rounded-3xl overflow-hidden border border-slate-700/80 shadow-2xl relative">
+            <div id="map" class="w-full h-full"></div>
+            
+            <!-- Legenda Melayang -->
+            <div class="absolute bottom-6 right-6 z-[1000] glass-dark p-4 rounded-2xl border border-slate-600/50 shadow-xl">
+                <h4 class="text-sm font-bold text-white mb-3">Status Posko</h4>
+                <div class="space-y-2">
+                    <div class="flex items-center">
+                        <span class="w-3 h-3 rounded-full bg-blue-500 border border-white mr-2"></span>
+                        <span class="text-xs text-slate-300">Stok Logistik Aman</span>
+                    </div>
+                    <div class="flex items-center">
+                        <span class="w-3 h-3 rounded-full bg-orange-500 border border-white mr-2"></span>
+                        <span class="text-xs text-slate-300">Stok Menipis</span>
+                    </div>
+                    <div class="flex items-center">
+                        <span class="w-3 h-3 rounded-full bg-red-500 border border-white mr-2 animate-pulse"></span>
+                        <span class="text-xs text-slate-300">Darurat Logistik / Medis</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <script type="module">
+        import { db } from './src/firebase.js';
+        import { collection, onSnapshot } from 'firebase/firestore';
+        
+        lucide.createIcons();
+
+        // Inisialisasi Peta Leaflet (Koordinat Tengah: Larantuka, Flores Timur)
+        const map = L.map('map').setView([-8.3371, 122.9818], 11);
+
+        // Menggunakan tile dari CartoDB Dark Matter
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+            attribution: '&copy; OpenStreetMap &copy; CARTO',
+            subdomains: 'abcd',
+            maxZoom: 19
+        }).addTo(map);
+
+        const redIcon = L.divIcon({
+            className: 'custom-div-icon',
+            html: "<div class='w-5 h-5 bg-red-500 rounded-full border-2 border-white shadow-[0_0_15px_rgba(239,68,68,0.8)] animate-pulse'></div>",
+            iconSize: [20, 20],
+            iconAnchor: [10, 10]
+        });
+
+        const blueIcon = L.divIcon({
+            className: 'custom-div-icon',
+            html: "<div class='w-4 h-4 bg-blue-500 rounded-full border-2 border-white shadow-lg'></div>",
+            iconSize: [16, 16],
+            iconAnchor: [8, 8]
+        });
+
+        // LayerGroup untuk menyimpan semua marker
+        let markerLayer = L.layerGroup().addTo(map);
+
+        // Listen ke koleksi "posko" di Firestore
+        onSnapshot(collection(db, "posko"), (snapshot) => {
+            // Hapus marker lama jika ada perubahan
+            markerLayer.clearLayers();
+            
+            // Jika kosong (database baru), tampilkan dummy untuk demo
+            if (snapshot.empty) {
+                L.marker([-8.35, 122.95], {icon: redIcon}).addTo(markerLayer).bindPopup(`
+                    <div class='p-1'>
+                        <h3 class='font-bold text-slate-800'>Posko Desa Ile Bura (Demo)</h3>
+                        <p class='text-xs text-red-600 font-medium mb-1'>Status: KRITIS PANGAN</p>
+                        <p class='text-xs text-slate-500'>*Data riil Firebase belum ada</p>
+                    </div>`);
+                return;
+            }
+
+            // Looping data riil dari Firebase
+            snapshot.forEach((doc) => {
+                const data = doc.data();
+                if (data.lat && data.lng) {
+                    const icon = data.status === 'Kritis' ? redIcon : blueIcon;
+                    L.marker([data.lat, data.lng], {icon: icon}).addTo(markerLayer)
+                        .bindPopup(`
+                            <div class='p-1'>
+                                <h3 class='font-bold text-slate-800'>${data.nama}</h3>
+                                <p class='text-xs font-medium mb-1 ${data.status === 'Kritis' ? 'text-red-600' : 'text-blue-600'}'>Status: ${data.status.toUpperCase()}</p>
+                                <p class='text-xs text-slate-600'>Relawan: ${data.relawan || 'Anonim'}<br>Pengungsi: ${data.jumlahPengungsi || 0} Jiwa</p>
+                            </div>
+                        `);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

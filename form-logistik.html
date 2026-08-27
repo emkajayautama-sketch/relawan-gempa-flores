@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Lapor Logistik Darurat</title>
+    <link href="/src/style.css" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="bg-slate-200 antialiased overflow-x-hidden selection:bg-alert-500 selection:text-white">
+    <div class="max-w-md mx-auto min-h-screen relative bg-slate-50 shadow-2xl pb-24 overflow-hidden flex flex-col">
+        
+        <!-- Header -->
+        <header class="w-full bg-alert-600 z-50 border-b border-alert-700 shrink-0 shadow-md">
+            <div class="px-6 py-4 flex items-center text-white">
+                <a href="index.html" class="p-2 -ml-2 rounded-xl hover:bg-alert-700 transition-colors">
+                    <i data-lucide="arrow-left" class="w-6 h-6"></i>
+                </a>
+                <h1 class="font-bold text-lg ml-3">Form Kebutuhan Logistik</h1>
+            </div>
+        </header>
+
+        <div class="bg-alert-50 border-b border-alert-200 px-6 py-3 flex items-start">
+            <i data-lucide="info" class="w-4 h-4 text-alert-600 mt-0.5 mr-2 shrink-0"></i>
+            <p class="text-xs text-alert-800 font-medium leading-relaxed">
+                Silakan isi kuantitas riil yang dibutuhkan di posko Anda saat ini. Kosongkan jika stok masih aman.
+            </p>
+        </div>
+
+        <!-- Main Content -->
+        <main class="flex-1 overflow-y-auto px-4 py-4 space-y-6">
+            
+            <form id="formLogistik">
+                <!-- Klaster Pangan & Air -->
+                <div class="bg-white rounded-3xl p-5 shadow-sm border border-slate-200 mb-5">
+                    <div class="flex items-center mb-4 pb-3 border-b border-slate-100">
+                        <div class="bg-blue-100 p-2 rounded-lg mr-3">
+                            <i data-lucide="wheat" class="w-5 h-5 text-blue-600"></i>
+                        </div>
+                        <h2 class="font-bold text-slate-800">Klaster Pangan & Air</h2>
+                    </div>
+                    
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between">
+                            <label class="text-sm font-semibold text-slate-700 w-1/2">Beras (Kg)</label>
+                            <input type="number" id="beras" min="0" class="w-1/3 bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-center text-slate-800 focus:outline-none focus:ring-2 focus:ring-alert-500" placeholder="0">
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <label class="text-sm font-semibold text-slate-700 w-1/2">Air Mineral (Dus)</label>
+                            <input type="number" id="air" min="0" class="w-1/3 bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-center text-slate-800 focus:outline-none focus:ring-2 focus:ring-alert-500" placeholder="0">
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <label class="text-sm font-semibold text-slate-700 w-1/2">Mie Instan (Dus)</label>
+                            <input type="number" id="mie" min="0" class="w-1/3 bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-center text-slate-800 focus:outline-none focus:ring-2 focus:ring-alert-500" placeholder="0">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Klaster Hunian -->
+                <div class="bg-white rounded-3xl p-5 shadow-sm border border-slate-200 mb-5">
+                    <div class="flex items-center mb-4 pb-3 border-b border-slate-100">
+                        <div class="bg-orange-100 p-2 rounded-lg mr-3">
+                            <i data-lucide="tent" class="w-5 h-5 text-orange-600"></i>
+                        </div>
+                        <h2 class="font-bold text-slate-800">Klaster Hunian (Shelter)</h2>
+                    </div>
+                    
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between">
+                            <label class="text-sm font-semibold text-slate-700 w-1/2">Tenda Keluarga</label>
+                            <input type="number" id="tenda" min="0" class="w-1/3 bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-center text-slate-800 focus:outline-none focus:ring-2 focus:ring-alert-500" placeholder="0">
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <label class="text-sm font-semibold text-slate-700 w-1/2">Selimut (Pcs)</label>
+                            <input type="number" id="selimut" min="0" class="w-1/3 bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-center text-slate-800 focus:outline-none focus:ring-2 focus:ring-alert-500" placeholder="0">
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <label class="text-sm font-semibold text-slate-700 w-1/2">Kasur/Matras</label>
+                            <input type="number" id="kasur" min="0" class="w-1/3 bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-center text-slate-800 focus:outline-none focus:ring-2 focus:ring-alert-500" placeholder="0">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Klaster Kesehatan -->
+                <div class="bg-white rounded-3xl p-5 shadow-sm border border-slate-200 mb-5">
+                    <div class="flex items-center mb-4 pb-3 border-b border-slate-100">
+                        <div class="bg-pink-100 p-2 rounded-lg mr-3">
+                            <i data-lucide="heart-pulse" class="w-5 h-5 text-pink-600"></i>
+                        </div>
+                        <h2 class="font-bold text-slate-800">Klaster Medis & Sanitasi</h2>
+                    </div>
+                    
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between">
+                            <label class="text-sm font-semibold text-slate-700 w-1/2">Kotak P3K</label>
+                            <input type="number" id="p3k" min="0" class="w-1/3 bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-center text-slate-800 focus:outline-none focus:ring-2 focus:ring-alert-500" placeholder="0">
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <label class="text-sm font-semibold text-slate-700 w-1/2">Popok Bayi/Anak</label>
+                            <input type="number" id="popok" min="0" class="w-1/3 bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-center text-slate-800 focus:outline-none focus:ring-2 focus:ring-alert-500" placeholder="0">
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <label class="text-sm font-semibold text-slate-700 w-1/2">Pembalut Wanita</label>
+                            <input type="number" id="pembalut" min="0" class="w-1/3 bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-center text-slate-800 focus:outline-none focus:ring-2 focus:ring-alert-500" placeholder="0">
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </main>
+
+        <!-- Bottom Footer Action -->
+        <div class="p-6 bg-white border-t border-slate-200 shrink-0">
+             <button id="btnKirim" class="w-full bg-alert-600 hover:bg-alert-700 text-white font-bold rounded-2xl py-4 shadow-lg shadow-alert-600/30 flex justify-center items-center transition-transform active:scale-95">
+                Kirim Laporan Posko <i data-lucide="send" class="w-5 h-5 ml-2"></i>
+            </button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { db, auth } from './src/firebase.js';
+        import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+
+        lucide.createIcons();
+
+        document.getElementById('btnKirim').addEventListener('click', async (e) => {
+            const btn = e.currentTarget;
+            btn.innerHTML = '<span class="animate-spin mr-2">⏳</span> Mengirim...';
+            btn.disabled = true;
+
+            const beras = parseInt(document.getElementById('beras').value) || 0;
+            const air = parseInt(document.getElementById('air').value) || 0;
+            const mie = parseInt(document.getElementById('mie').value) || 0;
+            const tenda = parseInt(document.getElementById('tenda').value) || 0;
+            const selimut = parseInt(document.getElementById('selimut').value) || 0;
+            const kasur = parseInt(document.getElementById('kasur').value) || 0;
+            const p3k = parseInt(document.getElementById('p3k').value) || 0;
+            const popok = parseInt(document.getElementById('popok').value) || 0;
+            const pembalut = parseInt(document.getElementById('pembalut').value) || 0;
+
+            const total = beras + air + mie + tenda + selimut + kasur + p3k + popok + pembalut;
+            if (total === 0) {
+                alert("Anda belum mengisi jumlah kebutuhan apapun.");
+                btn.innerHTML = 'Kirim Laporan Posko <i data-lucide="send" class="w-5 h-5 ml-2"></i>';
+                btn.disabled = false;
+                lucide.createIcons();
+                return;
+            }
+
+            try {
+                // Posko sementara hardcoded, nanti bisa diambil dari profil user
+                await addDoc(collection(db, "laporan_logistik"), {
+                    posko: "Posko Wulanggitang",
+                    pelapor: auth.currentUser?.email || "Relawan Anonim",
+                    kebutuhan: {
+                        beras: beras,
+                        air: air,
+                        mie: mie,
+                        tenda: tenda,
+                        selimut: selimut,
+                        kasur: kasur,
+                        p3k: p3k,
+                        popok: popok,
+                        pembalut: pembalut
+                    },
+                    createdAt: serverTimestamp()
+                });
+
+                alert("Laporan logistik berhasil dikirim ke Command Center!");
+                window.location.href = 'index.html';
+            } catch (error) {
+                console.error("Error submitting logistik:", error);
+                alert("Terjadi kesalahan: " + error.message);
+                btn.innerHTML = 'Kirim Laporan Posko <i data-lucide="send" class="w-5 h-5 ml-2"></i>';
+                btn.disabled = false;
+                lucide.createIcons();
+            }
+        });
+    </script>
+</body>
+</html>

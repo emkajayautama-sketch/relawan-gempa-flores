@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Input Data Pengungsi</title>
+    <link href="/src/style.css" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="bg-slate-200 antialiased overflow-x-hidden selection:bg-trust-500 selection:text-white">
+    <div class="max-w-md mx-auto min-h-screen relative bg-slate-50 shadow-2xl pb-24 overflow-hidden">
+        
+        <!-- Header -->
+        <header class="absolute top-0 w-full glass z-50 transition-all duration-300 border-b border-slate-200">
+            <div class="px-6 py-4 flex items-center">
+                <a href="index.html" class="p-2 -ml-2 rounded-xl hover:bg-slate-200/50 transition-colors">
+                    <i data-lucide="arrow-left" class="w-6 h-6 text-slate-700"></i>
+                </a>
+                <h1 class="text-slate-800 font-bold text-lg ml-3">Data Pengungsi Baru</h1>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="pt-24 px-6 h-full overflow-y-auto">
+            
+            <!-- Progress Wizard -->
+            <div class="flex justify-between items-center mb-8 relative">
+                <div class="absolute top-1/2 left-0 w-full h-1 bg-slate-200 -z-10 transform -translate-y-1/2"></div>
+                <div class="w-1/2 absolute top-1/2 left-0 h-1 bg-trust-500 -z-10 transform -translate-y-1/2"></div>
+                
+                <div class="flex flex-col items-center">
+                    <div class="w-8 h-8 rounded-full bg-trust-500 text-white flex items-center justify-center font-bold text-sm shadow-md">1</div>
+                    <span class="text-[10px] font-bold text-trust-600 mt-2">Data KK</span>
+                </div>
+                <div class="flex flex-col items-center">
+                    <div class="w-8 h-8 rounded-full bg-white border-2 border-slate-300 text-slate-400 flex items-center justify-center font-bold text-sm">2</div>
+                    <span class="text-[10px] font-medium text-slate-400 mt-2">Anggota</span>
+                </div>
+                <div class="flex flex-col items-center">
+                    <div class="w-8 h-8 rounded-full bg-white border-2 border-slate-300 text-slate-400 flex items-center justify-center font-bold text-sm">3</div>
+                    <span class="text-[10px] font-medium text-slate-400 mt-2">Selesai</span>
+                </div>
+            </div>
+
+            <form id="form-kk" class="space-y-6">
+                
+                <!-- Input Group -->
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1.5">Nomor Kartu Keluarga (KK)</label>
+                        <div class="relative">
+                            <i data-lucide="credit-card" class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400"></i>
+                            <input type="tel" id="noKk" pattern="[0-9]*" maxlength="16" placeholder="Masukkan 16 digit No KK" class="w-full bg-white border border-slate-300 rounded-2xl pl-11 pr-4 py-3 text-slate-800 focus:outline-none focus:ring-2 focus:ring-trust-500 focus:border-transparent transition-all shadow-sm">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1.5">Nama Kepala Keluarga</label>
+                        <div class="relative">
+                            <i data-lucide="user" class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400"></i>
+                            <input type="text" id="namaKk" placeholder="Nama lengkap sesuai KTP" class="w-full bg-white border border-slate-300 rounded-2xl pl-11 pr-4 py-3 text-slate-800 focus:outline-none focus:ring-2 focus:ring-trust-500 focus:border-transparent transition-all shadow-sm">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-1.5">Dusun/RT/RW Asal</label>
+                            <input type="text" id="rtRw" placeholder="Cth: RT 01" class="w-full bg-white border border-slate-300 rounded-2xl px-4 py-3 text-slate-800 focus:outline-none focus:ring-2 focus:ring-trust-500 focus:border-transparent transition-all shadow-sm">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-1.5">Desa Asal</label>
+                            <input type="text" id="desa" placeholder="Nama Desa" class="w-full bg-white border border-slate-300 rounded-2xl px-4 py-3 text-slate-800 focus:outline-none focus:ring-2 focus:ring-trust-500 focus:border-transparent transition-all shadow-sm">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Alert -->
+                <div class="bg-amber-50 border border-amber-200 rounded-2xl p-4 flex items-start">
+                    <i data-lucide="info" class="w-5 h-5 text-amber-500 shrink-0 mt-0.5 mr-3"></i>
+                    <p class="text-xs text-amber-700 leading-relaxed">
+                        Pastikan Nomor KK tidak ganda. Sistem akan otomatis menolak input jika No KK sudah terdaftar di posko lain untuk mencegah duplikasi data bantuan.
+                    </p>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="pt-4">
+                    <button type="button" id="btnLanjut" class="w-full bg-trust-600 hover:bg-trust-700 text-white font-bold rounded-2xl py-4 shadow-lg shadow-trust-600/30 flex justify-center items-center transition-transform active:scale-95">
+                        Lanjut Input Anggota Keluarga <i data-lucide="arrow-right" class="w-5 h-5 ml-2"></i>
+                    </button>
+                </div>
+            </form>
+        </main>
+    </div>
+
+    <script type="module">
+        import { db } from './src/firebase.js';
+        import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+
+        lucide.createIcons();
+
+        document.getElementById('btnLanjut').addEventListener('click', async (e) => {
+            const btn = e.currentTarget;
+            btn.innerHTML = '<span class="animate-spin mr-2">⏳</span> Menyimpan...';
+            btn.classList.add('opacity-75', 'cursor-not-allowed');
+            btn.disabled = true;
+
+            const noKk = document.getElementById('noKk').value;
+            const namaKk = document.getElementById('namaKk').value;
+            const rtRw = document.getElementById('rtRw').value;
+            const desa = document.getElementById('desa').value;
+
+            // Validasi sederhana
+            if(!noKk || !namaKk || !desa) {
+                alert("Mohon isi Nomor KK, Nama Kepala Keluarga, dan Desa asal!");
+                btn.innerHTML = 'Lanjut Input Anggota Keluarga <i data-lucide="arrow-right" class="w-5 h-5 ml-2"></i>';
+                btn.classList.remove('opacity-75', 'cursor-not-allowed');
+                btn.disabled = false;
+                lucide.createIcons();
+                return;
+            }
+
+            try {
+                // Simpan ke Firestore koleksi "keluarga"
+                const docRef = await addDoc(collection(db, "keluarga"), {
+                    noKk: noKk,
+                    namaKepalaKeluarga: namaKk,
+                    rtRwAsal: rtRw,
+                    desaAsal: desa,
+                    createdAt: serverTimestamp(),
+                    poskoAktif: "Posko Wulanggitang" // Nanti didapat dari Auth user
+                });
+                console.log("Document written with ID: ", docRef.id);
+                
+                // Pindah ke step berikutnya (Form Input Anggota)
+                alert("Data KK berhasil disimpan (Offline Mode Aktif). Lanjut ke pengisian data anggota!");
+                window.location.href = 'form-anggota.html?kkId=' + docRef.id;
+
+            } catch (error) {
+                console.error("Error adding document: ", error);
+                alert("Terjadi kesalahan: " + error.message);
+            } finally {
+                btn.innerHTML = 'Lanjut Input Anggota Keluarga <i data-lucide="arrow-right" class="w-5 h-5 ml-2"></i>';
+                btn.classList.remove('opacity-75', 'cursor-not-allowed');
+                btn.disabled = false;
+                lucide.createIcons();
+            }
+        });
+    </script>
+</body>
+</html>
