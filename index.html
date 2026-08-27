@@ -120,24 +120,24 @@
     <!-- Bottom Navigation Bar (Optional for PWA feel) -->
     <nav class="absolute bottom-0 w-full max-w-md glass border-t border-slate-200 pb-safe pt-2 px-6">
         <div class="flex justify-around items-center h-16">
-            <button class="flex flex-col items-center justify-center w-full text-trust-600 group">
+            <a href="index.html" class="flex flex-col items-center justify-center w-full text-trust-600 group cursor-default">
                 <div class="p-1.5 bg-trust-100 rounded-xl group-hover:bg-trust-200 transition-colors">
                     <i data-lucide="home" class="w-5 h-5"></i>
                 </div>
                 <span class="text-[10px] font-semibold mt-1">Beranda</span>
-            </button>
-            <button id="btnRiwayat" class="flex flex-col items-center justify-center w-full text-slate-400 hover:text-slate-600 transition-colors">
+            </a>
+            <a href="riwayat.html" class="flex flex-col items-center justify-center w-full text-slate-400 hover:text-slate-600 transition-colors">
                 <div class="p-1.5">
                     <i data-lucide="history" class="w-5 h-5"></i>
                 </div>
                 <span class="text-[10px] font-medium mt-1">Riwayat</span>
-            </button>
-            <button id="btnProfil" class="flex flex-col items-center justify-center w-full text-slate-400 hover:text-slate-600 transition-colors">
+            </a>
+            <a href="profil.html" class="flex flex-col items-center justify-center w-full text-slate-400 hover:text-slate-600 transition-colors">
                 <div class="p-1.5">
                     <i data-lucide="user" class="w-5 h-5"></i>
                 </div>
                 <span class="text-[10px] font-medium mt-1">Profil</span>
-            </button>
+            </a>
         </div>
     </nav>
 
@@ -190,20 +190,7 @@
             }
         });
 
-        // Handle Bottom Nav Actions
-        document.getElementById('btnRiwayat').addEventListener('click', () => {
-            alert("Fitur Riwayat sedang dalam tahap penyelesaian oleh Tim IT pusat.");
-        });
 
-        document.getElementById('btnProfil').addEventListener('click', () => {
-            if (confirm("Apakah Anda yakin ingin Keluar (Logout)?")) {
-                signOut(auth).then(() => {
-                    window.location.href = 'login.html';
-                }).catch((error) => {
-                    console.error("Gagal Logout:", error);
-                });
-            }
-        });
 
         // Header scroll effect
         const header = document.querySelector('header');

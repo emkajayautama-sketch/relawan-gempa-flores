@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Riwayat - Relawan Gempa</title>
+    <link href="/src/style.css" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
+        .pt-safe { padding-top: env(safe-area-inset-top); }
+        .skeleton {
+            background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+        }
+        @keyframes loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+    </style>
+</head>
+<body class="bg-slate-50 antialiased overflow-x-hidden selection:bg-trust-500 selection:text-white pb-24">
+    
+    <!-- Background Patterns -->
+    <div class="fixed top-0 left-0 w-full h-[30vh] -z-10 bg-gradient-to-b from-slate-800 to-slate-900 overflow-hidden">
+        <div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(#ffffff 1px, transparent 1px); background-size: 24px 24px;"></div>
+    </div>
+
+    <!-- Header -->
+    <header class="w-full max-w-md mx-auto pt-safe px-6 pb-4">
+        <div class="flex items-center justify-between mt-4">
+            <button onclick="window.location.href='index.html'" class="w-10 h-10 bg-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center text-white border border-white/20 hover:bg-white/20 transition-all active:scale-95">
+                <i data-lucide="arrow-left" class="w-5 h-5"></i>
+            </button>
+            <h1 class="text-white text-lg font-bold">Riwayat Data</h1>
+            <div class="w-10 h-10 flex items-center justify-center">
+                <i data-lucide="filter" class="w-5 h-5 text-white/70"></i>
+            </div>
+        </div>
+        
+        <!-- Filter Info -->
+        <div class="mt-4 glass-dark bg-white/10 p-3 rounded-2xl border border-white/20 flex items-center justify-between">
+            <div>
+                <p class="text-[10px] text-slate-300 uppercase tracking-wide font-semibold mb-0.5">Filter Posko</p>
+                <p id="riwayat-posko-name" class="text-white font-medium text-sm">Posko Nagekeo</p>
+            </div>
+            <button onclick="fetchRiwayat()" class="w-8 h-8 bg-trust-500 rounded-full flex items-center justify-center shadow-lg active:scale-90 transition-transform">
+                <i data-lucide="refresh-cw" class="w-4 h-4 text-white"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="w-full max-w-md mx-auto px-4 mt-4 z-10 relative">
+        <div id="loading-state" class="space-y-4">
+            <!-- Skeleton items -->
+            <div class="bg-white rounded-3xl p-5 shadow-sm border border-slate-100 flex items-start gap-4">
+                <div class="w-12 h-12 rounded-2xl skeleton shrink-0"></div>
+                <div class="w-full space-y-2 py-1">
+                    <div class="h-4 w-1/3 skeleton rounded-full"></div>
+                    <div class="h-3 w-2/3 skeleton rounded-full"></div>
+                </div>
+            </div>
+            <div class="bg-white rounded-3xl p-5 shadow-sm border border-slate-100 flex items-start gap-4">
+                <div class="w-12 h-12 rounded-2xl skeleton shrink-0"></div>
+                <div class="w-full space-y-2 py-1">
+                    <div class="h-4 w-1/4 skeleton rounded-full"></div>
+                    <div class="h-3 w-3/4 skeleton rounded-full"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="empty-state" class="hidden text-center py-10">
+            <div class="w-20 h-20 bg-slate-200 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i data-lucide="inbox" class="w-10 h-10 text-slate-400"></i>
+            </div>
+            <h3 class="text-slate-700 font-bold text-lg mb-1">Belum Ada Data</h3>
+            <p class="text-slate-500 text-sm px-6">Belum ada pendataan keluarga maupun laporan logistik di Posko ini.</p>
+        </div>
+
+        <!-- Feed List -->
+        <div id="feed-list" class="space-y-4">
+            <!-- Dynamic items injected here -->
+        </div>
+
+    </main>
+
+    <!-- Bottom Navigation Bar -->
+    <nav class="fixed bottom-0 left-0 w-full glass border-t border-slate-200 pb-safe pt-2 px-6 z-50">
+        <div class="max-w-md mx-auto flex justify-around items-center h-16">
+            <a href="index.html" class="flex flex-col items-center justify-center w-full text-slate-400 hover:text-slate-600 transition-colors">
+                <div class="p-1.5">
+                    <i data-lucide="home" class="w-5 h-5"></i>
+                </div>
+                <span class="text-[10px] font-medium mt-1">Beranda</span>
+            </a>
+            <a href="riwayat.html" class="flex flex-col items-center justify-center w-full text-trust-600 group cursor-default">
+                <div class="p-1.5 bg-trust-100 rounded-xl">
+                    <i data-lucide="history" class="w-5 h-5"></i>
+                </div>
+                <span class="text-[10px] font-semibold mt-1">Riwayat</span>
+            </a>
+            <a href="profil.html" class="flex flex-col items-center justify-center w-full text-slate-400 hover:text-slate-600 transition-colors">
+                <div class="p-1.5">
+                    <i data-lucide="user" class="w-5 h-5"></i>
+                </div>
+                <span class="text-[10px] font-medium mt-1">Profil</span>
+            </a>
+        </div>
+    </nav>
+
+    <script type="module">
+        import { auth, db } from './src/firebase.js';
+        import { onAuthStateChanged } from 'firebase/auth';
+        import { collection, query, where, getDocs, orderBy, limit } from "firebase/firestore";
+
+        lucide.createIcons();
+
+        // Get active Posko
+        const poskoAktif = localStorage.getItem('poskoName') || 'Posko Nagekeo';
+        document.getElementById('riwayat-posko-name').innerText = poskoAktif;
+
+        const loadingState = document.getElementById('loading-state');
+        const emptyState = document.getElementById('empty-state');
+        const feedList = document.getElementById('feed-list');
+
+        onAuthStateChanged(auth, (user) => {
+            if (!user) {
+                window.location.href = 'login.html';
+            } else {
+                fetchRiwayat();
+            }
+        });
+
+        // Make it available globally for the refresh button
+        window.fetchRiwayat = async function() {
+            loadingState.classList.remove('hidden');
+            emptyState.classList.add('hidden');
+            feedList.innerHTML = '';
+            
+            try {
+                // Fetch Keluarga
+                const keluargaRef = collection(db, "keluarga");
+                const qKeluarga = query(keluargaRef, where("poskoAktif", "==", poskoAktif), limit(10));
+                const keluargaSnap = await getDocs(qKeluarga);
+                
+                // Fetch Logistik
+                const logistikRef = collection(db, "laporan_logistik");
+                const qLogistik = query(logistikRef, where("posko", "==", poskoAktif), limit(10));
+                const logistikSnap = await getDocs(qLogistik);
+
+                let allData = [];
+
+                keluargaSnap.forEach((doc) => {
+                    let data = doc.data();
+                    allData.push({
+                        id: doc.id,
+                        type: 'keluarga',
+                        timestamp: data.createdAt ? data.createdAt.toMillis() : Date.now(),
+                        title: `Kepala Keluarga: ${data.namaKepalaKeluarga}`,
+                        subtitle: `Asal: RT/RW ${data.rtRwAsal} Desa ${data.desaAsal}`,
+                        pelapor: data.pelapor || 'Relawan (Versi Lama)'
+                    });
+                });
+
+                logistikSnap.forEach((doc) => {
+                    let data = doc.data();
+                    allData.push({
+                        id: doc.id,
+                        type: 'logistik',
+                        timestamp: data.createdAt ? data.createdAt.toMillis() : Date.now(),
+                        title: `Status: ${data.status || 'Update'}`,
+                        subtitle: `Laporan Stok & Kebutuhan Logistik`,
+                        pelapor: data.pelapor || 'Relawan Anonim'
+                    });
+                });
+
+                // Sort by timestamp desc
+                allData.sort((a, b) => b.timestamp - a.timestamp);
+
+                loadingState.classList.add('hidden');
+
+                if (allData.length === 0) {
+                    emptyState.classList.remove('hidden');
+                    return;
+                }
+
+                allData.forEach(item => {
+                    const date = new Date(item.timestamp);
+                    const timeString = date.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+                    const dateString = date.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
+
+                    const iconStr = item.type === 'keluarga' 
+                        ? `<div class="w-12 h-12 rounded-2xl bg-trust-100 flex items-center justify-center shrink-0 border border-trust-200"><i data-lucide="users" class="w-6 h-6 text-trust-600"></i></div>`
+                        : `<div class="w-12 h-12 rounded-2xl bg-alert-100 flex items-center justify-center shrink-0 border border-alert-200"><i data-lucide="package" class="w-6 h-6 text-alert-600"></i></div>`;
+                    
+                    const el = document.createElement('div');
+                    el.className = "bg-white rounded-3xl p-4 shadow-sm border border-slate-100 flex gap-4 hover:border-slate-300 transition-colors cursor-pointer active:scale-95 duration-200";
+                    el.innerHTML = `
+                        ${iconStr}
+                        <div class="flex-1 min-w-0">
+                            <div class="flex justify-between items-start mb-1">
+                                <h4 class="text-slate-800 font-bold text-sm truncate pr-2">${item.title}</h4>
+                                <span class="text-[10px] font-semibold text-slate-400 shrink-0 bg-slate-50 px-2 py-0.5 rounded-full">${dateString}, ${timeString}</span>
+                            </div>
+                            <p class="text-xs text-slate-500 mb-1 truncate">${item.subtitle}</p>
+                            <p class="text-[10px] text-slate-400 flex items-center">
+                                <i data-lucide="user-check" class="w-3 h-3 mr-1"></i> Diinput oleh: ${item.pelapor}
+                            </p>
+                        </div>
+                    `;
+                    feedList.appendChild(el);
+                });
+                
+                lucide.createIcons();
+
+            } catch (error) {
+                console.error("Error fetching riwayat:", error);
+                loadingState.classList.add('hidden');
+                alert("Gagal mengambil data: " + error.message);
+            }
+        }
+    </script>
+</body>
+</html>

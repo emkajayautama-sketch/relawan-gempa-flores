@@ -199,6 +199,8 @@
                     nama: nama,
                     nik: nik,
                     gender: gender,
+                    pelapor: auth.currentUser?.email || "Relawan Anonim",
+                    poskoAktif: localStorage.getItem('poskoName') || "Posko Nagekeo",
                     umur: umur,
                     kategoriUmur: badgeUmur.innerText,
                     statusRentan: statusRentan,

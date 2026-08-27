@@ -127,6 +127,7 @@
                     rtRwAsal: rtRw,
                     desaAsal: desa,
                     createdAt: serverTimestamp(),
+                    pelapor: auth.currentUser?.email || "Relawan Anonim",
                     poskoAktif: localStorage.getItem('poskoName') || "Posko Nagekeo"
                 });
                 console.log("Document written with ID: ", docRef.id);
