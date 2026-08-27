@@ -42,16 +42,25 @@
                     
                     <div id="klaster-pangan" class="space-y-4">
                         <div class="flex items-center justify-between default-item">
-                            <label class="text-sm font-semibold text-slate-700 w-1/2">Beras (Kg)</label>
-                            <input type="number" data-name="Beras (Kg)" min="0" class="w-1/3 bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-center text-slate-800 focus:outline-none focus:ring-2 focus:ring-alert-500" placeholder="0">
+                            <label class="text-sm font-semibold text-slate-700 w-2/5">Beras</label>
+                            <div class="w-3/5 flex items-center gap-2">
+                                <input type="number" data-name="Beras" data-unit="Kg" min="0" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-center text-slate-800 focus:outline-none focus:ring-2 focus:ring-alert-500" placeholder="0">
+                                <span class="text-xs font-semibold text-slate-500 w-12 text-center">Kg</span>
+                            </div>
                         </div>
                         <div class="flex items-center justify-between default-item">
-                            <label class="text-sm font-semibold text-slate-700 w-1/2">Air Mineral (Dus)</label>
-                            <input type="number" data-name="Air Mineral (Dus)" min="0" class="w-1/3 bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-center text-slate-800 focus:outline-none focus:ring-2 focus:ring-alert-500" placeholder="0">
+                            <label class="text-sm font-semibold text-slate-700 w-2/5">Air Mineral</label>
+                            <div class="w-3/5 flex items-center gap-2">
+                                <input type="number" data-name="Air Mineral" data-unit="Dus" min="0" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-center text-slate-800 focus:outline-none focus:ring-2 focus:ring-alert-500" placeholder="0">
+                                <span class="text-xs font-semibold text-slate-500 w-12 text-center">Dus</span>
+                            </div>
                         </div>
                         <div class="flex items-center justify-between default-item">
-                            <label class="text-sm font-semibold text-slate-700 w-1/2">Mie Instan (Dus)</label>
-                            <input type="number" data-name="Mie Instan (Dus)" min="0" class="w-1/3 bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-center text-slate-800 focus:outline-none focus:ring-2 focus:ring-alert-500" placeholder="0">
+                            <label class="text-sm font-semibold text-slate-700 w-2/5">Mie Instan</label>
+                            <div class="w-3/5 flex items-center gap-2">
+                                <input type="number" data-name="Mie Instan" data-unit="Dus" min="0" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-center text-slate-800 focus:outline-none focus:ring-2 focus:ring-alert-500" placeholder="0">
+                                <span class="text-xs font-semibold text-slate-500 w-12 text-center">Dus</span>
+                            </div>
                         </div>
                     </div>
                     <button type="button" onclick="tambahItem('klaster-pangan')" class="mt-4 w-full border border-dashed border-blue-300 text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-xl py-3 text-sm font-semibold flex items-center justify-center transition-colors active:scale-95">
@@ -70,16 +79,25 @@
                     
                     <div id="klaster-hunian" class="space-y-4">
                         <div class="flex items-center justify-between default-item">
-                            <label class="text-sm font-semibold text-slate-700 w-1/2">Tenda Keluarga</label>
-                            <input type="number" data-name="Tenda Keluarga" min="0" class="w-1/3 bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-center text-slate-800 focus:outline-none focus:ring-2 focus:ring-alert-500" placeholder="0">
+                            <label class="text-sm font-semibold text-slate-700 w-2/5">Tenda Kel.</label>
+                            <div class="w-3/5 flex items-center gap-2">
+                                <input type="number" data-name="Tenda Keluarga" data-unit="Unit" min="0" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-center text-slate-800 focus:outline-none focus:ring-2 focus:ring-alert-500" placeholder="0">
+                                <span class="text-xs font-semibold text-slate-500 w-12 text-center">Unit</span>
+                            </div>
                         </div>
                         <div class="flex items-center justify-between default-item">
-                            <label class="text-sm font-semibold text-slate-700 w-1/2">Selimut (Pcs)</label>
-                            <input type="number" data-name="Selimut (Pcs)" min="0" class="w-1/3 bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-center text-slate-800 focus:outline-none focus:ring-2 focus:ring-alert-500" placeholder="0">
+                            <label class="text-sm font-semibold text-slate-700 w-2/5">Selimut</label>
+                            <div class="w-3/5 flex items-center gap-2">
+                                <input type="number" data-name="Selimut" data-unit="Pcs" min="0" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-center text-slate-800 focus:outline-none focus:ring-2 focus:ring-alert-500" placeholder="0">
+                                <span class="text-xs font-semibold text-slate-500 w-12 text-center">Pcs</span>
+                            </div>
                         </div>
                         <div class="flex items-center justify-between default-item">
-                            <label class="text-sm font-semibold text-slate-700 w-1/2">Kasur/Matras</label>
-                            <input type="number" data-name="Kasur/Matras" min="0" class="w-1/3 bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-center text-slate-800 focus:outline-none focus:ring-2 focus:ring-alert-500" placeholder="0">
+                            <label class="text-sm font-semibold text-slate-700 w-2/5">Matras</label>
+                            <div class="w-3/5 flex items-center gap-2">
+                                <input type="number" data-name="Kasur/Matras" data-unit="Pcs" min="0" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-center text-slate-800 focus:outline-none focus:ring-2 focus:ring-alert-500" placeholder="0">
+                                <span class="text-xs font-semibold text-slate-500 w-12 text-center">Pcs</span>
+                            </div>
                         </div>
                     </div>
                     <button type="button" onclick="tambahItem('klaster-hunian')" class="mt-4 w-full border border-dashed border-orange-300 text-orange-600 bg-orange-50 hover:bg-orange-100 rounded-xl py-3 text-sm font-semibold flex items-center justify-center transition-colors active:scale-95">
@@ -98,16 +116,25 @@
                     
                     <div id="klaster-medis" class="space-y-4">
                         <div class="flex items-center justify-between default-item">
-                            <label class="text-sm font-semibold text-slate-700 w-1/2">Kotak P3K</label>
-                            <input type="number" data-name="Kotak P3K" min="0" class="w-1/3 bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-center text-slate-800 focus:outline-none focus:ring-2 focus:ring-alert-500" placeholder="0">
+                            <label class="text-sm font-semibold text-slate-700 w-2/5">Kotak P3K</label>
+                            <div class="w-3/5 flex items-center gap-2">
+                                <input type="number" data-name="Kotak P3K" data-unit="Kotak" min="0" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-center text-slate-800 focus:outline-none focus:ring-2 focus:ring-alert-500" placeholder="0">
+                                <span class="text-xs font-semibold text-slate-500 w-12 text-center">Kotak</span>
+                            </div>
                         </div>
                         <div class="flex items-center justify-between default-item">
-                            <label class="text-sm font-semibold text-slate-700 w-1/2">Popok Bayi/Anak</label>
-                            <input type="number" data-name="Popok Bayi/Anak" min="0" class="w-1/3 bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-center text-slate-800 focus:outline-none focus:ring-2 focus:ring-alert-500" placeholder="0">
+                            <label class="text-sm font-semibold text-slate-700 w-2/5">Popok Bayi</label>
+                            <div class="w-3/5 flex items-center gap-2">
+                                <input type="number" data-name="Popok Bayi/Anak" data-unit="Dus" min="0" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-center text-slate-800 focus:outline-none focus:ring-2 focus:ring-alert-500" placeholder="0">
+                                <span class="text-xs font-semibold text-slate-500 w-12 text-center">Dus</span>
+                            </div>
                         </div>
                         <div class="flex items-center justify-between default-item">
-                            <label class="text-sm font-semibold text-slate-700 w-1/2">Pembalut Wanita</label>
-                            <input type="number" data-name="Pembalut Wanita" min="0" class="w-1/3 bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-center text-slate-800 focus:outline-none focus:ring-2 focus:ring-alert-500" placeholder="0">
+                            <label class="text-sm font-semibold text-slate-700 w-2/5">Pembalut</label>
+                            <div class="w-3/5 flex items-center gap-2">
+                                <input type="number" data-name="Pembalut Wanita" data-unit="Dus" min="0" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-center text-slate-800 focus:outline-none focus:ring-2 focus:ring-alert-500" placeholder="0">
+                                <span class="text-xs font-semibold text-slate-500 w-12 text-center">Dus</span>
+                            </div>
                         </div>
                     </div>
                     <button type="button" onclick="tambahItem('klaster-medis')" class="mt-4 w-full border border-dashed border-pink-300 text-pink-600 bg-pink-50 hover:bg-pink-100 rounded-xl py-3 text-sm font-semibold flex items-center justify-center transition-colors active:scale-95">
@@ -135,13 +162,14 @@
         window.tambahItem = function(klasterId) {
             const container = document.getElementById(klasterId);
             const div = document.createElement('div');
-            div.className = "flex items-center gap-2 dynamic-item mt-2 animate-fade-in-up";
+            div.className = "flex items-center gap-1 dynamic-item mt-2 animate-fade-in-up";
             div.innerHTML = `
-                <button type="button" onclick="this.parentElement.remove()" class="text-red-400 hover:text-red-600 p-2 shrink-0 transition-colors">
+                <button type="button" onclick="this.parentElement.remove()" class="text-red-400 hover:text-red-600 p-1 shrink-0 transition-colors">
                     <i data-lucide="x-circle" class="w-5 h-5"></i>
                 </button>
-                <input type="text" class="item-name flex-1 bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-alert-500" placeholder="Nama Barang (Misal: Terpal)">
-                <input type="number" min="1" class="item-qty w-24 bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-center text-slate-800 focus:outline-none focus:ring-2 focus:ring-alert-500" placeholder="Jml">
+                <input type="text" class="item-name flex-1 bg-slate-50 border border-slate-300 rounded-xl px-2 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-alert-500" placeholder="Brg (Misal: Sarden)">
+                <input type="number" min="1" class="item-qty w-16 bg-slate-50 border border-slate-300 rounded-xl px-2 py-2 text-center text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-alert-500" placeholder="Jml">
+                <input type="text" class="item-unit w-16 bg-slate-50 border border-slate-300 rounded-xl px-2 py-2 text-center text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-alert-500" placeholder="Satuan">
             `;
             container.appendChild(div);
             lucide.createIcons();
@@ -159,7 +187,11 @@
             document.querySelectorAll('.default-item input[type="number"]').forEach(input => {
                 const qty = parseInt(input.value) || 0;
                 if (qty > 0) {
-                    kebutuhanData[input.getAttribute('data-name')] = qty;
+                    const itemName = input.getAttribute('data-name');
+                    const itemUnit = input.getAttribute('data-unit');
+                    // Simpan dengan format: "Beras (Kg)"
+                    const fullKey = itemUnit ? `${itemName} (${itemUnit})` : itemName;
+                    kebutuhanData[fullKey] = qty;
                     totalBarang += qty;
                 }
             });
@@ -168,12 +200,16 @@
             document.querySelectorAll('.dynamic-item').forEach(row => {
                 const name = row.querySelector('.item-name').value.trim();
                 const qty = parseInt(row.querySelector('.item-qty').value) || 0;
+                let unit = row.querySelector('.item-unit').value.trim();
+                
                 if (name !== "" && qty > 0) {
-                    // Gabungkan jika nama sama
-                    if (kebutuhanData[name]) {
-                        kebutuhanData[name] += qty;
+                    // Simpan dengan format: "Terpal (Lembar)"
+                    const fullKey = unit ? `${name} (${unit})` : name;
+                    
+                    if (kebutuhanData[fullKey]) {
+                        kebutuhanData[fullKey] += qty;
                     } else {
-                        kebutuhanData[name] = qty;
+                        kebutuhanData[fullKey] = qty;
                     }
                     totalBarang += qty;
                 }
