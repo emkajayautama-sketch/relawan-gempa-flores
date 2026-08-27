@@ -88,7 +88,7 @@
     <script type="module">
         import { db, auth, storage } from './src/firebase.js';
         import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
-        import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
+        import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
         lucide.createIcons();
 
@@ -167,50 +167,35 @@
                 const storageRef = ref(storage, fileName);
 
                 // Mulai unggah
-                const uploadTask = uploadBytesResumable(storageRef, selectedFile);
+                progressText.innerText = "Mengunggah foto... Mohon tunggu.";
+                const snapshot = await uploadBytes(storageRef, selectedFile);
+                
+                // Selesai unggah, dapatkan URL
+                progressText.innerText = "Menyimpan data ke sistem...";
+                const downloadURL = await getDownloadURL(snapshot.ref);
 
-                uploadTask.on('state_changed', 
-                    (snapshot) => {
-                        // Pantau progress
-                        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                        progressBar.style.width = progress + '%';
-                        progressText.innerText = Math.round(progress) + '% Diunggah';
-                    }, 
-                    (error) => {
-                        // Gagal unggah file
-                        console.error("Upload error:", error);
-                        alert("Gagal mengunggah foto: " + error.message);
-                        resetUI();
-                    }, 
-                    async () => {
-                        // Selesai unggah, dapatkan URL
-                        progressText.innerText = "Menyimpan data...";
-                        const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+                // Simpan ke Firestore
+                try {
+                    await addDoc(collection(db, "dokumentasi"), {
+                        posko: poskoName,
+                        pelapor: auth.currentUser?.email || "Relawan",
+                        imageUrl: downloadURL,
+                        storagePath: fileName,
+                        caption: caption,
+                        createdAt: serverTimestamp()
+                    });
 
-                        // Simpan ke Firestore
-                        try {
-                            await addDoc(collection(db, "dokumentasi"), {
-                                posko: poskoName,
-                                pelapor: auth.currentUser?.email || "Relawan",
-                                imageUrl: downloadURL,
-                                storagePath: fileName,
-                                caption: caption,
-                                createdAt: serverTimestamp()
-                            });
-
-                            alert("Foto berhasil diunggah!");
-                            window.location.href = 'index.html';
-                        } catch (dbError) {
-                            console.error("Firestore error:", dbError);
-                            alert("Foto tersimpan, tetapi gagal memperbarui database: " + dbError.message);
-                            resetUI();
-                        }
-                    }
-                );
+                    alert("Foto berhasil diunggah!");
+                    window.location.href = 'index.html';
+                } catch (dbError) {
+                    console.error("Firestore error:", dbError);
+                    alert("Foto tersimpan, tetapi gagal memperbarui database: " + dbError.message);
+                    resetUI();
+                }
 
             } catch (error) {
                 console.error("Error:", error);
-                alert("Terjadi kesalahan: " + error.message);
+                alert("Terjadi kesalahan/Gagal mengunggah: " + error.message);
                 resetUI();
             }
         });
