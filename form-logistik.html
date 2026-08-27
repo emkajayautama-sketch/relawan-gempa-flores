@@ -40,20 +40,23 @@
                         <h2 class="font-bold text-slate-800">Klaster Pangan & Air</h2>
                     </div>
                     
-                    <div class="space-y-4">
-                        <div class="flex items-center justify-between">
+                    <div id="klaster-pangan" class="space-y-4">
+                        <div class="flex items-center justify-between default-item">
                             <label class="text-sm font-semibold text-slate-700 w-1/2">Beras (Kg)</label>
-                            <input type="number" id="beras" min="0" class="w-1/3 bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-center text-slate-800 focus:outline-none focus:ring-2 focus:ring-alert-500" placeholder="0">
+                            <input type="number" data-name="Beras (Kg)" min="0" class="w-1/3 bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-center text-slate-800 focus:outline-none focus:ring-2 focus:ring-alert-500" placeholder="0">
                         </div>
-                        <div class="flex items-center justify-between">
+                        <div class="flex items-center justify-between default-item">
                             <label class="text-sm font-semibold text-slate-700 w-1/2">Air Mineral (Dus)</label>
-                            <input type="number" id="air" min="0" class="w-1/3 bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-center text-slate-800 focus:outline-none focus:ring-2 focus:ring-alert-500" placeholder="0">
+                            <input type="number" data-name="Air Mineral (Dus)" min="0" class="w-1/3 bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-center text-slate-800 focus:outline-none focus:ring-2 focus:ring-alert-500" placeholder="0">
                         </div>
-                        <div class="flex items-center justify-between">
+                        <div class="flex items-center justify-between default-item">
                             <label class="text-sm font-semibold text-slate-700 w-1/2">Mie Instan (Dus)</label>
-                            <input type="number" id="mie" min="0" class="w-1/3 bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-center text-slate-800 focus:outline-none focus:ring-2 focus:ring-alert-500" placeholder="0">
+                            <input type="number" data-name="Mie Instan (Dus)" min="0" class="w-1/3 bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-center text-slate-800 focus:outline-none focus:ring-2 focus:ring-alert-500" placeholder="0">
                         </div>
                     </div>
+                    <button type="button" onclick="tambahItem('klaster-pangan')" class="mt-4 w-full border border-dashed border-blue-300 text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-xl py-3 text-sm font-semibold flex items-center justify-center transition-colors active:scale-95">
+                        <i data-lucide="plus" class="w-4 h-4 mr-2"></i> Tambah Item Lainnya
+                    </button>
                 </div>
 
                 <!-- Klaster Hunian -->
@@ -65,20 +68,23 @@
                         <h2 class="font-bold text-slate-800">Klaster Hunian (Shelter)</h2>
                     </div>
                     
-                    <div class="space-y-4">
-                        <div class="flex items-center justify-between">
+                    <div id="klaster-hunian" class="space-y-4">
+                        <div class="flex items-center justify-between default-item">
                             <label class="text-sm font-semibold text-slate-700 w-1/2">Tenda Keluarga</label>
-                            <input type="number" id="tenda" min="0" class="w-1/3 bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-center text-slate-800 focus:outline-none focus:ring-2 focus:ring-alert-500" placeholder="0">
+                            <input type="number" data-name="Tenda Keluarga" min="0" class="w-1/3 bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-center text-slate-800 focus:outline-none focus:ring-2 focus:ring-alert-500" placeholder="0">
                         </div>
-                        <div class="flex items-center justify-between">
+                        <div class="flex items-center justify-between default-item">
                             <label class="text-sm font-semibold text-slate-700 w-1/2">Selimut (Pcs)</label>
-                            <input type="number" id="selimut" min="0" class="w-1/3 bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-center text-slate-800 focus:outline-none focus:ring-2 focus:ring-alert-500" placeholder="0">
+                            <input type="number" data-name="Selimut (Pcs)" min="0" class="w-1/3 bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-center text-slate-800 focus:outline-none focus:ring-2 focus:ring-alert-500" placeholder="0">
                         </div>
-                        <div class="flex items-center justify-between">
+                        <div class="flex items-center justify-between default-item">
                             <label class="text-sm font-semibold text-slate-700 w-1/2">Kasur/Matras</label>
-                            <input type="number" id="kasur" min="0" class="w-1/3 bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-center text-slate-800 focus:outline-none focus:ring-2 focus:ring-alert-500" placeholder="0">
+                            <input type="number" data-name="Kasur/Matras" min="0" class="w-1/3 bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-center text-slate-800 focus:outline-none focus:ring-2 focus:ring-alert-500" placeholder="0">
                         </div>
                     </div>
+                    <button type="button" onclick="tambahItem('klaster-hunian')" class="mt-4 w-full border border-dashed border-orange-300 text-orange-600 bg-orange-50 hover:bg-orange-100 rounded-xl py-3 text-sm font-semibold flex items-center justify-center transition-colors active:scale-95">
+                        <i data-lucide="plus" class="w-4 h-4 mr-2"></i> Tambah Item Lainnya
+                    </button>
                 </div>
 
                 <!-- Klaster Kesehatan -->
@@ -90,20 +96,23 @@
                         <h2 class="font-bold text-slate-800">Klaster Medis & Sanitasi</h2>
                     </div>
                     
-                    <div class="space-y-4">
-                        <div class="flex items-center justify-between">
+                    <div id="klaster-medis" class="space-y-4">
+                        <div class="flex items-center justify-between default-item">
                             <label class="text-sm font-semibold text-slate-700 w-1/2">Kotak P3K</label>
-                            <input type="number" id="p3k" min="0" class="w-1/3 bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-center text-slate-800 focus:outline-none focus:ring-2 focus:ring-alert-500" placeholder="0">
+                            <input type="number" data-name="Kotak P3K" min="0" class="w-1/3 bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-center text-slate-800 focus:outline-none focus:ring-2 focus:ring-alert-500" placeholder="0">
                         </div>
-                        <div class="flex items-center justify-between">
+                        <div class="flex items-center justify-between default-item">
                             <label class="text-sm font-semibold text-slate-700 w-1/2">Popok Bayi/Anak</label>
-                            <input type="number" id="popok" min="0" class="w-1/3 bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-center text-slate-800 focus:outline-none focus:ring-2 focus:ring-alert-500" placeholder="0">
+                            <input type="number" data-name="Popok Bayi/Anak" min="0" class="w-1/3 bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-center text-slate-800 focus:outline-none focus:ring-2 focus:ring-alert-500" placeholder="0">
                         </div>
-                        <div class="flex items-center justify-between">
+                        <div class="flex items-center justify-between default-item">
                             <label class="text-sm font-semibold text-slate-700 w-1/2">Pembalut Wanita</label>
-                            <input type="number" id="pembalut" min="0" class="w-1/3 bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-center text-slate-800 focus:outline-none focus:ring-2 focus:ring-alert-500" placeholder="0">
+                            <input type="number" data-name="Pembalut Wanita" min="0" class="w-1/3 bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-center text-slate-800 focus:outline-none focus:ring-2 focus:ring-alert-500" placeholder="0">
                         </div>
                     </div>
+                    <button type="button" onclick="tambahItem('klaster-medis')" class="mt-4 w-full border border-dashed border-pink-300 text-pink-600 bg-pink-50 hover:bg-pink-100 rounded-xl py-3 text-sm font-semibold flex items-center justify-center transition-colors active:scale-95">
+                        <i data-lucide="plus" class="w-4 h-4 mr-2"></i> Tambah Item Lainnya
+                    </button>
                 </div>
             </form>
         </main>
@@ -122,23 +131,55 @@
 
         lucide.createIcons();
 
+        // Fungsi tambah item dinamis
+        window.tambahItem = function(klasterId) {
+            const container = document.getElementById(klasterId);
+            const div = document.createElement('div');
+            div.className = "flex items-center gap-2 dynamic-item mt-2 animate-fade-in-up";
+            div.innerHTML = `
+                <button type="button" onclick="this.parentElement.remove()" class="text-red-400 hover:text-red-600 p-2 shrink-0 transition-colors">
+                    <i data-lucide="x-circle" class="w-5 h-5"></i>
+                </button>
+                <input type="text" class="item-name flex-1 bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-alert-500" placeholder="Nama Barang (Misal: Terpal)">
+                <input type="number" min="1" class="item-qty w-24 bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-center text-slate-800 focus:outline-none focus:ring-2 focus:ring-alert-500" placeholder="Jml">
+            `;
+            container.appendChild(div);
+            lucide.createIcons();
+        };
+
         document.getElementById('btnKirim').addEventListener('click', async (e) => {
             const btn = e.currentTarget;
             btn.innerHTML = '<span class="animate-spin mr-2">⏳</span> Mengirim...';
             btn.disabled = true;
 
-            const beras = parseInt(document.getElementById('beras').value) || 0;
-            const air = parseInt(document.getElementById('air').value) || 0;
-            const mie = parseInt(document.getElementById('mie').value) || 0;
-            const tenda = parseInt(document.getElementById('tenda').value) || 0;
-            const selimut = parseInt(document.getElementById('selimut').value) || 0;
-            const kasur = parseInt(document.getElementById('kasur').value) || 0;
-            const p3k = parseInt(document.getElementById('p3k').value) || 0;
-            const popok = parseInt(document.getElementById('popok').value) || 0;
-            const pembalut = parseInt(document.getElementById('pembalut').value) || 0;
+            let kebutuhanData = {};
+            let totalBarang = 0;
 
-            const total = beras + air + mie + tenda + selimut + kasur + p3k + popok + pembalut;
-            if (total === 0) {
+            // Kumpulkan data bawaan (default)
+            document.querySelectorAll('.default-item input[type="number"]').forEach(input => {
+                const qty = parseInt(input.value) || 0;
+                if (qty > 0) {
+                    kebutuhanData[input.getAttribute('data-name')] = qty;
+                    totalBarang += qty;
+                }
+            });
+
+            // Kumpulkan data dinamis
+            document.querySelectorAll('.dynamic-item').forEach(row => {
+                const name = row.querySelector('.item-name').value.trim();
+                const qty = parseInt(row.querySelector('.item-qty').value) || 0;
+                if (name !== "" && qty > 0) {
+                    // Gabungkan jika nama sama
+                    if (kebutuhanData[name]) {
+                        kebutuhanData[name] += qty;
+                    } else {
+                        kebutuhanData[name] = qty;
+                    }
+                    totalBarang += qty;
+                }
+            });
+
+            if (totalBarang === 0) {
                 alert("Anda belum mengisi jumlah kebutuhan apapun.");
                 btn.innerHTML = 'Kirim Laporan Posko <i data-lucide="send" class="w-5 h-5 ml-2"></i>';
                 btn.disabled = false;
@@ -147,21 +188,10 @@
             }
 
             try {
-                // Posko sementara hardcoded, nanti bisa diambil dari profil user
                 await addDoc(collection(db, "laporan_logistik"), {
                     posko: localStorage.getItem('poskoName') || "Posko Nagekeo",
                     pelapor: auth.currentUser?.email || "Relawan Anonim",
-                    kebutuhan: {
-                        beras: beras,
-                        air: air,
-                        mie: mie,
-                        tenda: tenda,
-                        selimut: selimut,
-                        kasur: kasur,
-                        p3k: p3k,
-                        popok: popok,
-                        pembalut: pembalut
-                    },
+                    kebutuhan: kebutuhanData,
                     createdAt: serverTimestamp()
                 });
 
