@@ -51,7 +51,8 @@ export default defineConfig({
         formFoto: resolve(__dirname, 'form-foto.html'),
         profil: resolve(__dirname, 'profil.html'),
         riwayat: resolve(__dirname, 'riwayat.html'),
-        adminLogistik: resolve(__dirname, 'admin-logistik.html')
+        adminLogistik: resolve(__dirname, 'admin-logistik.html'),
+        adminPengungsi: resolve(__dirname, 'admin-pengungsi.html')
       }
     }
   }
