@@ -126,13 +126,13 @@
                 </div>
                 <span class="text-[10px] font-semibold mt-1">Beranda</span>
             </button>
-            <button class="flex flex-col items-center justify-center w-full text-slate-400 hover:text-slate-600 transition-colors">
+            <button id="btnRiwayat" class="flex flex-col items-center justify-center w-full text-slate-400 hover:text-slate-600 transition-colors">
                 <div class="p-1.5">
                     <i data-lucide="history" class="w-5 h-5"></i>
                 </div>
                 <span class="text-[10px] font-medium mt-1">Riwayat</span>
             </button>
-            <button class="flex flex-col items-center justify-center w-full text-slate-400 hover:text-slate-600 transition-colors">
+            <button id="btnProfil" class="flex flex-col items-center justify-center w-full text-slate-400 hover:text-slate-600 transition-colors">
                 <div class="p-1.5">
                     <i data-lucide="user" class="w-5 h-5"></i>
                 </div>
@@ -157,6 +157,7 @@
     <!-- Initialize Icons -->
     <script type="module">
         import { auth } from './src/firebase.js';
+        import { onAuthStateChanged, signOut } from 'firebase/auth';
 
         lucide.createIcons();
         
@@ -186,6 +187,21 @@
                 localStorage.setItem('poskoDistrict', newDistrict);
                 poskoDistrictEl.innerHTML = `<i data-lucide="map-pin" class="w-4 h-4 mr-1"></i> ${newDistrict}`;
                 lucide.createIcons();
+            }
+        });
+
+        // Handle Bottom Nav Actions
+        document.getElementById('btnRiwayat').addEventListener('click', () => {
+            alert("Fitur Riwayat sedang dalam tahap penyelesaian oleh Tim IT pusat.");
+        });
+
+        document.getElementById('btnProfil').addEventListener('click', () => {
+            if (confirm("Apakah Anda yakin ingin Keluar (Logout)?")) {
+                signOut(auth).then(() => {
+                    window.location.href = 'login.html';
+                }).catch((error) => {
+                    console.error("Gagal Logout:", error);
+                });
             }
         });
 
