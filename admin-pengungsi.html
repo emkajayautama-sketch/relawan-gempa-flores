@@ -337,11 +337,6 @@
                             // Format Gender
                             const genderText = data.gender === 'L' ? 'Laki-laki' : 'Perempuan';
                             
-                            // Format Umur
-                            let colorUmur = 'bg-slate-700 text-slate-300 border border-slate-600';
-                            if(data.umur < 5) colorUmur = 'bg-orange-500/20 text-orange-400 border border-orange-500/30';
-                            if(data.umur >= 60) colorUmur = 'bg-purple-500/20 text-purple-400 border border-purple-500/30';
-                            
                             let kategoriPendek = data.kategoriUmur ? data.kategoriUmur.split(' (')[0] : '-';
 
                             // Ambil data Desa dari tabel keluarga berdasarkan kkId
@@ -364,8 +359,8 @@
                                 <td class="px-6 py-4 align-middle text-center font-bold text-slate-200">
                                     ${data.umur}
                                 </td>
-                                <td class="px-6 py-4 align-middle">
-                                    <span class="px-2 py-0.5 rounded-md text-[10px] font-bold ${colorUmur} inline-block">${kategoriPendek}</span>
+                                <td class="px-6 py-4 align-middle font-bold text-slate-300">
+                                    ${kategoriPendek}
                                 </td>
                                 <td class="px-6 py-4 align-middle whitespace-nowrap">
                                     ${rentanHtml}
