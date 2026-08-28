@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tim Relawan & Pengaturan - Admin Pusat</title>
+    <link href="/src/style.css" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script type="module">
+        import { auth } from './src/firebase.js';
+        import { onAuthStateChanged, signOut } from 'firebase/auth';
+
+        onAuthStateChanged(auth, (user) => {
+            if (!user) {
+                window.location.href = 'login.html';
+            } else if (!user.email.includes('admin')) {
+                alert("Akses ditolak. Halaman khusus Admin.");
+                window.location.href = 'index.html';
+            }
+        });
+        
+        window.logout = () => {
+            signOut(auth).then(() => window.location.href = 'login.html');
+        };
+    </script>
+</head>
+<body class="bg-slate-900 text-slate-200 font-sans antialiased overflow-hidden flex h-screen">
+
+    <!-- Sidebar -->
+    <aside class="w-64 glass-dark h-full flex flex-col justify-between border-r border-slate-700/50 z-20 shrink-0">
+        <div>
+            <!-- Logo area -->
+            <div class="h-20 flex items-center px-6 border-b border-slate-700/50 bg-slate-900/40">
+                <div class="bg-gradient-to-tr from-trust-600 to-trust-400 p-2 rounded-lg mr-3 shadow-lg shadow-trust-600/30">
+                    <i data-lucide="activity" class="text-white w-5 h-5"></i>
+                </div>
+                <h1 class="text-lg font-bold tracking-wide text-white">Relawan Gempa</h1>
+            </div>
+            
+            <!-- Navigation -->
+            <nav class="p-4 space-y-2 mt-4">
+                <a href="admin.html" class="flex items-center px-4 py-3 text-slate-300 hover:text-white hover:bg-slate-800/80 rounded-xl transition-all group">
+                    <i data-lucide="layout-dashboard" class="w-5 h-5 mr-3 group-hover:text-trust-400 transition-colors"></i>
+                    <span class="font-medium">Dashboard Utama</span>
+                </a>
+                <a href="admin-pengungsi.html" class="flex items-center px-4 py-3 text-slate-300 hover:text-white hover:bg-slate-800/80 rounded-xl transition-all group">
+                    <i data-lucide="users" class="w-5 h-5 mr-3 group-hover:text-trust-400 transition-colors"></i>
+                    <span class="font-medium">Data Pengungsi</span>
+                </a>
+                <a href="admin-map.html" class="flex items-center px-4 py-3 text-slate-300 hover:text-white hover:bg-slate-800/80 rounded-xl transition-all group">
+                    <i data-lucide="map" class="w-5 h-5 mr-3 group-hover:text-trust-400 transition-colors"></i>
+                    <span class="font-medium">Peta Sebaran</span>
+                </a>
+                <a href="admin-logistik.html" class="flex items-center px-4 py-3 text-slate-300 hover:text-white hover:bg-slate-800/80 rounded-xl transition-all group">
+                    <i data-lucide="box" class="w-5 h-5 mr-3 group-hover:text-alert-400 transition-colors"></i>
+                    <span class="font-medium">Klaster Logistik</span>
+                </a>
+                <a href="admin-galeri.html" class="flex items-center px-4 py-3 text-slate-300 hover:text-white hover:bg-slate-800/80 rounded-xl transition-all group">
+                    <i data-lucide="camera" class="w-5 h-5 mr-3 group-hover:text-purple-400 transition-colors"></i>
+                    <span class="font-medium">Galeri Lapangan</span>
+                </a>
+                <a href="admin-relawan.html" class="flex items-center px-4 py-3 bg-trust-500/20 text-trust-400 rounded-xl border border-trust-500/30 transition-all relative">
+                    <div class="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-8 bg-trust-500 rounded-r-full shadow-[0_0_10px_rgba(59,130,246,0.8)]"></div>
+                    <i data-lucide="settings" class="w-5 h-5 mr-3"></i>
+                    <span class="font-bold">Tim & Pengaturan</span>
+                </a>
+            </nav>
+        </div>
+        
+        <!-- User profile bottom -->
+        <div class="p-4 border-t border-slate-700/50 bg-slate-900/40">
+            <div class="flex items-center px-2 py-2 rounded-xl hover:bg-slate-800 cursor-pointer transition-colors" onclick="logout()">
+                <img src="https://i.pravatar.cc/150?img=11" alt="Admin" class="w-10 h-10 rounded-full border-2 border-slate-600">
+                <div class="ml-3">
+                    <p class="text-sm font-bold text-white">Admin Relawan Gempa</p>
+                    <p class="text-xs text-red-400 flex items-center hover:text-red-300 font-medium">
+                        <i data-lucide="log-out" class="w-3.5 h-3.5 mr-1.5"></i> Logout
+                    </p>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col h-full relative p-6">
+        
+        <!-- Header -->
+        <header class="flex justify-between items-center mb-6">
+            <div>
+                <h2 class="text-2xl font-bold text-white tracking-wide">Tim Relawan & Pengaturan</h2>
+                <p class="text-sm text-slate-400 mt-1">Kelola data anggota relawan dan konfigurasi sistem.</p>
+            </div>
+        </header>
+
+        <!-- Content Scrollable -->
+        <div class="flex-1 overflow-y-auto relative grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            <!-- Pengaturan Kop Surat Panel -->
+            <div class="lg:col-span-1 space-y-6">
+                <div class="glass-dark border border-slate-700/80 rounded-3xl p-6 shadow-2xl relative">
+                    <h3 class="text-lg font-bold text-white flex items-center mb-4">
+                        <i data-lucide="file-text" class="w-5 h-5 text-trust-400 mr-2"></i> Pengaturan Kop Surat
+                    </h3>
+                    <p class="text-xs text-slate-400 mb-4">Ubah tampilan kop surat untuk Cetak Laporan PDF.</p>
+                    
+                    <form id="form-kop" class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-300 mb-1">Logo Kop Surat</label>
+                            <div class="flex items-center gap-4">
+                                <div id="logo-preview" class="w-16 h-16 bg-slate-800 border border-slate-600 rounded-lg flex items-center justify-center overflow-hidden shrink-0">
+                                    <i data-lucide="image" class="w-6 h-6 text-slate-500"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <input type="file" id="logo-file" accept="image/*" class="w-full text-sm text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-trust-500/20 file:text-trust-400 hover:file:bg-trust-500/30 cursor-pointer">
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-300 mb-1">Nama Organisasi / Institusi</label>
+                            <input type="text" id="kop-nama1" placeholder="Cth: Tim Relawan Kemanusiaan" class="w-full px-4 py-2 bg-slate-800 border border-slate-600 rounded-xl text-white focus:outline-none focus:border-trust-500 transition-colors text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-300 mb-1">Unit / Posko Utama</label>
+                            <input type="text" id="kop-nama2" placeholder="Cth: Posko Utama Gempa Flores" class="w-full px-4 py-2 bg-slate-800 border border-slate-600 rounded-xl text-white focus:outline-none focus:border-trust-500 transition-colors text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-300 mb-1">Alamat Lengkap</label>
+                            <textarea id="kop-alamat" rows="2" placeholder="Cth: Jalan Raya Trans Flores..." class="w-full px-4 py-2 bg-slate-800 border border-slate-600 rounded-xl text-white focus:outline-none focus:border-trust-500 transition-colors text-sm resize-none"></textarea>
+                        </div>
+                        <button type="submit" id="btn-save-kop" class="w-full py-2 bg-trust-600 hover:bg-trust-500 text-white rounded-xl font-bold text-sm transition-colors flex items-center justify-center shadow-lg shadow-trust-600/30">
+                            <i data-lucide="save" class="w-4 h-4 mr-2"></i> Simpan Pengaturan
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Tabel Relawan Panel -->
+            <div class="lg:col-span-2 space-y-6">
+                <div class="glass-dark border border-slate-700/80 rounded-3xl p-6 shadow-2xl relative h-full flex flex-col">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-lg font-bold text-white flex items-center">
+                            <i data-lucide="users" class="w-5 h-5 text-purple-400 mr-2"></i> Database Tim Relawan
+                        </h3>
+                        <button onclick="openModal()" class="px-4 py-2 bg-purple-600/20 border border-purple-500/50 text-purple-400 hover:bg-purple-600 hover:text-white rounded-lg text-sm font-bold transition-all shadow-[0_0_15px_rgba(168,85,247,0.3)] flex items-center">
+                            <i data-lucide="plus" class="w-4 h-4 mr-1"></i> Tambah Data
+                        </button>
+                    </div>
+                    
+                    <div id="loading" class="flex flex-col items-center justify-center h-48">
+                        <i data-lucide="loader-2" class="w-8 h-8 text-trust-500 animate-spin mb-4"></i>
+                        <p class="text-slate-400 font-medium">Memuat data relawan...</p>
+                    </div>
+
+                    <div id="empty-state" class="hidden flex-col items-center justify-center h-48 text-center">
+                        <div class="w-16 h-16 bg-slate-800 border border-slate-700 rounded-full flex justify-center items-center mb-4">
+                            <i data-lucide="user-x" class="w-8 h-8 text-slate-500"></i>
+                        </div>
+                        <h3 class="text-lg font-bold text-white">Belum Ada Relawan</h3>
+                        <p class="text-slate-400 mt-1">Silakan tambahkan data anggota tim Anda.</p>
+                    </div>
+
+                    <!-- Table Container -->
+                    <div id="table-container" class="hidden flex-1 overflow-y-auto pr-2 rounded-xl border border-slate-700/50">
+                        <table class="w-full text-left border-collapse relative">
+                            <thead class="sticky top-0 bg-slate-800 z-10">
+                                <tr class="text-sm font-semibold text-slate-300">
+                                    <th class="px-6 py-4 border-b border-slate-700">Nama Lengkap</th>
+                                    <th class="px-6 py-4 border-b border-slate-700">Jabatan / Posisi</th>
+                                    <th class="px-6 py-4 border-b border-slate-700">Alamat</th>
+                                    <th class="px-6 py-4 border-b border-slate-700 text-center">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="relawan-tbody" class="text-sm divide-y divide-slate-700/50">
+                                <!-- Rows -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal Form Relawan -->
+    <div id="modal-relawan" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 hidden flex items-center justify-center opacity-0 transition-opacity">
+        <div class="bg-slate-800 border border-slate-600 rounded-2xl shadow-2xl w-full max-w-md p-6 transform scale-95 transition-transform" id="modal-content">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-bold text-white">Tambah Relawan</h3>
+                <button onclick="closeModal()" class="text-slate-400 hover:text-white transition-colors">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+            </div>
+            
+            <form id="form-relawan" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-slate-300 mb-1">Nama Lengkap</label>
+                    <input type="text" id="r-nama" required placeholder="Cth: Budi Santoso" class="w-full px-4 py-2 bg-slate-900 border border-slate-600 rounded-xl text-white focus:outline-none focus:border-purple-500 transition-colors">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-300 mb-1">Jabatan / Posisi</label>
+                    <input type="text" id="r-jabatan" required placeholder="Cth: Koordinator Medis" class="w-full px-4 py-2 bg-slate-900 border border-slate-600 rounded-xl text-white focus:outline-none focus:border-purple-500 transition-colors">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-300 mb-1">Alamat Lengkap</label>
+                    <textarea id="r-alamat" required rows="2" placeholder="Cth: Jl. Pahlawan No.12, Mbay" class="w-full px-4 py-2 bg-slate-900 border border-slate-600 rounded-xl text-white focus:outline-none focus:border-purple-500 transition-colors resize-none"></textarea>
+                </div>
+                <div class="pt-4 flex gap-3">
+                    <button type="button" onclick="closeModal()" class="flex-1 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-xl font-bold text-sm transition-colors">Batal</button>
+                    <button type="submit" id="btn-save-relawan" class="flex-1 py-2 bg-purple-600 hover:bg-purple-500 text-white rounded-xl font-bold text-sm transition-colors shadow-[0_0_15px_rgba(168,85,247,0.4)]">
+                        Simpan Data
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script type="module">
+        import { db, auth, storage } from './src/firebase.js';
+        import { collection, onSnapshot, query, orderBy, addDoc, deleteDoc, doc, setDoc, getDoc } from 'firebase/firestore';
+        import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+        import { onAuthStateChanged } from 'firebase/auth';
+
+        lucide.createIcons();
+
+        // Elemen
+        const tbody = document.getElementById('relawan-tbody');
+        const loading = document.getElementById('loading');
+        const emptyState = document.getElementById('empty-state');
+        const tableContainer = document.getElementById('table-container');
+        const modal = document.getElementById('modal-relawan');
+        const modalContent = document.getElementById('modal-content');
+        
+        // Modal functions
+        window.openModal = () => {
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                modalContent.classList.remove('scale-95');
+            }, 10);
+        };
+        
+        window.closeModal = () => {
+            modal.classList.add('opacity-0');
+            modalContent.classList.add('scale-95');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                document.getElementById('form-relawan').reset();
+            }, 300);
+        };
+
+        window.deleteRelawan = async (id) => {
+            if(confirm('Yakin ingin menghapus data relawan ini?')) {
+                try {
+                    await deleteDoc(doc(db, "relawan", id));
+                } catch(e) {
+                    alert('Gagal menghapus: ' + e.message);
+                }
+            }
+        };
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user && user.email.includes('admin')) {
+                // 1. Load Data Relawan
+                const q = query(collection(db, "relawan"), orderBy("nama", "asc"));
+                onSnapshot(q, (snapshot) => {
+                    loading.classList.add('hidden');
+                    if (snapshot.empty) {
+                        emptyState.classList.remove('hidden');
+                        tableContainer.classList.add('hidden');
+                        return;
+                    }
+
+                    emptyState.classList.add('hidden');
+                    tableContainer.classList.remove('hidden');
+                    
+                    let html = '';
+                    snapshot.forEach(docSnap => {
+                        const data = docSnap.data();
+                        html += `
+                        <tr class="hover:bg-slate-800/50 transition-colors border-b border-slate-700/50">
+                            <td class="px-6 py-4 align-middle">
+                                <p class="font-bold text-white">${data.nama}</p>
+                            </td>
+                            <td class="px-6 py-4 align-middle">
+                                <span class="px-3 py-1 bg-purple-500/20 text-purple-400 rounded-full text-xs font-bold border border-purple-500/30">${data.jabatan}</span>
+                            </td>
+                            <td class="px-6 py-4 align-middle text-slate-400">
+                                ${data.alamat}
+                            </td>
+                            <td class="px-6 py-4 align-middle text-center">
+                                <button onclick="deleteRelawan('${docSnap.id}')" class="p-2 text-slate-500 hover:text-red-400 hover:bg-slate-800 rounded-lg transition-colors">
+                                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        `;
+                    });
+                    
+                    tbody.innerHTML = html;
+                    lucide.createIcons();
+                });
+
+                // 2. Add Relawan Form Submit
+                document.getElementById('form-relawan').addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    const btn = document.getElementById('btn-save-relawan');
+                    btn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 mr-2 animate-spin"></i> Menyimpan...';
+                    btn.disabled = true;
+
+                    try {
+                        await addDoc(collection(db, "relawan"), {
+                            nama: document.getElementById('r-nama').value,
+                            jabatan: document.getElementById('r-jabatan').value,
+                            alamat: document.getElementById('r-alamat').value,
+                            createdAt: new Date()
+                        });
+                        closeModal();
+                    } catch(err) {
+                        alert("Gagal menyimpan: " + err.message);
+                    } finally {
+                        btn.innerHTML = 'Simpan Data';
+                        btn.disabled = false;
+                        lucide.createIcons();
+                    }
+                });
+
+                // 3. Load Pengaturan Kop Surat
+                try {
+                    const docSnap = await getDoc(doc(db, "pengaturan", "kopsurat"));
+                    if (docSnap.exists()) {
+                        const data = docSnap.data();
+                        if (data.nama1) document.getElementById('kop-nama1').value = data.nama1;
+                        if (data.nama2) document.getElementById('kop-nama2').value = data.nama2;
+                        if (data.alamat) document.getElementById('kop-alamat').value = data.alamat;
+                        if (data.logoUrl) {
+                            document.getElementById('logo-preview').innerHTML = `<img src="${data.logoUrl}" class="w-full h-full object-contain">`;
+                        }
+                    }
+                } catch(e) {
+                    console.error("Gagal load pengaturan", e);
+                }
+
+                // 4. Save Pengaturan Kop Surat
+                document.getElementById('form-kop').addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    const btn = document.getElementById('btn-save-kop');
+                    const fileInput = document.getElementById('logo-file');
+                    
+                    btn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 mr-2 animate-spin"></i> Menyimpan...';
+                    btn.disabled = true;
+
+                    try {
+                        let logoUrl = null;
+                        
+                        // Jika ada file gambar baru
+                        if (fileInput.files.length > 0) {
+                            const file = fileInput.files[0];
+                            const storageRef = ref(storage, 'settings/logo_kop.png');
+                            await uploadBytes(storageRef, file);
+                            logoUrl = await getDownloadURL(storageRef);
+                        } else {
+                            // Ambil URL lama dari preview jika tidak ada file baru
+                            const img = document.querySelector('#logo-preview img');
+                            if (img) logoUrl = img.src;
+                        }
+
+                        await setDoc(doc(db, "pengaturan", "kopsurat"), {
+                            nama1: document.getElementById('kop-nama1').value,
+                            nama2: document.getElementById('kop-nama2').value,
+                            alamat: document.getElementById('kop-alamat').value,
+                            logoUrl: logoUrl,
+                            updatedAt: new Date()
+                        });
+
+                        if (logoUrl) {
+                            document.getElementById('logo-preview').innerHTML = `<img src="${logoUrl}" class="w-full h-full object-contain">`;
+                        }
+                        
+                        alert("Pengaturan Kop Surat berhasil disimpan!");
+                    } catch(err) {
+                        alert("Gagal menyimpan pengaturan: " + err.message);
+                    } finally {
+                        btn.innerHTML = '<i data-lucide="save" class="w-4 h-4 mr-2"></i> Simpan Pengaturan';
+                        btn.disabled = false;
+                        lucide.createIcons();
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>

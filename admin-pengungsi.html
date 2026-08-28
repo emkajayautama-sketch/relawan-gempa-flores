@@ -62,6 +62,10 @@
                     <i data-lucide="camera" class="w-5 h-5 mr-3 group-hover:text-purple-400 transition-colors"></i>
                     <span class="font-medium">Galeri Lapangan</span>
                 </a>
+                <a href="admin-relawan.html" class="flex items-center px-4 py-3 text-slate-300 hover:text-white hover:bg-slate-800/80 rounded-xl transition-all group">
+                    <i data-lucide="settings" class="w-5 h-5 mr-3 group-hover:text-trust-400 transition-colors"></i>
+                    <span class="font-medium">Tim & Pengaturan</span>
+                </a>
             </nav>
         </div>
         
@@ -100,11 +104,17 @@
         </header>
 
         <!-- KOP SURAT (Khusus Print) -->
-        <div id="print-header" class="hidden print:block mb-8 text-center border-b-4 border-double border-black pb-4">
-            <h1 class="text-2xl font-bold uppercase tracking-widest text-black">Tim Relawan Kemanusiaan</h1>
-            <h2 class="text-xl font-bold uppercase text-black">Posko Utama Relawan Gempa Flores</h2>
-            <p class="text-sm text-black">Jalan Raya Trans Flores, Kabupaten Nagekeo, Nusa Tenggara Timur</p>
-            <p class="text-sm font-semibold mt-2 text-black" id="print-title">Laporan Resmi Data Pengungsi dan Rekapitulasi</p>
+        <div id="print-header" class="hidden print:flex items-center mb-8 border-b-4 border-double border-black pb-4 text-black">
+            <div class="w-24 h-24 mr-6 shrink-0 flex items-center justify-center">
+                <img id="print-logo" src="" class="max-w-full max-h-full object-contain hidden">
+            </div>
+            <div class="flex-1 text-center">
+                <h1 id="print-nama1" class="text-2xl font-bold uppercase tracking-widest">Tim Relawan Kemanusiaan</h1>
+                <h2 id="print-nama2" class="text-xl font-bold uppercase">Posko Utama Relawan Gempa Flores</h2>
+                <p id="print-alamat" class="text-sm">Jalan Raya Trans Flores, Kabupaten Nagekeo, Nusa Tenggara Timur</p>
+                <p class="text-sm font-semibold mt-2" id="print-title">Laporan Resmi Data Pengungsi dan Rekapitulasi</p>
+            </div>
+            <div class="w-24 shrink-0"></div> <!-- Placeholder for centering -->
         </div>
 
             <!-- Recap Table Container -->
@@ -181,7 +191,7 @@
 
     <script type="module">
         import { db, auth } from './src/firebase.js';
-        import { collection, onSnapshot, query, orderBy } from 'firebase/firestore';
+        import { collection, onSnapshot, query, orderBy, doc, getDoc } from 'firebase/firestore';
         import { onAuthStateChanged } from 'firebase/auth';
 
         lucide.createIcons();
@@ -193,8 +203,26 @@
         const tableContainer = document.getElementById('table-container');
         const recapContainer = document.getElementById('recap-container');
 
-        onAuthStateChanged(auth, (user) => {
+        onAuthStateChanged(auth, async (user) => {
             if (user && user.email.includes('admin')) {
+                // Load Kop Surat Configuration
+                try {
+                    const docSnap = await getDoc(doc(db, "pengaturan", "kopsurat"));
+                    if (docSnap.exists()) {
+                        const data = docSnap.data();
+                        if (data.nama1) document.getElementById('print-nama1').innerText = data.nama1;
+                        if (data.nama2) document.getElementById('print-nama2').innerText = data.nama2;
+                        if (data.alamat) document.getElementById('print-alamat').innerText = data.alamat;
+                        if (data.logoUrl) {
+                            const logoImg = document.getElementById('print-logo');
+                            logoImg.src = data.logoUrl;
+                            logoImg.classList.remove('hidden');
+                        }
+                    }
+                } catch(e) {
+                    console.error("Gagal load pengaturan kop surat", e);
+                }
+
                 // Listen Total KK
                 onSnapshot(collection(db, "keluarga"), (snapshot) => {
                     document.getElementById('stat-kk-pengungsi').innerText = snapshot.size;
