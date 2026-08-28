@@ -183,9 +183,10 @@
             <!-- TANDA TANGAN (Khusus Print) -->
             <div id="print-footer" class="hidden print:flex justify-end mt-16 pr-8">
                 <div class="text-center text-black">
-                    <p class="mb-24">Nagekeo, <span id="print-date"></span></p>
-                    <p class="font-bold underline">Koordinator Posko Utama</p>
-                    <p>NIP. 19800101 200501 1 001</p>
+                    <p class="mb-1">Nagekeo, <span id="print-date"></span></p>
+                    <p class="font-bold uppercase mb-24" id="print-ttd-role">KOORDINATOR UMUM</p>
+                    <p class="font-bold underline uppercase">( ........................................ )</p>
+                    <p>Jabatan: ........................................</p>
                 </div>
             </div>
         </div>
@@ -296,10 +297,14 @@
                         let totalSemuaHamil = 0;
                         let totalSemuaRentan = 0;
 
-                        // Ubah Judul Cetak
-                        document.getElementById('print-title').innerText = selectedPosko === 'all' ? 
-                            'Laporan Resmi Data Pengungsi dan Rekapitulasi' : 
-                            `Laporan Resmi Data Pengungsi - ${selectedPosko}`;
+                        // Ubah Judul Cetak & Jabatan TTD
+                        if (selectedPosko === 'all') {
+                            document.getElementById('print-title').innerText = 'Laporan Resmi Data Pengungsi dan Rekapitulasi';
+                            document.getElementById('print-ttd-role').innerText = 'KOORDINATOR UMUM';
+                        } else {
+                            document.getElementById('print-title').innerText = `Laporan Resmi Data Pengungsi - ${selectedPosko}`;
+                            document.getElementById('print-ttd-role').innerText = `KOORDINATOR ${selectedPosko.toUpperCase()}`;
+                        }
 
                         // Filter data array
                         const filteredData = selectedPosko === 'all' 
