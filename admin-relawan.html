@@ -354,9 +354,17 @@
                         // Jika ada file gambar baru
                         if (fileInput.files.length > 0) {
                             const file = fileInput.files[0];
-                            const storageRef = ref(storage, 'settings/logo_kop.png');
-                            await uploadBytes(storageRef, file);
-                            logoUrl = await getDownloadURL(storageRef);
+                            // Cek ukuran file (maks 500KB untuk base64 Firestore)
+                            if (file.size > 500000) {
+                                throw new Error("Ukuran gambar terlalu besar. Maksimal 500KB.");
+                            }
+                            
+                            logoUrl = await new Promise((resolve, reject) => {
+                                const reader = new FileReader();
+                                reader.onload = () => resolve(reader.result);
+                                reader.onerror = error => reject(error);
+                                reader.readAsDataURL(file);
+                            });
                         } else {
                             // Ambil URL lama dari preview jika tidak ada file baru
                             const img = document.querySelector('#logo-preview img');
