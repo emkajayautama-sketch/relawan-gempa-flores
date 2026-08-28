@@ -104,17 +104,16 @@
         </header>
 
         <!-- KOP SURAT (Khusus Print) -->
-        <div id="print-header" class="hidden print:flex items-center mb-8 border-b-4 border-double border-black pb-4 text-black">
-            <div class="w-24 h-24 mr-6 shrink-0 flex items-center justify-center">
-                <img id="print-logo" src="" class="max-w-full max-h-full object-contain hidden">
-            </div>
-            <div class="flex-1 text-center">
+        <div id="print-header" class="hidden print:block mb-8 border-b-4 border-double border-black pb-4 text-black text-center">
+            <img id="print-logo" src="" class="w-full max-h-32 object-contain mx-auto mb-2 hidden">
+            
+            <div id="print-text-container">
                 <h1 id="print-nama1" class="text-2xl font-bold uppercase tracking-widest">Tim Relawan Kemanusiaan</h1>
                 <h2 id="print-nama2" class="text-xl font-bold uppercase">Posko Utama Relawan Gempa Flores</h2>
                 <p id="print-alamat" class="text-sm">Jalan Raya Trans Flores, Kabupaten Nagekeo, Nusa Tenggara Timur</p>
-                <p class="text-sm font-semibold mt-2" id="print-title">Laporan Resmi Data Pengungsi dan Rekapitulasi</p>
             </div>
-            <div class="w-24 shrink-0"></div> <!-- Placeholder for centering -->
+            
+            <p class="text-sm font-semibold mt-2" id="print-title">Laporan Resmi Data Pengungsi dan Rekapitulasi</p>
         </div>
 
             <!-- Recap Table Container -->
@@ -217,6 +216,8 @@
                             const logoImg = document.getElementById('print-logo');
                             logoImg.src = data.logoUrl;
                             logoImg.classList.remove('hidden');
+                            // Sembunyikan teks karena gambar berfungsi sebagai Kop Surat full
+                            document.getElementById('print-text-container').classList.add('hidden');
                         }
                     }
                 } catch(e) {
