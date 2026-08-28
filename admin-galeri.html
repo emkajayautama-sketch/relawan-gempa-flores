@@ -6,6 +6,7 @@
     <title>Galeri Lapangan - Command Center</title>
     <link href="/src/style.css" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script type="module">
         import { auth } from './src/firebase.js';
         import { onAuthStateChanged, signOut } from 'firebase/auth';
@@ -89,6 +90,9 @@
             </div>
             
             <div class="flex items-center space-x-4">
+                <button id="btn-toggle-select" class="flex items-center px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-full transition-colors border border-slate-700 text-sm font-medium">
+                    <i data-lucide="check-square" class="w-4 h-4 mr-2"></i> Pilih Foto
+                </button>
                 <div class="relative">
                     <i data-lucide="search" class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400"></i>
                     <input type="text" id="search-posko" placeholder="Cari Posko atau Keterangan..." class="bg-slate-950/50 border border-slate-700 text-sm rounded-full pl-10 pr-4 py-2 text-white focus:outline-none focus:border-trust-500 focus:ring-1 focus:ring-trust-500 w-64 transition-all">
@@ -118,6 +122,23 @@
             <div id="gallery-grid" class="hidden grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4 items-start">
                 <!-- Cards will be injected here -->
             </div>
+        </div>
+
+        <!-- Bulk Action Bar -->
+        <div id="bulk-action-bar" class="hidden fixed bottom-8 left-1/2 transform -translate-x-1/2 z-40 bg-slate-800/95 backdrop-blur-md border border-slate-700 px-6 py-4 rounded-2xl shadow-2xl flex items-center space-x-6">
+            <div class="text-white font-medium flex-shrink-0">
+                <span id="selected-count" class="text-trust-400 font-bold text-xl mr-1">0</span> Foto Terpilih
+            </div>
+            <div class="h-6 w-px bg-slate-600"></div>
+            <button id="btn-bulk-download" class="flex items-center text-sm font-medium text-white bg-trust-600 hover:bg-trust-500 px-4 py-2 rounded-xl transition-colors">
+                <i data-lucide="download" class="w-4 h-4 mr-2"></i> Download Semua
+            </button>
+            <button id="btn-bulk-delete" class="flex items-center text-sm font-medium text-red-400 bg-red-900/30 hover:bg-red-900/50 border border-red-500/30 px-4 py-2 rounded-xl transition-colors">
+                <i data-lucide="trash-2" class="w-4 h-4 mr-2"></i> Hapus Semua
+            </button>
+            <button id="btn-cancel-select" class="ml-2 p-2 text-slate-400 hover:text-white transition-colors bg-slate-700/50 hover:bg-slate-700 rounded-full">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
         </div>
     </main>
 
@@ -178,6 +199,9 @@
         let allPhotos = [];
         let currentPhotoId = null;
         let currentPhotoUrl = null;
+        
+        let isSelectionMode = false;
+        let selectedPhotos = new Set();
 
         // Fetch dari Firestore (collection 'dokumentasi')
         // Kita harus menunggu status login (token) dari Firebase siap sebelum menarik data
@@ -234,9 +258,15 @@
                 card.innerHTML = `
                     <div class="relative w-full pt-[75%] overflow-hidden bg-slate-800">
                         <img src="${imgSrc}" class="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out" loading="lazy">
-                        <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/20 to-transparent opacity-90 group-hover:opacity-70 transition-opacity duration-300"></div>
+                        <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/20 to-transparent opacity-90 group-hover:opacity-70 transition-opacity duration-300 pointer-events-none"></div>
                         
-                        <div class="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        <div class="absolute inset-0 bg-slate-900/40 backdrop-blur-[2px] opacity-0 transition-opacity duration-200 z-10 select-overlay flex items-center justify-center">
+                            <div class="w-10 h-10 rounded-full border-2 border-white/50 flex items-center justify-center text-transparent transition-colors check-icon bg-black/20">
+                                <i data-lucide="check" class="w-6 h-6"></i>
+                            </div>
+                        </div>
+
+                        <div class="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none hover-icon">
                             <div class="w-8 h-8 bg-black/50 backdrop-blur-sm rounded-full flex items-center justify-center text-white border border-white/20">
                                 <i data-lucide="maximize-2" class="w-4 h-4"></i>
                             </div>
@@ -257,16 +287,49 @@
                     </div>
                 `;
                 
-                card.addEventListener('click', () => {
-                    currentPhotoId = photo.id;
-                    currentPhotoUrl = imgSrc;
-                    modalImg.src = imgSrc;
-                    modalPosko.innerText = photo.posko;
-                    modalCaption.innerText = `"${safeCaption}"`;
-                    modalMetaUser.innerHTML = `<i data-lucide="user" class="w-3.5 h-3.5 mr-1.5"></i> ${photo.pelapor || 'Relawan'}`;
-                    modalMetaTime.innerHTML = `<i data-lucide="clock" class="w-3.5 h-3.5 mr-1.5"></i> ${timeStr}`;
-                    lucide.createIcons();
-                    modal.classList.remove('hidden');
+                // If this photo was previously selected and we just re-rendered, restore its selected state visually
+                if (isSelectionMode && Array.from(selectedPhotos).some(p => p.id === photo.id)) {
+                    card.classList.add('ring-4', 'ring-trust-500', 'scale-95');
+                    card.querySelector('.select-overlay').classList.replace('opacity-0', 'opacity-100');
+                    const checkIcon = card.querySelector('.check-icon');
+                    checkIcon.classList.replace('bg-black/20', 'bg-trust-500');
+                    checkIcon.classList.replace('border-white/50', 'border-trust-500');
+                    checkIcon.classList.replace('text-transparent', 'text-white');
+                }
+                
+                card.addEventListener('click', (e) => {
+                    if (isSelectionMode) {
+                        e.preventDefault();
+                        const existingPhoto = Array.from(selectedPhotos).find(p => p.id === photo.id);
+                        if (existingPhoto) {
+                            selectedPhotos.delete(existingPhoto);
+                            card.classList.remove('ring-4', 'ring-trust-500', 'scale-95');
+                            card.querySelector('.select-overlay').classList.replace('opacity-100', 'opacity-0');
+                            const checkIcon = card.querySelector('.check-icon');
+                            checkIcon.classList.replace('bg-trust-500', 'bg-black/20');
+                            checkIcon.classList.replace('border-trust-500', 'border-white/50');
+                            checkIcon.classList.replace('text-white', 'text-transparent');
+                        } else {
+                            selectedPhotos.add(photo);
+                            card.classList.add('ring-4', 'ring-trust-500', 'scale-95');
+                            card.querySelector('.select-overlay').classList.replace('opacity-0', 'opacity-100');
+                            const checkIcon = card.querySelector('.check-icon');
+                            checkIcon.classList.replace('bg-black/20', 'bg-trust-500');
+                            checkIcon.classList.replace('border-white/50', 'border-trust-500');
+                            checkIcon.classList.replace('text-transparent', 'text-white');
+                        }
+                        updateBulkActionBar();
+                    } else {
+                        currentPhotoId = photo.id;
+                        currentPhotoUrl = imgSrc;
+                        modalImg.src = imgSrc;
+                        modalPosko.innerText = photo.posko;
+                        modalCaption.innerText = `"${safeCaption}"`;
+                        modalMetaUser.innerHTML = `<i data-lucide="user" class="w-3.5 h-3.5 mr-1.5"></i> ${photo.pelapor || 'Relawan'}`;
+                        modalMetaTime.innerHTML = `<i data-lucide="clock" class="w-3.5 h-3.5 mr-1.5"></i> ${timeStr}`;
+                        lucide.createIcons();
+                        modal.classList.remove('hidden');
+                    }
                 });
                 
                 grid.appendChild(card);
@@ -280,6 +343,115 @@
             const val = e.target.value.toLowerCase();
             const filtered = allPhotos.filter(p => p.posko.toLowerCase().includes(val) || (p.caption && p.caption.toLowerCase().includes(val)));
             renderGallery(filtered);
+        });
+
+        // Bulk Selection Logic
+        function updateBulkActionBar() {
+            const bulkActionBar = document.getElementById('bulk-action-bar');
+            const selectedCount = document.getElementById('selected-count');
+            if (isSelectionMode && selectedPhotos.size > 0) {
+                bulkActionBar.classList.remove('hidden');
+                selectedCount.innerText = selectedPhotos.size;
+            } else {
+                bulkActionBar.classList.add('hidden');
+            }
+        }
+
+        function toggleSelectionMode() {
+            isSelectionMode = !isSelectionMode;
+            if (!isSelectionMode) {
+                selectedPhotos.clear();
+            }
+            updateBulkActionBar();
+            
+            const btn = document.getElementById('btn-toggle-select');
+            if (isSelectionMode) {
+                btn.classList.add('bg-trust-600', 'text-white', 'border-trust-500');
+                btn.classList.remove('bg-slate-800', 'text-slate-300', 'border-slate-700');
+                btn.innerHTML = '<i data-lucide="x-square" class="w-4 h-4 mr-2"></i> Batal Pilih';
+            } else {
+                btn.classList.remove('bg-trust-600', 'text-white', 'border-trust-500');
+                btn.classList.add('bg-slate-800', 'text-slate-300', 'border-slate-700');
+                btn.innerHTML = '<i data-lucide="check-square" class="w-4 h-4 mr-2"></i> Pilih Foto';
+            }
+            lucide.createIcons();
+            
+            renderGallery(allPhotos); // Re-render to clear visual state of selection
+        }
+
+        document.getElementById('btn-toggle-select').addEventListener('click', toggleSelectionMode);
+        document.getElementById('btn-cancel-select').addEventListener('click', toggleSelectionMode);
+
+        document.getElementById('btn-bulk-delete').addEventListener('click', async () => {
+            if (confirm(`Yakin ingin menghapus ${selectedPhotos.size} foto? Tindakan ini tidak dapat dibatalkan.`)) {
+                const btn = document.getElementById('btn-bulk-delete');
+                const originalHtml = btn.innerHTML;
+                btn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 mr-2 animate-spin"></i> Menghapus...';
+                btn.disabled = true;
+                lucide.createIcons();
+                
+                try {
+                    const promises = Array.from(selectedPhotos).map(p => deleteDoc(doc(db, "dokumentasi", p.id)));
+                    await Promise.all(promises);
+                    toggleSelectionMode(); // Exit selection mode
+                } catch (error) {
+                    console.error("Bulk delete error:", error);
+                    alert("Gagal menghapus beberapa foto: " + error.message);
+                } finally {
+                    btn.innerHTML = originalHtml;
+                    btn.disabled = false;
+                    lucide.createIcons();
+                }
+            }
+        });
+
+        document.getElementById('btn-bulk-download').addEventListener('click', async () => {
+            if (typeof JSZip === 'undefined') {
+                alert("Modul ZIP belum siap, mohon tunggu sebentar.");
+                return;
+            }
+            const btn = document.getElementById('btn-bulk-download');
+            const originalHtml = btn.innerHTML;
+            btn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 mr-2 animate-spin"></i> Menyiapkan ZIP...';
+            btn.disabled = true;
+            lucide.createIcons();
+
+            try {
+                const zip = new JSZip();
+                const promises = Array.from(selectedPhotos).map(async (p, index) => {
+                    const url = p.imageUrl || 'https://via.placeholder.com/400x300/1e293b/64748b?text=No+Image';
+                    try {
+                        const response = await fetch(url);
+                        const blob = await response.blob();
+                        const filename = `foto_${index+1}_${p.posko.replace(/[^a-zA-Z0-9]/g, '_')}.jpg`;
+                        zip.file(filename, blob);
+                    } catch (err) {
+                        console.error("Error fetching photo for zip:", err);
+                    }
+                });
+
+                await Promise.all(promises);
+                const content = await zip.generateAsync({type: "blob"});
+                
+                const url = window.URL.createObjectURL(content);
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = url;
+                a.download = `Arsip_Foto_Relawan_${Date.now()}.zip`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+                
+                toggleSelectionMode();
+            } catch (error) {
+                console.error("Bulk download error:", error);
+                alert("Terjadi kesalahan saat mengunduh ZIP.");
+            } finally {
+                btn.innerHTML = originalHtml;
+                btn.disabled = false;
+                lucide.createIcons();
+            }
         });
 
         // Modal Actions
