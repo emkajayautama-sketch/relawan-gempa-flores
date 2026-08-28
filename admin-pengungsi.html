@@ -164,10 +164,10 @@
                         <table class="w-full text-left border-collapse">
                         <thead>
                             <tr class="bg-slate-800/80 border-b border-slate-700/50 text-sm font-semibold text-slate-300">
-                                <th class="px-6 py-4">Nama Lengkap</th>
+                                <th class="px-6 py-4 w-1/4 min-w-[200px]">Nama Lengkap</th>
                                 <th class="px-6 py-4">NIK</th>
                                 <th class="px-6 py-4">Jenis Kelamin</th>
-                                <th class="px-6 py-4">Umur</th>
+                                <th class="px-6 py-4">Umur (Tahun)</th>
                                 <th class="px-6 py-4">Kategori</th>
                                 <th class="px-6 py-4">Kondisi Khusus</th>
                                 <th class="px-6 py-4">Asal Desa/Kelurahan</th>
@@ -342,7 +342,7 @@
 
                             html += `
                             <tr class="hover:bg-slate-800/50 transition-colors border-b border-slate-700/30">
-                                <td class="px-6 py-4 align-middle">
+                                <td class="px-6 py-4 align-middle whitespace-nowrap">
                                     <p class="font-bold text-white text-base">${data.nama}</p>
                                 </td>
                                 <td class="px-6 py-4 align-middle text-slate-400">
@@ -351,8 +351,8 @@
                                 <td class="px-6 py-4 align-middle whitespace-nowrap text-slate-300">
                                     ${genderText}
                                 </td>
-                                <td class="px-6 py-4 align-middle font-bold text-slate-200">
-                                    ${data.umur} Tahun
+                                <td class="px-6 py-4 align-middle text-center font-bold text-slate-200">
+                                    ${data.umur}
                                 </td>
                                 <td class="px-6 py-4 align-middle">
                                     <span class="px-2 py-0.5 rounded-md text-[10px] font-bold ${colorUmur} inline-block">${kategoriPendek}</span>
