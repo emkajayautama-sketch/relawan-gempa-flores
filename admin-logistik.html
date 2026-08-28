@@ -431,7 +431,7 @@
                         window.logistikData[id].timeStr = timeStr;
                         window.logistikData[id].filteredKebutuhan = {};
 
-                        let rincianHtml = '<ul class="space-y-1">';
+                        let groupedItems = {};
                         let hasMatchingItems = false;
                         
                         const klasterFilter = document.getElementById('filter-klaster') ? document.getElementById('filter-klaster').value : 'all';
@@ -453,17 +453,33 @@
 
                             if (klasterFilter === 'all' || klasterFilter === klaster) {
                                 hasMatchingItems = true;
-                                rincianHtml += `<li class="flex items-center"><i data-lucide="chevron-right" class="w-3 h-3 text-slate-500 mr-1 shrink-0"></i> <span class="font-bold text-white">${qty}</span> <span class="ml-1 text-slate-400">${realItem}</span></li>`;
                                 
-                                window.logistikData[id].filteredKebutuhan[realItem] = qty;
+                                if (!groupedItems[klaster]) groupedItems[klaster] = [];
+                                groupedItems[klaster].push({ item: realItem, qty: qty });
                                 
-                                if (!recapStats[realItem]) recapStats[realItem] = 0;
-                                recapStats[realItem] += qty;
+                                if (!window.logistikData[id].filteredKebutuhan[klaster]) {
+                                    window.logistikData[id].filteredKebutuhan[klaster] = [];
+                                }
+                                window.logistikData[id].filteredKebutuhan[klaster].push({ item: realItem, qty: qty });
+                                
+                                if (!recapStats[klaster]) recapStats[klaster] = {};
+                                if (!recapStats[klaster][realItem]) recapStats[klaster][realItem] = 0;
+                                recapStats[klaster][realItem] += qty;
                             }
                         }
-                        rincianHtml += '</ul>';
                         
                         if (!hasMatchingItems) return;
+
+                        let rincianHtml = '';
+                        for (const [klasterName, items] of Object.entries(groupedItems)) {
+                            rincianHtml += `<div class="mb-3 last:mb-0">
+                                <div class="text-xs font-bold text-trust-400 uppercase mb-1 border-b border-slate-700/50 pb-1">${klasterName}</div>
+                                <ul class="space-y-1">`;
+                            for (const req of items) {
+                                rincianHtml += `<li class="flex items-center"><i data-lucide="chevron-right" class="w-3 h-3 text-slate-500 mr-1 shrink-0"></i> <span class="font-bold text-white">${req.qty}</span> <span class="ml-1 text-slate-400">${req.item}</span></li>`;
+                            }
+                            rincianHtml += `</ul></div>`;
+                        }
 
                         html += `
                         <tr class="hover:bg-slate-800/50 transition-colors">
@@ -488,34 +504,46 @@
                     let printRekapHtml = '';
                     let no = 1;
                     
-                    for (const [item, totalQty] of Object.entries(recapStats)) {
-                        let namaBarang = item;
-                        let satuan = '-';
-                        if (item.includes('(') && item.includes(')')) {
-                            const parts = item.split(' (');
-                            namaBarang = parts[0];
-                            satuan = parts[1].replace(')', '');
-                        }
+                    for (const [klasterName, itemsObj] of Object.entries(recapStats)) {
                         recapHtml += `
-                            <tr class="hover:bg-slate-800/50 transition-colors border-b border-slate-700/30">
-                                <td class="px-6 py-4 align-middle text-center text-slate-400">${no}</td>
-                                <td class="px-6 py-4 align-middle font-bold text-white">${namaBarang}</td>
-                                <td class="px-6 py-4 align-middle text-center text-slate-300">
-                                    <span class="px-2 py-0.5 bg-slate-700 rounded text-xs font-medium">${satuan}</span>
-                                </td>
-                                <td class="px-6 py-4 align-middle text-center font-black text-trust-400 text-lg">${totalQty}</td>
+                            <tr class="bg-slate-800/80 border-b border-slate-700/50">
+                                <td colspan="4" class="px-6 py-2 align-middle font-bold text-trust-400 uppercase text-xs">${klasterName}</td>
                             </tr>
                         `;
                         printRekapHtml += `
                             <tr>
-                                <td class="border border-black px-4 py-2 text-center">${no}</td>
-                                <td class="border border-black px-4 py-2">${namaBarang}</td>
-                                <td class="border border-black px-4 py-2 text-center font-bold">${totalQty}</td>
-                                <td class="border border-black px-4 py-2 text-center">${satuan}</td>
-                                <td class="border border-black px-4 py-2"></td>
+                                <td colspan="5" class="border border-black px-4 py-1 bg-gray-200 font-bold uppercase text-xs">${klasterName}</td>
                             </tr>
                         `;
-                        no++;
+                        for (const [item, totalQty] of Object.entries(itemsObj)) {
+                            let namaBarang = item;
+                            let satuan = '-';
+                            if (item.includes('(') && item.includes(')')) {
+                                const parts = item.split(' (');
+                                namaBarang = parts[0];
+                                satuan = parts[1].replace(')', '');
+                            }
+                            recapHtml += `
+                                <tr class="hover:bg-slate-800/50 transition-colors border-b border-slate-700/30">
+                                    <td class="px-6 py-3 align-middle text-center text-slate-400">${no}</td>
+                                    <td class="px-6 py-3 align-middle font-bold text-white pl-10">${namaBarang}</td>
+                                    <td class="px-6 py-3 align-middle text-center text-slate-300">
+                                        <span class="px-2 py-0.5 bg-slate-700 rounded text-xs font-medium">${satuan}</span>
+                                    </td>
+                                    <td class="px-6 py-3 align-middle text-center font-black text-trust-400 text-lg">${totalQty}</td>
+                                </tr>
+                            `;
+                            printRekapHtml += `
+                                <tr>
+                                    <td class="border border-black px-4 py-2 text-center">${no}</td>
+                                    <td class="border border-black px-4 py-2 pl-8">${namaBarang}</td>
+                                    <td class="border border-black px-4 py-2 text-center font-bold">${totalQty}</td>
+                                    <td class="border border-black px-4 py-2 text-center">${satuan}</td>
+                                    <td class="border border-black px-4 py-2"></td>
+                                </tr>
+                            `;
+                            no++;
+                        }
                     }
                     
                     document.getElementById('recap-tbody').innerHTML = recapHtml;
@@ -567,24 +595,29 @@
             let html = '';
             let no = 1;
             
-            for (const [item, qty] of Object.entries(data.filteredKebutuhan || {})) {
-                let namaBarang = item;
-                let satuan = '-';
-                if (item.includes('(') && item.includes(')')) {
-                    const parts = item.split(' (');
-                    namaBarang = parts[0];
-                    satuan = parts[1].replace(')', '');
+            for (const [klasterName, items] of Object.entries(data.filteredKebutuhan || {})) {
+                if(items.length > 0) {
+                    html += `<tr><td colspan="5" class="border border-black px-4 py-1 bg-gray-200 font-bold uppercase text-xs">${klasterName}</td></tr>`;
+                    for (const req of items) {
+                        let namaBarang = req.item;
+                        let satuan = '-';
+                        if (namaBarang.includes('(') && namaBarang.includes(')')) {
+                            const parts = namaBarang.split(' (');
+                            namaBarang = parts[0];
+                            satuan = parts[1].replace(')', '');
+                        }
+                        
+                        html += `
+                        <tr>
+                            <td class="border border-black px-4 py-2 text-center">${no++}</td>
+                            <td class="border border-black px-4 py-2 pl-8">${namaBarang}</td>
+                            <td class="border border-black px-4 py-2 text-center font-bold">${req.qty}</td>
+                            <td class="border border-black px-4 py-2 text-center">${satuan}</td>
+                            <td class="border border-black px-4 py-2"></td>
+                        </tr>
+                        `;
+                    }
                 }
-                
-                html += `
-                <tr>
-                    <td class="border border-black px-4 py-2 text-center">${no++}</td>
-                    <td class="border border-black px-4 py-2">${namaBarang}</td>
-                    <td class="border border-black px-4 py-2 text-center font-bold">${qty}</td>
-                    <td class="border border-black px-4 py-2 text-center">${satuan}</td>
-                    <td class="border border-black px-4 py-2"></td>
-                </tr>
-                `;
             }
             
             tbody.innerHTML = html;
