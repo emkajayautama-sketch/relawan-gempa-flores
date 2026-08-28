@@ -88,13 +88,14 @@
     <main class="flex-1 flex flex-col h-full relative p-6">
         
         <!-- Header -->
-        <header class="flex justify-between items-center mb-6">
+        <header class="flex justify-between items-center mb-6 print:hidden">
             <div>
                 <h2 class="text-2xl font-bold text-white tracking-wide">Laporan Logistik Darurat</h2>
                 <p class="text-sm text-slate-400 mt-1">Daftar permohonan bantuan dari seluruh posko relawan.</p>
             </div>
             <div class="flex gap-3">
-                <button onclick="window.print()" class="px-4 py-2 border border-slate-600 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800 font-medium flex items-center text-sm transition-colors cursor-pointer shadow-sm glass-dark">
+                <!-- Master cetak button di-hide karena sekarang cetak per baris -->
+                <button onclick="window.print()" class="hidden px-4 py-2 border border-slate-600 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800 font-medium items-center text-sm transition-colors cursor-pointer shadow-sm glass-dark">
                     <i data-lucide="printer" class="w-4 h-4 mr-2"></i> Cetak PDF
                 </button>
             </div>
@@ -116,7 +117,7 @@
             </div>
 
             <!-- Table Container -->
-            <div id="table-container" class="hidden glass-dark border border-slate-700/80 rounded-3xl shadow-2xl overflow-hidden relative">
+            <div id="table-container" class="hidden print:hidden glass-dark border border-slate-700/80 rounded-3xl shadow-2xl overflow-hidden relative">
                 <div class="overflow-x-auto">
                     <table class="w-full text-left border-collapse">
                         <thead>
@@ -137,9 +138,71 @@
         </div>
     </main>
 
+    <!-- PRINT AREA -->
+    <div id="print-area" class="hidden print:block text-black bg-white absolute inset-0 z-50 p-8 w-full min-h-screen">
+        <!-- Kop Surat Header -->
+        <div class="border-b-4 border-double border-black pb-4 text-center mb-6">
+            <img id="print-logo" src="" class="w-full max-h-32 object-contain mx-auto mb-2 hidden">
+            <div id="print-text-container">
+                <h1 id="print-nama1" class="text-2xl font-bold uppercase tracking-widest">Tim Relawan Kemanusiaan</h1>
+                <h2 id="print-nama2" class="text-xl font-bold uppercase">Posko Utama Relawan Gempa Flores</h2>
+                <p id="print-alamat" class="text-sm">Jalan Raya Trans Flores, Kabupaten Nagekeo, Nusa Tenggara Timur</p>
+            </div>
+        </div>
+        
+        <!-- Laporan Info -->
+        <h3 class="text-center text-lg font-bold uppercase mb-6">LAPORAN LOGISTIK DARURAT</h3>
+        
+        <table class="mb-6 w-full text-sm">
+            <tr>
+                <td class="w-32 py-1">Nama Posko</td>
+                <td class="w-4 text-center">:</td>
+                <td id="print-posko" class="font-bold">Posko Utama</td>
+            </tr>
+            <tr>
+                <td class="py-1">Pelapor</td>
+                <td class="text-center">:</td>
+                <td id="print-pelapor">Relawan1</td>
+            </tr>
+            <tr>
+                <td class="py-1">Waktu Laporan</td>
+                <td class="text-center">:</td>
+                <td id="print-waktu">28 Agustus 2026</td>
+            </tr>
+        </table>
+        
+        <!-- Data Table -->
+        <table class="w-full text-left border-collapse border border-black text-sm mb-16">
+            <thead>
+                <tr class="bg-gray-200">
+                    <th class="border border-black px-4 py-2 text-center w-12">No.</th>
+                    <th class="border border-black px-4 py-2 text-center">Rincian Kebutuhan</th>
+                    <th class="border border-black px-4 py-2 text-center">Jumlah</th>
+                    <th class="border border-black px-4 py-2 text-center">Satuan</th>
+                    <th class="border border-black px-4 py-2 text-center">Ket</th>
+                </tr>
+            </thead>
+            <tbody id="print-tbody">
+                <!-- Rows -->
+            </tbody>
+        </table>
+        
+        <!-- Footer Signature -->
+        <div class="flex justify-end pr-8">
+            <div class="text-center">
+                <p class="mb-1">Mbay, <span id="print-date-ttd"></span></p>
+                <p class="font-bold uppercase">KORDINATOR RELAWAN GEMPA FLORES</p>
+                <p class="font-bold uppercase mb-24" id="print-ttd-posko">POSKO UTAMA</p>
+                
+                <p class="font-bold underline uppercase">( ........................................ )</p>
+                <p class="text-left">Ketua</p>
+            </div>
+        </div>
+    </div>
+
     <script type="module">
         import { db, auth } from './src/firebase.js';
-        import { collection, onSnapshot, query, orderBy } from 'firebase/firestore';
+        import { collection, onSnapshot, query, orderBy, doc as fDoc, getDoc } from 'firebase/firestore';
         import { onAuthStateChanged } from 'firebase/auth';
 
         lucide.createIcons();
@@ -149,8 +212,29 @@
         const emptyState = document.getElementById('empty-state');
         const tableContainer = document.getElementById('table-container');
 
-        onAuthStateChanged(auth, (user) => {
+        onAuthStateChanged(auth, async (user) => {
             if (user && user.email.includes('admin')) {
+                window.logistikData = {};
+
+                // Fetch Kop Surat
+                try {
+                    const docSnap = await getDoc(fDoc(db, "pengaturan", "kopsurat"));
+                    if (docSnap.exists()) {
+                        const d = docSnap.data();
+                        if (d.nama1) document.getElementById('print-nama1').innerText = d.nama1;
+                        if (d.nama2) document.getElementById('print-nama2').innerText = d.nama2;
+                        if (d.alamat) document.getElementById('print-alamat').innerText = d.alamat;
+                        if (d.logoUrl) {
+                            const logoImg = document.getElementById('print-logo');
+                            logoImg.src = d.logoUrl;
+                            logoImg.classList.remove('hidden');
+                            document.getElementById('print-text-container').classList.add('hidden');
+                        }
+                    }
+                } catch(e) {
+                    console.error("Gagal load pengaturan kop surat", e);
+                }
+
                 const q = query(collection(db, "laporan_logistik"), orderBy("createdAt", "desc"));
                 
                 onSnapshot(q, (snapshot) => {
@@ -180,6 +264,9 @@
                         }
                         rincianHtml += '</ul>';
 
+                        window.logistikData[doc.id] = data;
+                        window.logistikData[doc.id].timeStr = timeStr;
+
                         html += `
                         <tr class="hover:bg-slate-800/50 transition-colors">
                             <td class="px-6 py-4 align-top whitespace-nowrap"><span class="px-3 py-1 bg-slate-800 border border-slate-600 text-slate-300 rounded-full text-xs font-medium shadow-sm">${timeStr}</span></td>
@@ -187,7 +274,10 @@
                             <td class="px-6 py-4 align-top text-slate-400">${data.pelapor}</td>
                             <td class="px-6 py-4 align-top">${rincianHtml}</td>
                             <td class="px-6 py-4 align-top text-center">
-                                <span class="px-3 py-1 bg-alert-500/20 text-alert-400 rounded-full text-xs font-bold border border-alert-500/30 shadow-[0_0_10px_rgba(249,115,22,0.2)]">URGENT</span>
+                                <span class="px-3 py-1 bg-alert-500/20 text-alert-400 rounded-full text-xs font-bold border border-alert-500/30 shadow-[0_0_10px_rgba(249,115,22,0.2)] block mb-3">URGENT</span>
+                                <button onclick="cetakLaporan('${doc.id}')" class="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-white rounded text-xs font-bold flex items-center justify-center w-full transition-colors border border-slate-600">
+                                    <i data-lucide="printer" class="w-3 h-3 mr-1.5"></i> Cetak Surat
+                                </button>
                             </td>
                         </tr>
                         `;
@@ -201,6 +291,44 @@
                 });
             }
         });
+        window.cetakLaporan = function(id) {
+            const data = window.logistikData[id];
+            if(!data) return;
+            
+            document.getElementById('print-posko').innerText = data.posko;
+            document.getElementById('print-pelapor').innerText = data.pelapor;
+            document.getElementById('print-waktu').innerText = data.timeStr;
+            
+            document.getElementById('print-date-ttd').innerText = new Date().toLocaleDateString('id-ID', {day: 'numeric', month: 'long', year: 'numeric'});
+            document.getElementById('print-ttd-posko').innerText = data.posko.toUpperCase();
+            
+            const tbody = document.getElementById('print-tbody');
+            let html = '';
+            let no = 1;
+            
+            for (const [item, qty] of Object.entries(data.kebutuhan || {})) {
+                let namaBarang = item;
+                let satuan = '-';
+                if (item.includes('(') && item.includes(')')) {
+                    const parts = item.split(' (');
+                    namaBarang = parts[0];
+                    satuan = parts[1].replace(')', '');
+                }
+                
+                html += `
+                <tr>
+                    <td class="border border-black px-4 py-2 text-center">${no++}</td>
+                    <td class="border border-black px-4 py-2">${namaBarang}</td>
+                    <td class="border border-black px-4 py-2 text-center font-bold">${qty}</td>
+                    <td class="border border-black px-4 py-2 text-center">${satuan}</td>
+                    <td class="border border-black px-4 py-2"></td>
+                </tr>
+                `;
+            }
+            
+            tbody.innerHTML = html;
+            window.print();
+        };
     </script>
 </body>
 </html>
