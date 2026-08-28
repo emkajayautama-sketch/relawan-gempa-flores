@@ -113,7 +113,7 @@
         <div class="flex-1 overflow-y-auto p-8 z-10 custom-scrollbar">
             
             <!-- KPI Cards -->
-            <div class="grid grid-cols-4 gap-6 mb-8">
+            <div class="grid grid-cols-5 gap-6 mb-8">
                 <!-- Card 1 -->
                 <div class="glass-dark p-6 rounded-3xl border-t border-slate-700/80 hover:-translate-y-1 transition-transform">
                     <div class="flex justify-between items-start mb-4">
@@ -124,6 +124,16 @@
                     <h3 id="stat-posko" class="text-4xl font-extrabold text-white">48<span class="text-lg text-slate-500 font-normal ml-2">Lokasi</span></h3>
                 </div>
                 
+                <!-- Card 1.5 -->
+                <div class="glass-dark p-6 rounded-3xl border-t border-slate-700/80 hover:-translate-y-1 transition-transform">
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="p-3 bg-slate-800 rounded-2xl text-blue-400"><i data-lucide="home" class="w-6 h-6"></i></div>
+                        <span class="px-2.5 py-1 rounded-full bg-blue-500/20 text-blue-400 text-xs font-bold">Keluarga</span>
+                    </div>
+                    <p class="text-slate-400 text-sm font-medium mb-1">Total Kepala Keluarga</p>
+                    <h3 id="stat-kk" class="text-4xl font-extrabold text-white">0<span class="text-lg text-slate-500 font-normal ml-2">KK</span></h3>
+                </div>
+
                 <!-- Card 2 -->
                 <div class="glass-dark p-6 rounded-3xl border-t border-slate-700/80 hover:-translate-y-1 transition-transform">
                     <div class="flex justify-between items-start mb-4">
@@ -236,6 +246,11 @@
         // 1. Listen Total Pengungsi & Rentan
         onAuthStateChanged(auth, (user) => {
             if (user) {
+                // Listen Total KK
+                onSnapshot(collection(db, "keluarga"), (snapshot) => {
+                    document.getElementById('stat-kk').innerHTML = `${snapshot.size}<span class="text-lg text-slate-500 font-normal ml-2">KK</span>`;
+                });
+
                 onSnapshot(collection(db, "anggota"), (snapshot) => {
                     let totalPengungsi = snapshot.size;
                     let totalRentan = 0;

@@ -94,7 +94,16 @@
         <div class="flex-1 overflow-y-auto p-8 relative">
             
             <!-- Statistik Card -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex items-center">
+                    <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mr-4">
+                        <i data-lucide="home" class="w-6 h-6 text-blue-600"></i>
+                    </div>
+                    <div>
+                        <p class="text-sm text-slate-500 font-medium mb-1">Total Kepala Keluarga</p>
+                        <h3 class="text-2xl font-bold text-slate-800" id="stat-kk-pengungsi">0</h3>
+                    </div>
+                </div>
                 <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex items-center">
                     <div class="w-12 h-12 bg-trust-100 rounded-full flex items-center justify-center mr-4">
                         <i data-lucide="users" class="w-6 h-6 text-trust-600"></i>
@@ -173,6 +182,11 @@
 
         onAuthStateChanged(auth, (user) => {
             if (user && user.email.includes('admin')) {
+                // Listen Total KK
+                onSnapshot(collection(db, "keluarga"), (snapshot) => {
+                    document.getElementById('stat-kk-pengungsi').innerText = snapshot.size;
+                });
+
                 const q = query(collection(db, "anggota"));
                 
                 onSnapshot(q, (snapshot) => {
