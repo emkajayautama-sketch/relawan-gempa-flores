@@ -173,7 +173,7 @@
 
         onAuthStateChanged(auth, (user) => {
             if (user && user.email.includes('admin')) {
-                const q = query(collection(db, "anggota"), orderBy("createdAt", "desc"));
+                const q = query(collection(db, "anggota"));
                 
                 onSnapshot(q, (snapshot) => {
                     loading.classList.add('hidden');

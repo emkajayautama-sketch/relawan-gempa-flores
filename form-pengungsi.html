@@ -133,7 +133,7 @@
                         namaKepalaKeluarga: namaKk,
                         rtRwAsal: rtRw,
                         desaAsal: desa,
-                        createdAt: serverTimestamp(),
+                        createdAt: new Date(),
                         pelapor: user.email || "Relawan Anonim",
                         poskoAktif: localStorage.getItem('poskoName') || "Posko Nagekeo"
                     });

@@ -29,7 +29,9 @@ export default defineConfig({
       },
       workbox: {
         // Caching semua aset statis agar bisa offline 100%
-        globPatterns: ['**/*.{js,css,html,ico,png,svg,json}']
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,json}'],
+        navigateFallback: null,
+        ignoreURLParametersMatching: [/.*/]
       }
     })
   ],
