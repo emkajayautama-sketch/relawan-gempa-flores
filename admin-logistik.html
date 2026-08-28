@@ -94,6 +94,12 @@
                 <p class="text-sm text-slate-400 mt-1">Daftar permohonan bantuan dari seluruh posko relawan.</p>
             </div>
             <div class="flex gap-3">
+                <select id="filter-waktu" class="px-4 py-2 border border-slate-600 rounded-lg text-slate-300 bg-slate-800 focus:outline-none focus:border-trust-500 text-sm cursor-pointer glass-dark appearance-none pr-8">
+                    <option value="all">Semua Waktu</option>
+                    <option value="today">Hari Ini (24 Jam)</option>
+                    <option value="week">1 Minggu Terakhir</option>
+                    <option value="month">1 Bulan Terakhir</option>
+                </select>
                 <!-- Master cetak button di-hide karena sekarang cetak per baris -->
                 <button onclick="window.print()" class="hidden px-4 py-2 border border-slate-600 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800 font-medium items-center text-sm transition-colors cursor-pointer shadow-sm glass-dark">
                     <i data-lucide="printer" class="w-4 h-4 mr-2"></i> Cetak PDF
@@ -112,8 +118,32 @@
                 <div class="w-16 h-16 bg-slate-800 rounded-full flex justify-center items-center mb-4 border border-slate-700">
                     <i data-lucide="check-circle" class="w-8 h-8 text-emerald-500"></i>
                 </div>
-                <h3 class="text-lg font-bold text-white">Semua Posko Aman!</h3>
-                <p class="text-slate-400 mt-1">Belum ada laporan kebutuhan logistik darurat saat ini.</p>
+                <h3 class="text-lg font-bold text-white">Data Tidak Ditemukan!</h3>
+                <p class="text-slate-400 mt-1">Belum ada laporan kebutuhan logistik untuk filter waktu ini.</p>
+            </div>
+
+            <!-- Recap Container -->
+            <div id="recap-container" class="hidden print:hidden mb-8 glass-dark border border-slate-700/80 rounded-3xl shadow-2xl overflow-hidden relative">
+                <div class="p-5 border-b border-slate-700/50 bg-slate-800/80">
+                    <h3 class="text-lg font-bold text-white flex items-center">
+                        <i data-lucide="bar-chart-2" class="w-5 h-5 mr-2 text-trust-400"></i> Rekapitulasi Total Kebutuhan
+                    </h3>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-slate-800/50 border-b border-slate-700/50 text-sm font-semibold text-slate-300">
+                                <th class="px-6 py-4 w-12 text-center">No.</th>
+                                <th class="px-6 py-4">Nama Barang</th>
+                                <th class="px-6 py-4 text-center">Satuan</th>
+                                <th class="px-6 py-4 text-center">Total Kebutuhan</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recap-tbody" class="text-sm divide-y divide-slate-700/50">
+                            <!-- Recap Rows -->
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
             <!-- Table Container -->
@@ -240,32 +270,73 @@
                 onSnapshot(q, (snapshot) => {
                     loading.classList.add('hidden');
                     
-                    if (snapshot.empty) {
+                    window.allLogistikDocs = [];
+                    snapshot.forEach(doc => {
+                        window.allLogistikDocs.push({ id: doc.id, data: doc.data() });
+                    });
+                    
+                    window.renderLogistikData();
+                }, (error) => {
+                    console.error("Error fetching logistik:", error);
+                    loading.innerHTML = `<p class="text-red-500">Gagal memuat data: ${error.message}</p>`;
+                });
+                
+                document.getElementById('filter-waktu').addEventListener('change', () => {
+                    window.renderLogistikData();
+                });
+
+                window.renderLogistikData = function() {
+                    const filter = document.getElementById('filter-waktu').value;
+                    const now = new Date();
+                    
+                    let filteredDocs = window.allLogistikDocs.filter(docObj => {
+                        if (filter === 'all') return true;
+                        
+                        const createdAt = docObj.data.createdAt ? docObj.data.createdAt.toDate() : new Date();
+                        const diffTime = Math.abs(now - createdAt);
+                        const diffDays = diffTime / (1000 * 60 * 60 * 24);
+                        
+                        if (filter === 'today') return diffDays <= 1;
+                        if (filter === 'week') return diffDays <= 7;
+                        if (filter === 'month') return diffDays <= 30;
+                        return true;
+                    });
+                    
+                    if (filteredDocs.length === 0) {
                         emptyState.classList.remove('hidden');
                         tableContainer.classList.add('hidden');
+                        document.getElementById('recap-container').classList.add('hidden');
                         return;
                     }
 
                     emptyState.classList.add('hidden');
                     tableContainer.classList.remove('hidden');
+                    document.getElementById('recap-container').classList.remove('hidden');
                     
                     let html = '';
-                    snapshot.forEach(doc => {
-                        const data = doc.data();
+                    let recapStats = {};
+                    window.logistikData = {};
+
+                    filteredDocs.forEach(docObj => {
+                        const id = docObj.id;
+                        const data = docObj.data;
+                        
                         const timeStr = data.createdAt ? data.createdAt.toDate().toLocaleString('id-ID', {
                             day: 'numeric', month: 'short', year: 'numeric', 
                             hour: '2-digit', minute:'2-digit'
                         }) : 'Baru saja';
                         
-                        // Render rincian kebutuhan
+                        window.logistikData[id] = data;
+                        window.logistikData[id].timeStr = timeStr;
+
                         let rincianHtml = '<ul class="space-y-1">';
                         for (const [item, qty] of Object.entries(data.kebutuhan || {})) {
                             rincianHtml += `<li class="flex items-center"><i data-lucide="chevron-right" class="w-3 h-3 text-slate-500 mr-1 shrink-0"></i> <span class="font-bold text-white">${qty}</span> <span class="ml-1 text-slate-400">${item}</span></li>`;
+                            
+                            if (!recapStats[item]) recapStats[item] = 0;
+                            recapStats[item] += qty;
                         }
                         rincianHtml += '</ul>';
-
-                        window.logistikData[doc.id] = data;
-                        window.logistikData[doc.id].timeStr = timeStr;
 
                         html += `
                         <tr class="hover:bg-slate-800/50 transition-colors">
@@ -275,7 +346,7 @@
                             <td class="px-6 py-4 align-top">${rincianHtml}</td>
                             <td class="px-6 py-4 align-top text-center">
                                 <span class="px-3 py-1 bg-alert-500/20 text-alert-400 rounded-full text-xs font-bold border border-alert-500/30 shadow-[0_0_10px_rgba(249,115,22,0.2)] block mb-3">URGENT</span>
-                                <button onclick="cetakLaporan('${doc.id}')" class="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-white rounded text-xs font-bold flex items-center justify-center w-full transition-colors border border-slate-600">
+                                <button onclick="cetakLaporan('${id}')" class="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-white rounded text-xs font-bold flex items-center justify-center w-full transition-colors border border-slate-600">
                                     <i data-lucide="printer" class="w-3 h-3 mr-1.5"></i> Cetak Surat
                                 </button>
                             </td>
@@ -284,11 +355,34 @@
                     });
                     
                     tbody.innerHTML = html;
+                    
+                    // Render Recap Table
+                    let recapHtml = '';
+                    let no = 1;
+                    
+                    for (const [item, totalQty] of Object.entries(recapStats)) {
+                        let namaBarang = item;
+                        let satuan = '-';
+                        if (item.includes('(') && item.includes(')')) {
+                            const parts = item.split(' (');
+                            namaBarang = parts[0];
+                            satuan = parts[1].replace(')', '');
+                        }
+                        recapHtml += `
+                            <tr class="hover:bg-slate-800/50 transition-colors border-b border-slate-700/30">
+                                <td class="px-6 py-4 align-middle text-center text-slate-400">${no++}</td>
+                                <td class="px-6 py-4 align-middle font-bold text-white">${namaBarang}</td>
+                                <td class="px-6 py-4 align-middle text-center text-slate-300">
+                                    <span class="px-2 py-0.5 bg-slate-700 rounded text-xs font-medium">${satuan}</span>
+                                </td>
+                                <td class="px-6 py-4 align-middle text-center font-black text-trust-400 text-lg">${totalQty}</td>
+                            </tr>
+                        `;
+                    }
+                    
+                    document.getElementById('recap-tbody').innerHTML = recapHtml;
                     lucide.createIcons();
-                }, (error) => {
-                    console.error("Error fetching logistik:", error);
-                    loading.innerHTML = `<p class="text-red-500">Gagal memuat data: ${error.message}</p>`;
-                });
+                };
             }
         });
         window.cetakLaporan = function(id) {
