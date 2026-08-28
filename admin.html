@@ -320,31 +320,34 @@
         new Chart(ctx, {
             type: 'bar',
             data: {
-                labels: ['Wulanggitang', 'Ile Bura', 'Titehena', 'Demon Pagong', 'Larantuka'],
+                labels: ['Kab. Nagekeo'],
                 datasets: [
                     {
                         label: 'Pangan & Air',
-                        data: [85, 45, 90, 60, 95],
+                        data: [85],
                         backgroundColor: gradientFood,
                         borderColor: '#3b82f6',
                         borderWidth: 2,
                         borderRadius: 6,
+                        maxBarThickness: 80
                     },
                     {
                         label: 'Hunian (Shelter)',
-                        data: [65, 30, 80, 50, 85],
+                        data: [65],
                         backgroundColor: gradientShelter,
                         borderColor: '#f97316',
                         borderWidth: 2,
                         borderRadius: 6,
+                        maxBarThickness: 80
                     },
                     {
                         label: 'Kesehatan (Obat/Sanitasi)',
-                        data: [40, 20, 60, 40, 75],
+                        data: [40],
                         backgroundColor: gradientHealth,
                         borderColor: '#ec4899',
                         borderWidth: 2,
                         borderRadius: 6,
+                        maxBarThickness: 80
                     }
                 ]
             },
