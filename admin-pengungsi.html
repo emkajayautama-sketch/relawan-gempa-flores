@@ -127,7 +127,8 @@
                             <thead>
                                 <tr class="bg-slate-800/80 border-b border-slate-700/50 text-sm font-semibold text-slate-300">
                                     <th class="px-6 py-4">Nama Posko</th>
-                                    <th class="px-6 py-4 text-center">Total Individu</th>
+                                    <th class="px-6 py-4 text-center">Total KK</th>
+                                    <th class="px-6 py-4 text-center">Total Individu (Jiwa)</th>
                                     <th class="px-6 py-4 text-center">Bayi & Balita</th>
                                     <th class="px-6 py-4 text-center">Ibu Hamil</th>
                                     <th class="px-6 py-4 text-center">Kelompok Rentan</th>
@@ -292,6 +293,7 @@
                         let recapHtml = '';
                         const poskoStats = {};
                         
+                        let totalSemuaKk = 0;
                         let totalSemuaIndividu = 0;
                         let totalSemuaBalita = 0;
                         let totalSemuaHamil = 0;
@@ -316,7 +318,10 @@
                             
                             // Hitung stat untuk recap (selalu dihitung)
                             if (!poskoStats[posko]) {
-                                poskoStats[posko] = { individu: 0, balita: 0, hamil: 0, rentan: 0 };
+                                poskoStats[posko] = { individu: 0, balita: 0, hamil: 0, rentan: 0, kkSet: new Set() };
+                            }
+                            if (data.kkId) {
+                                poskoStats[posko].kkSet.add(data.kkId);
                             }
                             poskoStats[posko].individu++;
                             if(data.umur <= 5) poskoStats[posko].balita++;
@@ -376,6 +381,8 @@
                         recapContainer.classList.remove('hidden');
                         
                         for (const [poskoName, stats] of Object.entries(poskoStats)) {
+                            const totalKk = stats.kkSet.size;
+                            totalSemuaKk += totalKk;
                             totalSemuaIndividu += stats.individu;
                             totalSemuaBalita += stats.balita;
                             totalSemuaHamil += stats.hamil;
@@ -384,7 +391,8 @@
                             recapHtml += `
                             <tr class="hover:bg-slate-800/50 transition-colors border-b border-slate-700/30">
                                 <td class="px-6 py-4 align-middle font-bold text-white">${poskoName}</td>
-                                <td class="px-6 py-4 align-middle text-center font-bold text-trust-400">${stats.individu} Jiwa</td>
+                                <td class="px-6 py-4 align-middle text-center font-bold text-blue-400">${totalKk}</td>
+                                <td class="px-6 py-4 align-middle text-center font-bold text-trust-400">${stats.individu}</td>
                                 <td class="px-6 py-4 align-middle text-center text-pink-400 font-medium">${stats.balita}</td>
                                 <td class="px-6 py-4 align-middle text-center text-rose-400 font-medium">${stats.hamil}</td>
                                 <td class="px-6 py-4 align-middle text-center text-amber-400 font-medium">${stats.rentan}</td>
@@ -395,7 +403,8 @@
                         recapHtml += `
                             <tr class="bg-slate-800/80 border-t-2 border-slate-600">
                                 <td class="px-6 py-4 align-middle font-black text-white text-right">TOTAL KESELURUHAN:</td>
-                                <td class="px-6 py-4 align-middle text-center font-black text-trust-400">${totalSemuaIndividu} Jiwa</td>
+                                <td class="px-6 py-4 align-middle text-center font-black text-blue-400">${totalSemuaKk}</td>
+                                <td class="px-6 py-4 align-middle text-center font-black text-trust-400">${totalSemuaIndividu}</td>
                                 <td class="px-6 py-4 align-middle text-center text-pink-400 font-bold">${totalSemuaBalita}</td>
                                 <td class="px-6 py-4 align-middle text-center text-rose-400 font-bold">${totalSemuaHamil}</td>
                                 <td class="px-6 py-4 align-middle text-center text-amber-400 font-bold">${totalSemuaRentan}</td>
