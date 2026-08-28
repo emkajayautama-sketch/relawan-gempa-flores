@@ -255,17 +255,41 @@
             </div>
         </div>
         
-        <h3 class="text-center text-lg font-bold uppercase mb-2">REKAPITULASI KEBUTUHAN LOGISTIK DARURAT</h3>
-        <p class="text-center text-sm font-bold mb-6" id="print-rekap-periode">Periode: Semua Waktu</p>
+        <h3 class="text-center text-lg font-bold uppercase">REKAPITULASI</h3>
+        <h3 class="text-center text-lg font-bold uppercase mb-6">LAPORAN LOGISTIK DARURAT</h3>
+        
+        <table class="mb-6 w-full text-sm">
+            <tr>
+                <td class="w-32 py-1">Nama Posko</td>
+                <td class="w-4 text-center">:</td>
+                <td class="font-bold">Posko Utama</td>
+            </tr>
+            <tr>
+                <td class="py-1">Pelapor</td>
+                <td class="text-center">:</td>
+                <td id="print-pelapor-rekap">Admin</td>
+            </tr>
+            <tr>
+                <td class="py-1">Periode Laporan</td>
+                <td class="text-center">:</td>
+                <td id="print-periode-rekap">Semua Waktu</td>
+            </tr>
+            <tr>
+                <td class="py-1">KLASTER</td>
+                <td class="text-center">:</td>
+                <td class="font-bold uppercase">LOGISTIK</td>
+            </tr>
+        </table>
         
         <!-- Data Table -->
         <table class="w-full text-left border-collapse border border-black text-sm mb-16">
             <thead>
                 <tr class="bg-gray-200">
                     <th class="border border-black px-4 py-2 text-center w-12">No.</th>
-                    <th class="border border-black px-4 py-2 text-center">Nama Barang</th>
+                    <th class="border border-black px-4 py-2 text-center">Rincian Kebutuhan</th>
+                    <th class="border border-black px-4 py-2 text-center">Jumlah</th>
                     <th class="border border-black px-4 py-2 text-center">Satuan</th>
-                    <th class="border border-black px-4 py-2 text-center">Total Kebutuhan</th>
+                    <th class="border border-black px-4 py-2 text-center">Ket</th>
                 </tr>
             </thead>
             <tbody id="print-tbody-rekap">
@@ -277,11 +301,11 @@
         <div class="flex justify-end pr-8">
             <div class="text-center">
                 <p class="mb-1">Mbay, <span id="print-date-ttd-rekap"></span></p>
-                <p class="font-bold uppercase">KORDINATOR LOGISTIK</p>
-                <p class="font-bold uppercase mb-24">TIM RELAWAN GEMPA FLORES</p>
+                <p class="font-bold uppercase">KORDINATOR RELAWAN GEMPA FLORES</p>
+                <p class="font-bold uppercase mb-24">POSKO UTAMA</p>
                 
                 <p class="font-bold underline uppercase">( ........................................ )</p>
-                <p class="text-left">Koordinator</p>
+                <p class="text-left">Ketua</p>
             </div>
         </div>
     </div>
@@ -449,8 +473,9 @@
                             <tr>
                                 <td class="border border-black px-4 py-2 text-center">${no}</td>
                                 <td class="border border-black px-4 py-2">${namaBarang}</td>
-                                <td class="border border-black px-4 py-2 text-center">${satuan}</td>
                                 <td class="border border-black px-4 py-2 text-center font-bold">${totalQty}</td>
+                                <td class="border border-black px-4 py-2 text-center">${satuan}</td>
+                                <td class="border border-black px-4 py-2"></td>
                             </tr>
                         `;
                         no++;
@@ -537,7 +562,9 @@
             document.getElementById('print-area-rekap').classList.add('print:block');
 
             const sel = document.getElementById('filter-waktu');
-            document.getElementById('print-rekap-periode').innerText = "Periode: " + sel.options[sel.selectedIndex].text;
+            document.getElementById('print-periode-rekap').innerText = sel.options[sel.selectedIndex].text;
+            document.getElementById('print-date-ttd-rekap').innerText = new Date().toLocaleDateString('id-ID', {day: 'numeric', month: 'long', year: 'numeric'});
+            document.getElementById('print-pelapor-rekap').innerText = auth.currentUser ? auth.currentUser.email : "Admin Logistik";
             document.getElementById('print-date-ttd-rekap').innerText = new Date().toLocaleDateString('id-ID', {day: 'numeric', month: 'long', year: 'numeric'});
             
             document.getElementById('print-tbody-rekap').innerHTML = window.lastPrintRekapHtml || '';
