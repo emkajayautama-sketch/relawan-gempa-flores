@@ -112,7 +112,7 @@
 
     <script type="module">
         import { db, auth } from './src/firebase.js';
-        import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+        import { collection, addDoc, getDoc, doc, updateDoc, serverTimestamp } from 'firebase/firestore';
 
         lucide.createIcons();
 
@@ -133,9 +133,58 @@
             lucide.createIcons();
         };
 
+        const urlParams = new URLSearchParams(window.location.search);
+        const editId = urlParams.get('editId');
+        
+        if (editId) {
+            document.querySelector('h1').innerText = "Edit Laporan Logistik";
+            document.getElementById('btnKirim').innerHTML = 'Simpan Perubahan <i data-lucide="send" class="w-5 h-5 ml-2"></i>';
+            lucide.createIcons();
+
+            getDoc(doc(db, "laporan_logistik", editId)).then(docSnap => {
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    const kebutuhan = data.kebutuhan || {};
+                    
+                    for (const [key, qty] of Object.entries(kebutuhan)) {
+                        // Coba cari di default item
+                        // Format key adalah "Nama Barang (Satuan)" atau "Nama Barang"
+                        let parsedName = key;
+                        let parsedUnit = '';
+                        const match = key.match(/(.+?)\s*\((.+?)\)$/);
+                        if (match) {
+                            parsedName = match[1].trim();
+                            parsedUnit = match[2].trim();
+                        }
+
+                        const defaultInput = document.querySelector(`.default-item input[data-name="${parsedName}"]`);
+                        if (defaultInput) {
+                            defaultInput.value = qty;
+                        } else {
+                            // Masukkan ke dinamis item
+                            // Tapi masuk klaster mana? Kita masukkan saja ke klaster-pangan (bebas, karena datanya sama)
+                            const container = document.getElementById('klaster-pangan');
+                            const div = document.createElement('div');
+                            div.className = "flex items-center gap-1 dynamic-item mt-2 animate-fade-in-up";
+                            div.innerHTML = `
+                                <button type="button" onclick="this.parentElement.remove()" class="text-red-400 hover:text-red-600 p-1 shrink-0 transition-colors">
+                                    <i data-lucide="x-circle" class="w-5 h-5"></i>
+                                </button>
+                                <input type="text" class="item-name flex-1 bg-slate-50 border border-slate-300 rounded-xl px-2 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-alert-500" value="${parsedName}">
+                                <input type="number" min="1" class="item-qty w-16 bg-slate-50 border border-slate-300 rounded-xl px-2 py-2 text-center text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-alert-500" value="${qty}">
+                                <input type="text" class="item-unit w-16 bg-slate-50 border border-slate-300 rounded-xl px-2 py-2 text-center text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-alert-500" value="${parsedUnit}">
+                            `;
+                            container.appendChild(div);
+                            lucide.createIcons();
+                        }
+                    }
+                }
+            });
+        }
+
         document.getElementById('btnKirim').addEventListener('click', async (e) => {
             const btn = e.currentTarget;
-            btn.innerHTML = '<span class="animate-spin mr-2">⏳</span> Mengirim...';
+            btn.innerHTML = '<span class="animate-spin mr-2">⏳</span> Menyimpan...';
             btn.disabled = true;
 
             let kebutuhanData = {};
@@ -182,19 +231,27 @@
             }
 
             try {
-                await addDoc(collection(db, "laporan_logistik"), {
-                    posko: localStorage.getItem('poskoName') || "Posko Nagekeo",
-                    pelapor: auth.currentUser?.email || "Relawan Anonim",
-                    kebutuhan: kebutuhanData,
-                    createdAt: serverTimestamp()
-                });
+                if (editId) {
+                    await updateDoc(doc(db, "laporan_logistik", editId), {
+                        kebutuhan: kebutuhanData,
+                        updatedAt: serverTimestamp()
+                    });
+                    alert("Perubahan laporan logistik berhasil disimpan!");
+                } else {
+                    await addDoc(collection(db, "laporan_logistik"), {
+                        posko: localStorage.getItem('poskoName') || "Posko Nagekeo",
+                        pelapor: auth.currentUser?.email || "Relawan Anonim",
+                        kebutuhan: kebutuhanData,
+                        createdAt: serverTimestamp()
+                    });
+                    alert("Laporan logistik berhasil dikirim ke Command Center!");
+                }
 
-                alert("Laporan logistik berhasil dikirim ke Command Center!");
                 window.location.href = 'index.html';
             } catch (error) {
                 console.error("Error submitting logistik:", error);
                 alert("Terjadi kesalahan: " + error.message);
-                btn.innerHTML = 'Kirim Laporan Posko <i data-lucide="send" class="w-5 h-5 ml-2"></i>';
+                btn.innerHTML = editId ? 'Simpan Perubahan <i data-lucide="send" class="w-5 h-5 ml-2"></i>' : 'Kirim Laporan Posko <i data-lucide="send" class="w-5 h-5 ml-2"></i>';
                 btn.disabled = false;
                 lucide.createIcons();
             }

@@ -46,9 +46,9 @@
             <div class="mb-4 flex justify-between items-end">
                 <div>
                     <h2 class="text-xl font-bold text-slate-800">Daftar Anggota</h2>
-                    <p class="text-xs text-slate-500">Keluarga Bpk. Budi (No KK: 123...)</p>
+                    <p class="text-xs text-slate-500" id="kkInfoText">Memuat Data KK...</p>
                 </div>
-                <span class="bg-trust-100 text-trust-700 text-xs font-bold px-2 py-1 rounded-lg">0 Terdata</span>
+                <span id="counterBadge" class="bg-trust-100 text-trust-700 text-xs font-bold px-2 py-1 rounded-lg">0 Terdata</span>
             </div>
 
             <!-- List Anggota Kosong -->
@@ -57,6 +57,11 @@
                     <i data-lucide="user-plus" class="w-8 h-8 text-slate-400"></i>
                 </div>
                 <p class="text-slate-500 text-sm font-medium">Belum ada anggota keluarga yang ditambahkan.</p>
+            </div>
+            
+            <!-- List Anggota (Terisi) -->
+            <div id="listAnggota" class="space-y-3 mb-6 hidden">
+                <!-- Data akan di-render di sini oleh JavaScript -->
             </div>
 
             <!-- Form Tambah Anggota -->
@@ -131,7 +136,7 @@
 
     <script type="module">
         import { db, auth } from './src/firebase.js';
-        import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+        import { collection, addDoc, getDoc, doc, query, where, onSnapshot, deleteDoc } from 'firebase/firestore';
         import { onAuthStateChanged } from 'firebase/auth';
 
         lucide.createIcons();
@@ -149,7 +154,62 @@
             if (!kkId) {
                 alert("Sesi tidak valid! Harap isi data KK terlebih dahulu.");
                 window.location.href = 'form-pengungsi.html';
+                return;
             }
+
+            // Fetch info KK
+            getDoc(doc(db, "keluarga", kkId)).then(docSnap => {
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    document.getElementById('kkInfoText').innerText = `Keluarga: ${data.namaKepalaKeluarga} (No KK: ${data.noKk})`;
+                }
+            });
+
+            const emptyState = document.getElementById('emptyState');
+            const listAnggota = document.getElementById('listAnggota');
+            const counterBadge = document.getElementById('counterBadge');
+            
+            // Listen realtime Anggota for this KK
+            const qAnggota = query(collection(db, "anggota"), where("kkId", "==", kkId));
+            onSnapshot(qAnggota, (snapshot) => {
+                counterAnggota = snapshot.size;
+                counterBadge.innerText = `${counterAnggota} Terdata`;
+
+                if (snapshot.empty) {
+                    emptyState.classList.remove('hidden');
+                    listAnggota.classList.add('hidden');
+                    listAnggota.innerHTML = '';
+                } else {
+                    emptyState.classList.add('hidden');
+                    listAnggota.classList.remove('hidden');
+                    
+                    let html = '';
+                    snapshot.forEach(doc => {
+                        const data = doc.data();
+                        
+                        // Format rentan
+                        let rentanHtml = '';
+                        if (data.statusRentan && data.statusRentan.length > 0) {
+                            rentanHtml = `<div class="flex gap-1 mt-2">` + data.statusRentan.map(r => `<span class="px-2 py-0.5 bg-amber-50 text-amber-600 border border-amber-200 text-[9px] rounded font-bold uppercase">${r}</span>`).join('') + `</div>`;
+                        }
+                        
+                        html += `
+                            <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+                                <div>
+                                    <h4 class="font-bold text-slate-800 text-sm">${data.nama}</h4>
+                                    <p class="text-xs text-slate-500">${data.umur} Tahun • ${data.gender === 'L' ? 'Laki-laki' : 'Perempuan'}</p>
+                                    ${rentanHtml}
+                                </div>
+                                <button onclick="hapusAnggota('${doc.id}')" class="w-8 h-8 rounded-full bg-red-50 text-red-500 flex items-center justify-center hover:bg-red-100 transition-colors">
+                                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+                        `;
+                    });
+                    listAnggota.innerHTML = html;
+                    lucide.createIcons();
+                }
+            });
 
             const inputUmur = document.getElementById('umur');
             const badgeUmur = document.getElementById('kategoriUmurBadge');
@@ -214,10 +274,7 @@
                         createdAt: new Date()
                     });
 
-                    counterAnggota++;
-                    // Update badge jumlah anggota
-                    document.querySelector('.bg-trust-100.text-trust-700').innerText = `${counterAnggota} Terdata`;
-
+                    // Update counter diurus oleh onSnapshot di atas
                     alert("Anggota berhasil disimpan!");
                     
                     // Reset form
@@ -244,6 +301,18 @@
                 window.location.href = 'index.html';
             });
         });
+
+        // Delete function global
+        window.hapusAnggota = async (id) => {
+            if (confirm("Yakin ingin menghapus anggota ini?")) {
+                try {
+                    await deleteDoc(doc(db, "anggota", id));
+                } catch (error) {
+                    console.error("Gagal menghapus:", error);
+                    alert("Gagal menghapus data.");
+                }
+            }
+        };
     </script>
 </body>
 </html>

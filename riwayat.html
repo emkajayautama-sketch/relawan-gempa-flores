@@ -113,7 +113,7 @@
     <script type="module">
         import { auth, db } from './src/firebase.js';
         import { onAuthStateChanged } from 'firebase/auth';
-        import { collection, query, where, getDocs, orderBy, limit } from "firebase/firestore";
+        import { collection, query, where, getDocs, orderBy, limit, deleteDoc, doc } from "firebase/firestore";
 
         lucide.createIcons();
 
@@ -202,7 +202,7 @@
                     
                     if (item.type === 'keluarga') {
                         el.innerHTML = `
-                            <a href="form-anggota.html?kkId=${item.id}" class="block bg-white rounded-3xl p-4 shadow-sm border border-slate-100 mb-4 transform hover:scale-[1.02] transition-transform relative cursor-pointer">
+                            <div class="bg-white rounded-3xl p-4 shadow-sm border border-slate-100 mb-4 transform transition-transform relative">
                                 <div class="flex items-start">
                                     ${iconStr}
                                     <div class="ml-4 flex-1">
@@ -217,12 +217,22 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="absolute right-4 bottom-4 bg-trust-50 text-trust-600 text-[10px] font-bold px-2 py-1 rounded-lg border border-trust-200">Klik untuk tambah anggota</div>
-                            </a>
+                                <div class="mt-4 flex gap-2 border-t border-slate-100 pt-3">
+                                    <button onclick="window.location.href='form-pengungsi.html?editId=${item.id}'" class="flex-1 flex justify-center items-center py-2 bg-slate-50 text-slate-600 rounded-xl text-xs font-bold border border-slate-200 hover:bg-slate-100 active:scale-95 transition-all">
+                                        <i data-lucide="edit" class="w-3.5 h-3.5 mr-1.5"></i> Edit KK
+                                    </button>
+                                    <button onclick="hapusData('${item.id}', 'keluarga')" class="flex-1 flex justify-center items-center py-2 bg-red-50 text-red-600 rounded-xl text-xs font-bold border border-red-100 hover:bg-red-100 active:scale-95 transition-all">
+                                        <i data-lucide="trash-2" class="w-3.5 h-3.5 mr-1.5"></i> Hapus
+                                    </button>
+                                    <button onclick="window.location.href='form-anggota.html?kkId=${item.id}'" class="flex-[1.5] flex justify-center items-center py-2 bg-trust-50 text-trust-600 rounded-xl text-xs font-bold border border-trust-200 hover:bg-trust-100 active:scale-95 transition-all">
+                                        <i data-lucide="user-plus" class="w-3.5 h-3.5 mr-1.5"></i> Anggota
+                                    </button>
+                                </div>
+                            </div>
                         `;
                     } else {
                         el.innerHTML = `
-                            <div class="bg-white rounded-3xl p-4 shadow-sm border border-slate-100 mb-4 transform hover:scale-[1.02] transition-transform relative">
+                            <div class="bg-white rounded-3xl p-4 shadow-sm border border-slate-100 mb-4 transform transition-transform relative">
                                 <div class="flex items-start">
                                     ${iconStr}
                                     <div class="ml-4 flex-1">
@@ -236,6 +246,14 @@
                                             <span class="text-[10px] text-slate-400">Diinput oleh: ${item.pelapor}</span>
                                         </div>
                                     </div>
+                                </div>
+                                <div class="mt-4 flex gap-2 border-t border-slate-100 pt-3">
+                                    <button onclick="window.location.href='form-logistik.html?editId=${item.id}'" class="flex-1 flex justify-center items-center py-2 bg-slate-50 text-slate-600 rounded-xl text-xs font-bold border border-slate-200 hover:bg-slate-100 active:scale-95 transition-all">
+                                        <i data-lucide="edit" class="w-3.5 h-3.5 mr-1.5"></i> Edit
+                                    </button>
+                                    <button onclick="hapusData('${item.id}', 'logistik')" class="flex-1 flex justify-center items-center py-2 bg-red-50 text-red-600 rounded-xl text-xs font-bold border border-red-100 hover:bg-red-100 active:scale-95 transition-all">
+                                        <i data-lucide="trash-2" class="w-3.5 h-3.5 mr-1.5"></i> Hapus
+                                    </button>
                                 </div>
                             </div>
                         `;
@@ -255,6 +273,37 @@
                 emptyState.querySelector('p').innerText = "Koneksi ke server terganggu atau hak akses ditolak. Silakan coba lagi nanti.";
             }
         }
+
+        window.hapusData = async (id, type) => {
+            const confirmMsg = type === 'keluarga' 
+                ? "Yakin ingin menghapus Kepala Keluarga ini? Semua data anggota di dalam KK ini juga akan terhapus!" 
+                : "Yakin ingin menghapus laporan logistik ini?";
+            
+            if (!confirm(confirmMsg)) return;
+
+            try {
+                if (type === 'keluarga') {
+                    // Hapus data KK
+                    await deleteDoc(doc(db, "keluarga", id));
+                    
+                    // Cascade delete anggota
+                    const qAnggota = query(collection(db, "anggota"), where("kkId", "==", id));
+                    const anggotaSnap = await getDocs(qAnggota);
+                    anggotaSnap.forEach(async (anggotaDoc) => {
+                        await deleteDoc(doc(db, "anggota", anggotaDoc.id));
+                    });
+                } else {
+                    // Hapus data logistik
+                    await deleteDoc(doc(db, "laporan_logistik", id));
+                }
+                
+                alert("Data berhasil dihapus!");
+                fetchRiwayatData(); // Refresh list
+            } catch (error) {
+                console.error("Error menghapus data:", error);
+                alert("Gagal menghapus data: " + error.message);
+            }
+        };
     </script>
 </body>
 </html>

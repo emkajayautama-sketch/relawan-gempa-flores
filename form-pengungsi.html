@@ -94,32 +94,61 @@
 
     <script type="module">
         import { db, auth } from './src/firebase.js';
-        import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+        import { collection, addDoc, getDoc, doc, updateDoc } from 'firebase/firestore';
         import { onAuthStateChanged } from 'firebase/auth';
 
         lucide.createIcons();
 
-        onAuthStateChanged(auth, (user) => {
+        onAuthStateChanged(auth, async (user) => {
             if (!user) {
                 window.location.href = 'login.html';
                 return;
             }
 
-            document.getElementById('btnLanjut').addEventListener('click', async (e) => {
+            // Cek Mode Edit
+            const urlParams = new URLSearchParams(window.location.search);
+            const editId = urlParams.get('editId');
+            
+            const noKkInput = document.getElementById('noKk');
+            const namaKkInput = document.getElementById('namaKk');
+            const rtRwInput = document.getElementById('rtRw');
+            const desaInput = document.getElementById('desa');
+            const btnLanjut = document.getElementById('btnLanjut');
+
+            if (editId) {
+                document.querySelector('h1').innerText = "Edit Data Pengungsi";
+                btnLanjut.innerHTML = 'Simpan Perubahan & Lanjut <i data-lucide="arrow-right" class="w-5 h-5 ml-2"></i>';
+                lucide.createIcons();
+                
+                try {
+                    const docSnap = await getDoc(doc(db, "keluarga", editId));
+                    if (docSnap.exists()) {
+                        const data = docSnap.data();
+                        noKkInput.value = data.noKk;
+                        namaKkInput.value = data.namaKepalaKeluarga;
+                        rtRwInput.value = data.rtRwAsal;
+                        desaInput.value = data.desaAsal;
+                    }
+                } catch (e) {
+                    console.error("Gagal mengambil data", e);
+                }
+            }
+
+            btnLanjut.addEventListener('click', async (e) => {
                 const btn = e.currentTarget;
                 btn.innerHTML = '<span class="animate-spin mr-2">⏳</span> Menyimpan...';
                 btn.classList.add('opacity-75', 'cursor-not-allowed');
                 btn.disabled = true;
 
-                const noKk = document.getElementById('noKk').value;
-                const namaKk = document.getElementById('namaKk').value;
-                const rtRw = document.getElementById('rtRw').value;
-                const desa = document.getElementById('desa').value;
+                const noKk = noKkInput.value;
+                const namaKk = namaKkInput.value;
+                const rtRw = rtRwInput.value;
+                const desa = desaInput.value;
 
                 // Validasi sederhana
                 if(!noKk || !namaKk || !desa) {
                     alert("Mohon isi Nomor KK, Nama Kepala Keluarga, dan Desa asal!");
-                    btn.innerHTML = 'Lanjut Input Anggota Keluarga <i data-lucide="arrow-right" class="w-5 h-5 ml-2"></i>';
+                    btn.innerHTML = editId ? 'Simpan Perubahan & Lanjut <i data-lucide="arrow-right" class="w-5 h-5 ml-2"></i>' : 'Lanjut Input Anggota Keluarga <i data-lucide="arrow-right" class="w-5 h-5 ml-2"></i>';
                     btn.classList.remove('opacity-75', 'cursor-not-allowed');
                     btn.disabled = false;
                     lucide.createIcons();
@@ -127,27 +156,40 @@
                 }
 
                 try {
-                    // Simpan ke Firestore koleksi "keluarga"
-                    const docRef = await addDoc(collection(db, "keluarga"), {
-                        noKk: noKk,
-                        namaKepalaKeluarga: namaKk,
-                        rtRwAsal: rtRw,
-                        desaAsal: desa,
-                        createdAt: new Date(),
-                        pelapor: user.email || "Relawan Anonim",
-                        poskoAktif: localStorage.getItem('poskoName') || "Posko Nagekeo"
-                    });
-                    console.log("Document written with ID: ", docRef.id);
+                    let nextId = editId;
+                    
+                    if (editId) {
+                        // Update Data Lama
+                        await updateDoc(doc(db, "keluarga", editId), {
+                            noKk: noKk,
+                            namaKepalaKeluarga: namaKk,
+                            rtRwAsal: rtRw,
+                            desaAsal: desa
+                        });
+                        alert("Data KK berhasil diperbarui! Lanjut ke pengisian data anggota!");
+                    } else {
+                        // Simpan Baru
+                        const docRef = await addDoc(collection(db, "keluarga"), {
+                            noKk: noKk,
+                            namaKepalaKeluarga: namaKk,
+                            rtRwAsal: rtRw,
+                            desaAsal: desa,
+                            createdAt: new Date(),
+                            pelapor: user.email || "Relawan Anonim",
+                            poskoAktif: localStorage.getItem('poskoName') || "Posko Nagekeo"
+                        });
+                        nextId = docRef.id;
+                        alert("Data KK berhasil disimpan (Offline Mode Aktif). Lanjut ke pengisian data anggota!");
+                    }
                     
                     // Pindah ke step berikutnya (Form Input Anggota)
-                    alert("Data KK berhasil disimpan (Offline Mode Aktif). Lanjut ke pengisian data anggota!");
-                    window.location.href = 'form-anggota.html?kkId=' + docRef.id;
+                    window.location.href = 'form-anggota.html?kkId=' + nextId;
 
                 } catch (error) {
-                    console.error("Error adding document: ", error);
+                    console.error("Error saving document: ", error);
                     alert("Terjadi kesalahan: " + error.message);
                 } finally {
-                    btn.innerHTML = 'Lanjut Input Anggota Keluarga <i data-lucide="arrow-right" class="w-5 h-5 ml-2"></i>';
+                    btn.innerHTML = editId ? 'Simpan Perubahan & Lanjut <i data-lucide="arrow-right" class="w-5 h-5 ml-2"></i>' : 'Lanjut Input Anggota Keluarga <i data-lucide="arrow-right" class="w-5 h-5 ml-2"></i>';
                     btn.classList.remove('opacity-75', 'cursor-not-allowed');
                     btn.disabled = false;
                     lucide.createIcons();
