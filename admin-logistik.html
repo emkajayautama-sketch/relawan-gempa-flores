@@ -107,6 +107,16 @@
             </div>
         </header>
 
+        <!-- Tabs -->
+        <div class="flex space-x-1 mb-6 bg-slate-800/50 p-1 rounded-xl w-max border border-slate-700/50 print:hidden">
+            <button id="tab-laporan" onclick="switchTab('laporan')" class="px-5 py-2 rounded-lg text-sm font-bold bg-trust-500 text-white shadow-sm transition-all">
+                Daftar Laporan
+            </button>
+            <button id="tab-rekap" onclick="switchTab('rekap')" class="px-5 py-2 rounded-lg text-sm font-bold text-slate-400 hover:text-white hover:bg-slate-700/50 transition-all">
+                Rekapitulasi
+            </button>
+        </div>
+
         <!-- Content Scrollable -->
         <div class="flex-1 overflow-y-auto relative">
             <div id="loading" class="flex flex-col items-center justify-center h-64">
@@ -310,8 +320,14 @@
                     }
 
                     emptyState.classList.add('hidden');
-                    tableContainer.classList.remove('hidden');
-                    document.getElementById('recap-container').classList.remove('hidden');
+                    
+                    if (window.currentTab === 'laporan') {
+                        tableContainer.classList.remove('hidden');
+                        document.getElementById('recap-container').classList.add('hidden');
+                    } else {
+                        tableContainer.classList.add('hidden');
+                        document.getElementById('recap-container').classList.remove('hidden');
+                    }
                     
                     let html = '';
                     let recapStats = {};
@@ -385,6 +401,28 @@
                 };
             }
         });
+
+        window.currentTab = 'laporan';
+        
+        window.switchTab = function(tab) {
+            window.currentTab = tab;
+            
+            const btnLaporan = document.getElementById('tab-laporan');
+            const btnRekap = document.getElementById('tab-rekap');
+            
+            if (tab === 'laporan') {
+                btnLaporan.className = "px-5 py-2 rounded-lg text-sm font-bold bg-trust-500 text-white shadow-sm transition-all";
+                btnRekap.className = "px-5 py-2 rounded-lg text-sm font-bold text-slate-400 hover:text-white hover:bg-slate-700/50 transition-all";
+            } else {
+                btnRekap.className = "px-5 py-2 rounded-lg text-sm font-bold bg-trust-500 text-white shadow-sm transition-all";
+                btnLaporan.className = "px-5 py-2 rounded-lg text-sm font-bold text-slate-400 hover:text-white hover:bg-slate-700/50 transition-all";
+            }
+            
+            if (window.renderLogistikData) {
+                window.renderLogistikData();
+            }
+        };
+
         window.cetakLaporan = function(id) {
             const data = window.logistikData[id];
             if(!data) return;
