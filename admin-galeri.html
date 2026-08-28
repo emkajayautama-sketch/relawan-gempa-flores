@@ -115,7 +115,7 @@
             </div>
 
             <!-- Masonry Grid -->
-            <div id="gallery-grid" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 items-start">
+            <div id="gallery-grid" class="hidden grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4 items-start">
                 <!-- Cards will be injected here -->
             </div>
         </div>
@@ -130,9 +130,18 @@
         <div class="text-center w-full max-w-2xl bg-slate-900 p-5 rounded-2xl border border-slate-700 shadow-2xl">
             <h3 id="modal-posko" class="text-xl font-bold text-trust-400 mb-2"></h3>
             <p id="modal-caption" class="text-base text-slate-200 italic mb-4 leading-relaxed"></p>
-            <div class="flex items-center justify-center space-x-4 text-xs text-slate-400">
+            <div class="flex items-center justify-center space-x-4 text-xs text-slate-400 mb-4">
                 <span id="modal-meta-user" class="flex items-center bg-slate-800 px-3 py-1.5 rounded-full"><i data-lucide="user" class="w-3.5 h-3.5 mr-1.5"></i> </span>
                 <span id="modal-meta-time" class="flex items-center bg-slate-800 px-3 py-1.5 rounded-full"><i data-lucide="clock" class="w-3.5 h-3.5 mr-1.5"></i> </span>
+            </div>
+            <!-- Action Buttons -->
+            <div class="flex items-center justify-center space-x-3 pt-4 border-t border-slate-700/50">
+                <button id="btn-download" class="flex items-center px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-xl transition-colors border border-slate-600 text-sm font-medium">
+                    <i data-lucide="download" class="w-4 h-4 mr-2"></i> Download
+                </button>
+                <button id="btn-delete" class="flex items-center px-4 py-2 bg-red-900/30 hover:bg-red-900/50 text-red-400 rounded-xl transition-colors border border-red-500/30 text-sm font-medium">
+                    <i data-lucide="trash-2" class="w-4 h-4 mr-2"></i> Hapus Foto
+                </button>
             </div>
         </div>
     </div>
@@ -146,7 +155,7 @@
 
     <script type="module">
         import { db, auth } from './src/firebase.js';
-        import { collection, onSnapshot, query, orderBy, limit } from 'firebase/firestore';
+        import { collection, onSnapshot, query, orderBy, limit, doc, deleteDoc } from 'firebase/firestore';
         import { onAuthStateChanged } from 'firebase/auth';
 
         lucide.createIcons();
@@ -163,8 +172,12 @@
         const modalCaption = document.getElementById('modal-caption');
         const modalMetaUser = document.getElementById('modal-meta-user');
         const modalMetaTime = document.getElementById('modal-meta-time');
+        const btnDownload = document.getElementById('btn-download');
+        const btnDelete = document.getElementById('btn-delete');
         
         let allPhotos = [];
+        let currentPhotoId = null;
+        let currentPhotoUrl = null;
 
         // Fetch dari Firestore (collection 'dokumentasi')
         // Kita harus menunggu status login (token) dari Firebase siap sebelum menarik data
@@ -229,27 +242,30 @@
                             </div>
                         </div>
 
-                        <div class="absolute bottom-3 left-4 right-4">
-                            <span class="px-2.5 py-1 bg-trust-600/90 backdrop-blur-md text-white text-[10px] font-bold tracking-wider uppercase rounded-md shadow-lg border border-trust-400/30">
+                        <div class="absolute bottom-3 left-3 right-3">
+                            <span class="px-2 py-1 bg-trust-600/90 backdrop-blur-md text-white text-[10px] font-bold tracking-wider uppercase rounded-md shadow-lg border border-trust-400/30">
                                 ${photo.posko}
                             </span>
                         </div>
                     </div>
-                    <div class="p-4 flex-1 flex flex-col bg-slate-900/50">
-                        <p class="text-slate-300 text-sm italic mb-4 line-clamp-2 leading-relaxed">"${safeCaption}"</p>
-                        <div class="mt-auto pt-3 border-t border-slate-700/50 flex items-center justify-between text-[11px] text-slate-400 font-medium">
-                            <span class="flex items-center"><i data-lucide="user" class="w-3.5 h-3.5 mr-1.5 text-slate-500"></i> ${safeUser}</span>
-                            <span class="flex items-center"><i data-lucide="clock" class="w-3.5 h-3.5 mr-1.5 text-slate-500"></i> ${timeStr}</span>
+                    <div class="p-3 flex-1 flex flex-col bg-slate-900/50">
+                        <p class="text-slate-300 text-xs italic mb-3 line-clamp-2 leading-relaxed">"${safeCaption}"</p>
+                        <div class="mt-auto pt-2 border-t border-slate-700/50 flex items-center justify-between text-[10px] text-slate-400 font-medium">
+                            <span class="flex items-center truncate mr-2"><i data-lucide="user" class="w-3 h-3 mr-1 text-slate-500"></i> <span class="truncate">${safeUser}</span></span>
+                            <span class="flex items-center shrink-0"><i data-lucide="clock" class="w-3 h-3 mr-1 text-slate-500"></i> ${timeStr}</span>
                         </div>
                     </div>
                 `;
                 
                 card.addEventListener('click', () => {
+                    currentPhotoId = photo.id;
+                    currentPhotoUrl = imgSrc;
                     modalImg.src = imgSrc;
                     modalPosko.innerText = photo.posko;
                     modalCaption.innerText = `"${safeCaption}"`;
                     modalMetaUser.innerHTML = `<i data-lucide="user" class="w-3.5 h-3.5 mr-1.5"></i> ${photo.pelapor || 'Relawan'}`;
                     modalMetaTime.innerHTML = `<i data-lucide="clock" class="w-3.5 h-3.5 mr-1.5"></i> ${timeStr}`;
+                    lucide.createIcons();
                     modal.classList.remove('hidden');
                 });
                 
@@ -264,6 +280,55 @@
             const val = e.target.value.toLowerCase();
             const filtered = allPhotos.filter(p => p.posko.toLowerCase().includes(val) || (p.caption && p.caption.toLowerCase().includes(val)));
             renderGallery(filtered);
+        });
+
+        // Modal Actions
+        btnDownload.addEventListener('click', () => {
+            if (currentPhotoUrl) {
+                fetch(currentPhotoUrl)
+                    .then(response => response.blob())
+                    .then(blob => {
+                        const url = window.URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.style.display = 'none';
+                        a.href = url;
+                        a.download = `foto_${modalPosko.innerText.replace(/[^a-zA-Z0-9]/g, '_')}_${Date.now()}.jpg`;
+                        document.body.appendChild(a);
+                        a.click();
+                        window.URL.revokeObjectURL(url);
+                        document.body.removeChild(a);
+                    })
+                    .catch(err => {
+                        console.error('Download via fetch failed, opening in new tab:', err);
+                        window.open(currentPhotoUrl, '_blank');
+                    });
+            }
+        });
+
+        btnDelete.addEventListener('click', async () => {
+            if (currentPhotoId && confirm('Hapus foto ini? Tindakan ini tidak dapat dibatalkan.')) {
+                try {
+                    const originalText = btnDelete.innerHTML;
+                    btnDelete.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 mr-2 animate-spin"></i> Menghapus...';
+                    btnDelete.disabled = true;
+                    lucide.createIcons();
+                    
+                    await deleteDoc(doc(db, "dokumentasi", currentPhotoId));
+                    
+                    modal.classList.add('hidden');
+                    
+                    btnDelete.innerHTML = originalText;
+                    btnDelete.disabled = false;
+                    lucide.createIcons();
+                } catch (error) {
+                    console.error("Error deleting photo:", error);
+                    alert("Gagal menghapus foto: " + error.message);
+                    
+                    btnDelete.innerHTML = '<i data-lucide="trash-2" class="w-4 h-4 mr-2"></i> Hapus Foto';
+                    btnDelete.disabled = false;
+                    lucide.createIcons();
+                }
+            }
         });
 
         // Close modal
