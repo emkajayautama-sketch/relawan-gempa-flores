@@ -190,14 +190,24 @@
             let kebutuhanData = {};
             let totalBarang = 0;
 
-            // Kumpulkan data bawaan (default)
-            document.querySelectorAll('.default-item input[type="number"]').forEach(input => {
+            // Kumpulkan data default
+            document.querySelectorAll('.default-item').forEach(row => {
+                const input = row.querySelector('input[type="number"]');
                 const qty = parseInt(input.value) || 0;
+                
                 if (qty > 0) {
                     const itemName = input.getAttribute('data-name');
                     const itemUnit = input.getAttribute('data-unit');
-                    // Simpan dengan format: "Beras (Kg)"
-                    const fullKey = itemUnit ? `${itemName} (${itemUnit})` : itemName;
+                    
+                    const klasterDiv = row.closest('div[id^="klaster-"]');
+                    let klasterName = "Logistik Umum";
+                    if (klasterDiv) {
+                        if (klasterDiv.id === 'klaster-pangan') klasterName = "Pangan & Air";
+                        else if (klasterDiv.id === 'klaster-hunian') klasterName = "Hunian (Shelter)";
+                        else if (klasterDiv.id === 'klaster-medis') klasterName = "Medis & Sanitasi";
+                    }
+
+                    const fullKey = itemUnit ? `[${klasterName}] ${itemName} (${itemUnit})` : `[${klasterName}] ${itemName}`;
                     kebutuhanData[fullKey] = qty;
                     totalBarang += qty;
                 }
@@ -210,8 +220,15 @@
                 let unit = row.querySelector('.item-unit').value.trim();
                 
                 if (name !== "" && qty > 0) {
-                    // Simpan dengan format: "Terpal (Lembar)"
-                    const fullKey = unit ? `${name} (${unit})` : name;
+                    const klasterDiv = row.closest('div[id^="klaster-"]');
+                    let klasterName = "Logistik Umum";
+                    if (klasterDiv) {
+                        if (klasterDiv.id === 'klaster-pangan') klasterName = "Pangan & Air";
+                        else if (klasterDiv.id === 'klaster-hunian') klasterName = "Hunian (Shelter)";
+                        else if (klasterDiv.id === 'klaster-medis') klasterName = "Medis & Sanitasi";
+                    }
+
+                    const fullKey = unit ? `[${klasterName}] ${name} (${unit})` : `[${klasterName}] ${name}`;
                     
                     if (kebutuhanData[fullKey]) {
                         kebutuhanData[fullKey] += qty;

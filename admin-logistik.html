@@ -94,6 +94,13 @@
                 <p class="text-sm text-slate-400 mt-1">Daftar permohonan bantuan dari seluruh posko relawan.</p>
             </div>
             <div class="flex gap-3">
+                <select id="filter-klaster" class="px-4 py-2 border border-slate-600 rounded-lg text-slate-300 bg-slate-800 focus:outline-none focus:border-trust-500 text-sm cursor-pointer glass-dark appearance-none pr-8">
+                    <option value="all">Semua Klaster</option>
+                    <option value="Pangan & Air">Pangan & Air</option>
+                    <option value="Hunian (Shelter)">Hunian (Shelter)</option>
+                    <option value="Medis & Sanitasi">Medis & Sanitasi</option>
+                    <option value="Logistik Umum">Lainnya / Umum</option>
+                </select>
                 <select id="filter-waktu" class="px-4 py-2 border border-slate-600 rounded-lg text-slate-300 bg-slate-800 focus:outline-none focus:border-trust-500 text-sm cursor-pointer glass-dark appearance-none pr-8">
                     <option value="all">Semua Waktu</option>
                     <option value="today">Hari Ini (24 Jam)</option>
@@ -277,7 +284,7 @@
             <tr>
                 <td class="py-1">KLASTER</td>
                 <td class="text-center">:</td>
-                <td class="font-bold uppercase">LOGISTIK</td>
+                <td class="font-bold uppercase" id="print-klaster-rekap">LOGISTIK</td>
             </tr>
         </table>
         
@@ -368,6 +375,10 @@
                 document.getElementById('filter-waktu').addEventListener('change', () => {
                     window.renderLogistikData();
                 });
+                
+                document.getElementById('filter-klaster').addEventListener('change', () => {
+                    window.renderLogistikData();
+                });
 
                 window.renderLogistikData = function() {
                     const filter = document.getElementById('filter-waktu').value;
@@ -418,15 +429,41 @@
                         
                         window.logistikData[id] = data;
                         window.logistikData[id].timeStr = timeStr;
+                        window.logistikData[id].filteredKebutuhan = {};
 
                         let rincianHtml = '<ul class="space-y-1">';
+                        let hasMatchingItems = false;
+                        
+                        const klasterFilter = document.getElementById('filter-klaster') ? document.getElementById('filter-klaster').value : 'all';
+
                         for (const [item, qty] of Object.entries(data.kebutuhan || {})) {
-                            rincianHtml += `<li class="flex items-center"><i data-lucide="chevron-right" class="w-3 h-3 text-slate-500 mr-1 shrink-0"></i> <span class="font-bold text-white">${qty}</span> <span class="ml-1 text-slate-400">${item}</span></li>`;
+                            let realItem = item;
+                            let klaster = "Logistik Umum";
                             
-                            if (!recapStats[item]) recapStats[item] = 0;
-                            recapStats[item] += qty;
+                            const klasterMatch = item.match(/^\[(.*?)\]\s*(.*)$/);
+                            if (klasterMatch) {
+                                klaster = klasterMatch[1];
+                                realItem = klasterMatch[2];
+                            } else {
+                                const lowerItem = item.toLowerCase();
+                                if (lowerItem.includes('beras') || lowerItem.includes('susu') || lowerItem.includes('minyak') || lowerItem.includes('mie') || lowerItem.includes('makanan') || lowerItem.includes('air') || lowerItem.includes('kopi') || lowerItem.includes('gula') || lowerItem.includes('telur') || lowerItem.includes('sarden') || lowerItem.includes('biskuit')) klaster = "Pangan & Air";
+                                else if (lowerItem.includes('tikar') || lowerItem.includes('tenda') || lowerItem.includes('spon') || lowerItem.includes('terpal') || lowerItem.includes('selimut') || lowerItem.includes('pakaian') || lowerItem.includes('sabun') || lowerItem.includes('popok') || lowerItem.includes('pembalut') || lowerItem.includes('sikat')) klaster = "Hunian (Shelter)";
+                                else if (lowerItem.includes('obat') || lowerItem.includes('p3k') || lowerItem.includes('masker') || lowerItem.includes('sanitizer') || lowerItem.includes('disinfektan')) klaster = "Medis & Sanitasi";
+                            }
+
+                            if (klasterFilter === 'all' || klasterFilter === klaster) {
+                                hasMatchingItems = true;
+                                rincianHtml += `<li class="flex items-center"><i data-lucide="chevron-right" class="w-3 h-3 text-slate-500 mr-1 shrink-0"></i> <span class="font-bold text-white">${qty}</span> <span class="ml-1 text-slate-400">${realItem}</span></li>`;
+                                
+                                window.logistikData[id].filteredKebutuhan[realItem] = qty;
+                                
+                                if (!recapStats[realItem]) recapStats[realItem] = 0;
+                                recapStats[realItem] += qty;
+                            }
                         }
                         rincianHtml += '</ul>';
+                        
+                        if (!hasMatchingItems) return;
 
                         html += `
                         <tr class="hover:bg-slate-800/50 transition-colors">
@@ -530,7 +567,7 @@
             let html = '';
             let no = 1;
             
-            for (const [item, qty] of Object.entries(data.kebutuhan || {})) {
+            for (const [item, qty] of Object.entries(data.filteredKebutuhan || {})) {
                 let namaBarang = item;
                 let satuan = '-';
                 if (item.includes('(') && item.includes(')')) {
@@ -561,11 +598,14 @@
             document.getElementById('print-area-rekap').classList.remove('print:hidden', 'hidden');
             document.getElementById('print-area-rekap').classList.add('print:block');
 
-            const sel = document.getElementById('filter-waktu');
-            document.getElementById('print-periode-rekap').innerText = sel.options[sel.selectedIndex].text;
+            const selWaktu = document.getElementById('filter-waktu');
+            const selKlaster = document.getElementById('filter-klaster');
+            
+            document.getElementById('print-periode-rekap').innerText = selWaktu.options[selWaktu.selectedIndex].text;
+            document.getElementById('print-klaster-rekap').innerText = selKlaster.value === 'all' ? 'SEMUA KLASTER LOGISTIK' : selKlaster.options[selKlaster.selectedIndex].text.toUpperCase();
+            
             document.getElementById('print-date-ttd-rekap').innerText = new Date().toLocaleDateString('id-ID', {day: 'numeric', month: 'long', year: 'numeric'});
             document.getElementById('print-pelapor-rekap').innerText = auth.currentUser ? auth.currentUser.email : "Admin Logistik";
-            document.getElementById('print-date-ttd-rekap').innerText = new Date().toLocaleDateString('id-ID', {day: 'numeric', month: 'long', year: 'numeric'});
             
             document.getElementById('print-tbody-rekap').innerHTML = window.lastPrintRekapHtml || '';
             
