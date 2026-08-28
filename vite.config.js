@@ -54,7 +54,8 @@ export default defineConfig({
         profil: resolve(__dirname, 'profil.html'),
         riwayat: resolve(__dirname, 'riwayat.html'),
         adminLogistik: resolve(__dirname, 'admin-logistik.html'),
-        adminPengungsi: resolve(__dirname, 'admin-pengungsi.html')
+        adminPengungsi: resolve(__dirname, 'admin-pengungsi.html'),
+        adminRelawan: resolve(__dirname, 'admin-relawan.html')
       }
     }
   }
