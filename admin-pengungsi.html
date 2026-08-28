@@ -83,22 +83,34 @@
     <main class="flex-1 flex flex-col h-full relative p-6">
         
         <!-- Header -->
-        <header class="flex justify-between items-center mb-6">
+        <header class="flex justify-between items-center mb-6 print:hidden">
             <div>
                 <h2 class="text-2xl font-bold text-white tracking-wide">Data Pengungsi Terdaftar</h2>
                 <p class="text-sm text-slate-400 mt-1">Rekapan anggota jiwa dari berbagai posko.</p>
             </div>
             <div class="flex gap-3">
-                <button onclick="window.print()" class="px-4 py-2 border border-slate-600 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800 font-medium flex items-center text-sm transition-colors cursor-pointer shadow-sm glass-dark">
+                <select id="filter-posko" class="px-4 py-2 border border-slate-600 rounded-lg text-slate-300 bg-slate-800 focus:outline-none focus:border-trust-500 text-sm cursor-pointer glass-dark appearance-none pr-8">
+                    <option value="all">Semua Posko (Rekap Keseluruhan)</option>
+                    <!-- Options populated by JS -->
+                </select>
+                <button onclick="document.getElementById('print-date').innerText = new Date().toLocaleDateString('id-ID', {day: 'numeric', month: 'long', year: 'numeric'}); window.print()" class="px-4 py-2 border border-slate-600 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800 font-medium flex items-center text-sm transition-colors cursor-pointer shadow-sm glass-dark">
                     <i data-lucide="printer" class="w-4 h-4 mr-2"></i> Cetak PDF
                 </button>
             </div>
         </header>
 
+        <!-- KOP SURAT (Khusus Print) -->
+        <div id="print-header" class="hidden print:block mb-8 text-center border-b-4 border-double border-black pb-4">
+            <h1 class="text-2xl font-bold uppercase tracking-widest text-black">Badan Penanggulangan Bencana Daerah</h1>
+            <h2 class="text-xl font-bold uppercase text-black">Posko Utama Relawan Gempa Flores</h2>
+            <p class="text-sm text-black">Jalan Raya Trans Flores, Kabupaten Nagekeo, Nusa Tenggara Timur</p>
+            <p class="text-sm font-semibold mt-2 text-black" id="print-title">Laporan Resmi Data Pengungsi dan Rekapitulasi</p>
+        </div>
+
             <!-- Recap Table Container -->
             <div id="recap-container" class="hidden mb-8">
-                <h3 class="text-xl font-bold text-white mb-4 flex items-center">
-                    <i data-lucide="bar-chart-2" class="w-6 h-6 mr-2 text-trust-400"></i> Rekapitulasi per Posko
+                <h3 class="text-xl font-bold text-white mb-4 flex items-center print:text-black">
+                    <i data-lucide="bar-chart-2" class="w-6 h-6 mr-2 text-trust-400 print:hidden"></i> Rekapitulasi per Posko
                 </h3>
                 <div class="glass-dark border border-slate-700/80 rounded-3xl shadow-2xl overflow-hidden relative">
                     <div class="overflow-x-auto">
@@ -134,8 +146,8 @@
 
             <!-- Data Detail Container -->
             <div id="table-container" class="hidden">
-                <h3 class="text-xl font-bold text-white mb-4 flex items-center">
-                    <i data-lucide="users" class="w-6 h-6 mr-2 text-blue-400"></i> Data Detail Pengungsi
+                <h3 class="text-xl font-bold text-white mb-4 flex items-center print:text-black mt-8">
+                    <i data-lucide="users" class="w-6 h-6 mr-2 text-blue-400 print:hidden"></i> Data Detail Pengungsi
                 </h3>
                 <div class="glass-dark border border-slate-700/80 rounded-3xl shadow-2xl overflow-hidden relative">
                     <div class="overflow-x-auto">
@@ -153,6 +165,15 @@
                             <!-- Rows akan digenerate dari JS -->
                         </tbody>
                     </table>
+                </div>
+            </div>
+
+            <!-- TANDA TANGAN (Khusus Print) -->
+            <div id="print-footer" class="hidden print:flex justify-end mt-16 pr-8">
+                <div class="text-center text-black">
+                    <p class="mb-24">Nagekeo, <span id="print-date"></span></p>
+                    <p class="font-bold underline">Koordinator Posko Utama</p>
+                    <p>NIP. 19800101 200501 1 001</p>
                 </div>
             </div>
         </div>
@@ -195,92 +216,144 @@
                     tableContainer.classList.remove('hidden');
                     recapContainer.classList.remove('hidden');
                     
-                    let html = '';
-                    const poskoStats = {};
-
+                    // Variabel global untuk menampung data
+                    window.pengungsiData = [];
+                    
                     snapshot.forEach(doc => {
-                        const data = doc.data();
-                        
-                        // Perhitungan Rekap Posko
-                        const posko = data.poskoAktif || 'Tidak Diketahui';
-                        if (!poskoStats[posko]) {
-                            poskoStats[posko] = { individu: 0, balita: 0, rentan: 0 };
-                        }
-                        poskoStats[posko].individu++;
-                        if(data.umur <= 5) poskoStats[posko].balita++;
-                        if(data.umur >= 60 || (data.statusRentan && data.statusRentan.length > 0)) poskoStats[posko].rentan++;
-
-                        // Format status rentan
-                        let rentanHtml = '-';
-                        if (data.statusRentan && data.statusRentan.length > 0) {
-                            rentanHtml = data.statusRentan.map(r => `<span class="px-2 py-1 bg-amber-500/20 text-amber-400 border border-amber-500/30 text-[10px] rounded-md font-bold uppercase mr-1">${r}</span>`).join('');
-                        }
-
-                        // Format Gender
-                        const genderIcon = data.gender === 'L' ? '<i data-lucide="user" class="w-4 h-4 text-blue-400 mr-2"></i> Laki-laki' : '<i data-lucide="user" class="w-4 h-4 text-pink-400 mr-2"></i> Perempuan';
-                        
-                        // Format Umur
-                        let colorUmur = 'bg-slate-700 text-slate-300 border border-slate-600';
-                        if(data.umur < 5) colorUmur = 'bg-orange-500/20 text-orange-400 border border-orange-500/30';
-                        if(data.umur >= 60) colorUmur = 'bg-purple-500/20 text-purple-400 border border-purple-500/30';
-
-                        html += `
-                        <tr class="hover:bg-slate-800/50 transition-colors border-b border-slate-700/30">
-                            <td class="px-6 py-4 align-middle">
-                                <p class="font-bold text-white text-base">${data.nama}</p>
-                                <p class="text-xs text-slate-400 mt-0.5">NIK: ${data.nik || '-'}</p>
-                            </td>
-                            <td class="px-6 py-4 align-middle whitespace-nowrap flex items-center h-full pt-6">
-                                ${genderIcon}
-                            </td>
-                            <td class="px-6 py-4 align-middle">
-                                <p class="font-bold text-slate-200">${data.umur} Tahun</p>
-                                <span class="px-2 py-0.5 rounded-md text-[10px] font-bold ${colorUmur} mt-1 inline-block">${data.kategoriUmur}</span>
-                            </td>
-                            <td class="px-6 py-4 align-middle whitespace-nowrap">
-                                ${rentanHtml}
-                            </td>
-                            <td class="px-6 py-4 align-middle">
-                                <span class="font-bold text-trust-400">${posko}</span>
-                            </td>
-                        </tr>
-                        `;
+                        window.pengungsiData.push(doc.data());
                     });
                     
-                    // Render Recap Table
-                    let recapHtml = '';
-                    let totalSemuaIndividu = 0;
-                    let totalSemuaBalita = 0;
-                    let totalSemuaRentan = 0;
-
-                    for (const [poskoName, stats] of Object.entries(poskoStats)) {
-                        totalSemuaIndividu += stats.individu;
-                        totalSemuaBalita += stats.balita;
-                        totalSemuaRentan += stats.rentan;
-
-                        recapHtml += `
-                        <tr class="hover:bg-slate-800/50 transition-colors border-b border-slate-700/30">
-                            <td class="px-6 py-4 align-middle font-bold text-white">${poskoName}</td>
-                            <td class="px-6 py-4 align-middle text-center font-bold text-trust-400">${stats.individu} Jiwa</td>
-                            <td class="px-6 py-4 align-middle text-center text-pink-400 font-medium">${stats.balita}</td>
-                            <td class="px-6 py-4 align-middle text-center text-amber-400 font-medium">${stats.rentan}</td>
-                        </tr>
-                        `;
-                    }
+                    // Render Dropdown Posko
+                    const poskoSet = new Set(window.pengungsiData.map(d => d.poskoAktif || 'Tidak Diketahui'));
+                    const filterSelect = document.getElementById('filter-posko');
+                    // Simpan opsi "Semua Posko"
+                    const defaultOption = '<option value="all">Semua Posko (Rekap Keseluruhan)</option>';
+                    let optionsHtml = defaultOption;
+                    poskoSet.forEach(posko => {
+                        optionsHtml += `<option value="${posko}">${posko}</option>`;
+                    });
                     
-                    // Tambahkan baris Total Keseluruhan di rekap
-                    recapHtml += `
-                        <tr class="bg-slate-800/80 border-t-2 border-slate-600">
-                            <td class="px-6 py-4 align-middle font-black text-white text-right">TOTAL KESELURUHAN:</td>
-                            <td class="px-6 py-4 align-middle text-center font-black text-trust-400">${totalSemuaIndividu} Jiwa</td>
-                            <td class="px-6 py-4 align-middle text-center text-pink-400 font-bold">${totalSemuaBalita}</td>
-                            <td class="px-6 py-4 align-middle text-center text-amber-400 font-bold">${totalSemuaRentan}</td>
-                        </tr>
-                    `;
+                    // Hanya update options jika jumlahnya berubah untuk mencegah reset saat data real-time masuk
+                    if(filterSelect.options.length - 1 !== poskoSet.size) {
+                        const currentValue = filterSelect.value;
+                        filterSelect.innerHTML = optionsHtml;
+                        if(Array.from(filterSelect.options).some(opt => opt.value === currentValue)) {
+                            filterSelect.value = currentValue;
+                        }
+                    }
 
-                    recapTbody.innerHTML = recapHtml;
-                    tbody.innerHTML = html;
-                    lucide.createIcons();
+                    // Fungsi Render Tabel berdasarkan Filter
+                    window.renderData = function() {
+                        const selectedPosko = filterSelect.value;
+                        let html = '';
+                        let recapHtml = '';
+                        const poskoStats = {};
+                        
+                        let totalSemuaIndividu = 0;
+                        let totalSemuaBalita = 0;
+                        let totalSemuaRentan = 0;
+
+                        // Ubah Judul Cetak
+                        document.getElementById('print-title').innerText = selectedPosko === 'all' ? 
+                            'Laporan Resmi Data Pengungsi dan Rekapitulasi' : 
+                            `Laporan Resmi Data Pengungsi - ${selectedPosko}`;
+
+                        // Filter data array
+                        const filteredData = selectedPosko === 'all' 
+                            ? window.pengungsiData 
+                            : window.pengungsiData.filter(d => (d.poskoAktif || 'Tidak Diketahui') === selectedPosko);
+
+                        filteredData.forEach(data => {
+                            const posko = data.poskoAktif || 'Tidak Diketahui';
+                            
+                            // Hitung stat untuk recap (hanya jika mode "all")
+                            if (selectedPosko === 'all') {
+                                if (!poskoStats[posko]) {
+                                    poskoStats[posko] = { individu: 0, balita: 0, rentan: 0 };
+                                }
+                                poskoStats[posko].individu++;
+                                if(data.umur <= 5) poskoStats[posko].balita++;
+                                if(data.umur >= 60 || (data.statusRentan && data.statusRentan.length > 0)) poskoStats[posko].rentan++;
+                            }
+
+                            // Format status rentan
+                            let rentanHtml = '-';
+                            if (data.statusRentan && data.statusRentan.length > 0) {
+                                rentanHtml = data.statusRentan.map(r => `<span class="px-2 py-1 bg-amber-500/20 text-amber-400 border border-amber-500/30 text-[10px] rounded-md font-bold uppercase mr-1">${r}</span>`).join('');
+                            }
+
+                            // Format Gender
+                            const genderIcon = data.gender === 'L' ? '<i data-lucide="user" class="w-4 h-4 text-blue-400 mr-2"></i> Laki-laki' : '<i data-lucide="user" class="w-4 h-4 text-pink-400 mr-2"></i> Perempuan';
+                            
+                            // Format Umur
+                            let colorUmur = 'bg-slate-700 text-slate-300 border border-slate-600';
+                            if(data.umur < 5) colorUmur = 'bg-orange-500/20 text-orange-400 border border-orange-500/30';
+                            if(data.umur >= 60) colorUmur = 'bg-purple-500/20 text-purple-400 border border-purple-500/30';
+
+                            html += `
+                            <tr class="hover:bg-slate-800/50 transition-colors border-b border-slate-700/30">
+                                <td class="px-6 py-4 align-middle">
+                                    <p class="font-bold text-white text-base">${data.nama}</p>
+                                    <p class="text-xs text-slate-400 mt-0.5">NIK: ${data.nik || '-'}</p>
+                                </td>
+                                <td class="px-6 py-4 align-middle whitespace-nowrap flex items-center h-full pt-6">
+                                    ${genderIcon}
+                                </td>
+                                <td class="px-6 py-4 align-middle">
+                                    <p class="font-bold text-slate-200">${data.umur} Tahun</p>
+                                    <span class="px-2 py-0.5 rounded-md text-[10px] font-bold ${colorUmur} mt-1 inline-block">${data.kategoriUmur}</span>
+                                </td>
+                                <td class="px-6 py-4 align-middle whitespace-nowrap">
+                                    ${rentanHtml}
+                                </td>
+                                <td class="px-6 py-4 align-middle">
+                                    <span class="font-bold text-trust-400">${posko}</span>
+                                </td>
+                            </tr>
+                            `;
+                        });
+
+                        // Tampilkan / Sembunyikan Rekap
+                        if (selectedPosko === 'all') {
+                            recapContainer.classList.remove('hidden');
+                            
+                            for (const [poskoName, stats] of Object.entries(poskoStats)) {
+                                totalSemuaIndividu += stats.individu;
+                                totalSemuaBalita += stats.balita;
+                                totalSemuaRentan += stats.rentan;
+
+                                recapHtml += `
+                                <tr class="hover:bg-slate-800/50 transition-colors border-b border-slate-700/30">
+                                    <td class="px-6 py-4 align-middle font-bold text-white">${poskoName}</td>
+                                    <td class="px-6 py-4 align-middle text-center font-bold text-trust-400">${stats.individu} Jiwa</td>
+                                    <td class="px-6 py-4 align-middle text-center text-pink-400 font-medium">${stats.balita}</td>
+                                    <td class="px-6 py-4 align-middle text-center text-amber-400 font-medium">${stats.rentan}</td>
+                                </tr>
+                                `;
+                            }
+                            
+                            recapHtml += `
+                                <tr class="bg-slate-800/80 border-t-2 border-slate-600">
+                                    <td class="px-6 py-4 align-middle font-black text-white text-right">TOTAL KESELURUHAN:</td>
+                                    <td class="px-6 py-4 align-middle text-center font-black text-trust-400">${totalSemuaIndividu} Jiwa</td>
+                                    <td class="px-6 py-4 align-middle text-center text-pink-400 font-bold">${totalSemuaBalita}</td>
+                                    <td class="px-6 py-4 align-middle text-center text-amber-400 font-bold">${totalSemuaRentan}</td>
+                                </tr>
+                            `;
+                            recapTbody.innerHTML = recapHtml;
+                        } else {
+                            recapContainer.classList.add('hidden');
+                        }
+
+                        tbody.innerHTML = html;
+                        lucide.createIcons();
+                    };
+
+                    // Panggil render data pertama kali
+                    window.renderData();
+                    
+                    // Event listener filter
+                    filterSelect.addEventListener('change', window.renderData);
                 }, (error) => {
                     console.error("Error fetching pengungsi:", error);
                     loading.innerHTML = `<p class="text-red-500">Gagal memuat data: ${error.message}</p>`;
