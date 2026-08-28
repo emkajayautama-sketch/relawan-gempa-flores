@@ -31,3 +31,47 @@
   border: 1px solid rgba(51, 65, 85, 1);
 }
 
+@media print {
+  /* Sembunyikan sidebar dan tombol print */
+  aside, button[onclick="window.print()"] {
+    display: none !important;
+  }
+  
+  /* Reset background ke putih agar hemat tinta dan bersih */
+  body, main, div, header, table, tr, th, td {
+    background-color: white !important;
+    background: none !important;
+  }
+  
+  /* Paksa semua teks menjadi hitam agar terbaca saat di-print */
+  * {
+    color: black !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+    border-color: #cbd5e1 !important;
+  }
+  
+  /* Hapus limitasi scroll dan expand ke full page */
+  body, main {
+    height: auto !important;
+    overflow: visible !important;
+  }
+  main {
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+  }
+  .overflow-y-auto, .overflow-x-auto, .overflow-hidden {
+    overflow: visible !important;
+  }
+
+  /* Perbaiki tampilan tabel */
+  table {
+    border-collapse: collapse !important;
+    width: 100% !important;
+  }
+  th, td {
+    border-bottom: 1px solid #94a3b8 !important;
+    padding: 10px !important;
+  }
+}
