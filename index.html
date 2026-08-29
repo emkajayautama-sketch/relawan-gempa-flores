@@ -35,29 +35,24 @@
 </head>
 <body class="bg-slate-200 antialiased overflow-x-hidden selection:bg-trust-500 selection:text-white">
     <!-- Mobile Container Wrapper -->
-    <div class="max-w-md mx-auto min-h-screen relative bg-gradient-to-br from-blue-50 via-slate-50 to-indigo-100 shadow-2xl pb-24 overflow-hidden">
-    <!-- Hero Background Element -->
-    <div class="fixed top-0 left-0 w-full h-80 bg-slate-900 rounded-b-[40px] -z-10 shadow-2xl overflow-hidden">
-        <img src="/hero-bencana.jpg" class="absolute inset-0 w-full h-full object-cover opacity-50" alt="Bencana Alam">
-        <div class="absolute inset-0 bg-gradient-to-b from-slate-900/80 via-trust-900/60 to-slate-900/95"></div>
-    </div>
+    <div class="max-w-md mx-auto min-h-screen relative bg-slate-900 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-indigo-900 via-slate-900 to-black shadow-2xl pb-24 overflow-hidden">
 
     <!-- Header / Navbar -->
-    <header class="absolute top-0 w-full max-w-md glass z-50 transition-all duration-300">
+    <header class="absolute top-0 w-full max-w-md bg-white/5 backdrop-blur-xl border-b border-white/10 z-50 transition-all duration-300">
         <div class="px-6 py-4 flex justify-between items-center">
             <div class="flex items-center space-x-3">
-                <div class="bg-white/20 p-2 rounded-xl backdrop-blur-md border border-white/30">
-                    <i data-lucide="shield-alert" class="text-white w-6 h-6"></i>
+                <div class="bg-trust-500/20 p-2 rounded-xl backdrop-blur-md border border-trust-500/30">
+                    <i data-lucide="shield-alert" class="text-trust-400 w-6 h-6"></i>
                 </div>
                 <div>
                     <h1 class="text-white font-bold text-lg leading-tight tracking-wide">RELAWAN GEMPA</h1>
-                    <p class="text-trust-100 text-xs font-medium flex items-center mt-0.5">
-                        <span class="w-2 h-2 rounded-full bg-green-400 mr-1.5 animate-pulse"></span> Tersinkronisasi
+                    <p class="text-trust-300 text-xs font-medium flex items-center mt-0.5">
+                        <span class="w-2 h-2 rounded-full bg-green-400 mr-1.5 animate-pulse shadow-[0_0_8px_rgba(74,222,128,0.8)]"></span> Tersinkronisasi
                     </p>
                 </div>
             </div>
             
-            <button class="w-10 h-10 rounded-full border-2 border-white/40 overflow-hidden shadow-sm hover:scale-105 transition-transform bg-white/20">
+            <button class="w-10 h-10 rounded-full border-2 border-white/20 overflow-hidden shadow-lg hover:scale-105 transition-transform bg-white/10">
                 <img id="user-avatar" src="https://api.dicebear.com/7.x/initials/svg?seed=Relawan" alt="Profile" class="w-full h-full object-cover">
             </button>
         </div>
@@ -67,96 +62,96 @@
     <main class="pt-28 px-6">
         <!-- Greeting Section -->
         <div class="mb-8 animate-fade-in-up relative z-10 text-center flex flex-col items-center">
-            <img src="/hero-bencana.jpg" alt="Bencana Gempa Flores" class="w-full h-40 object-cover rounded-2xl shadow-xl shadow-black/20 border-2 border-white/30 mb-3">
-            <p class="text-white text-sm drop-shadow-md font-medium tracking-wide">Tetap aman dan semangat bertugas di lapangan.</p>
+            <img src="/hero-bencana.jpg" alt="Bencana Gempa Flores" class="w-full h-40 object-cover rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.5)] border border-white/20 mb-4">
+            <p class="text-slate-300 text-sm font-medium tracking-wide">Tetap aman dan semangat bertugas di lapangan.</p>
         </div>
 
         <!-- Quick Stats Card -->
-        <div class="bg-gradient-to-br from-white to-blue-50 rounded-3xl p-5 shadow-xl shadow-trust-900/10 mb-8 border border-blue-100/50 relative overflow-hidden transform hover:-translate-y-1 transition-all duration-300">
-            <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-trust-100 to-transparent rounded-bl-full opacity-50"></div>
+        <div class="bg-white/10 backdrop-blur-xl rounded-3xl p-5 shadow-2xl mb-8 border border-white/10 relative overflow-hidden transform hover:-translate-y-1 transition-all duration-300">
+            <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-trust-500/20 to-transparent rounded-bl-full opacity-50"></div>
             <div class="flex items-center justify-between relative z-10">
                 <div>
-                    <p class="text-slate-500 text-xs font-semibold uppercase tracking-wider mb-1">Posko Aktif Anda</p>
-                    <h3 id="posko-name" class="text-2xl font-bold text-slate-800 cursor-pointer hover:text-trust-600 transition-colors" title="Klik untuk mengubah Posko">Posko Nagekeo</h3>
-                    <div class="text-slate-500 text-sm mt-1 flex items-center hover:text-trust-600 transition-colors">
-                        <i data-lucide="map-pin" class="w-4 h-4 mr-1"></i> 
-                        <select id="kecamatan-select" class="bg-transparent outline-none cursor-pointer text-slate-500 hover:text-trust-600 font-medium appearance-none">
-                            <option value="aesesa">Kecamatan Aesesa</option>
-                            <option value="aesesa_selatan">Kec. Aesesa Selatan</option>
-                            <option value="boawae">Kecamatan Boawae</option>
-                            <option value="keo_tengah">Kec. Keo Tengah</option>
-                            <option value="mauponggo">Kecamatan Mauponggo</option>
-                            <option value="nangaroro">Kecamatan Nangaroro</option>
-                            <option value="wolowae">Kecamatan Wolowae</option>
+                    <p class="text-slate-400 text-xs font-semibold uppercase tracking-wider mb-1">Posko Aktif Anda</p>
+                    <h3 id="posko-name" class="text-2xl font-bold text-white cursor-pointer hover:text-trust-400 transition-colors" title="Klik untuk mengubah Posko">Posko Nagekeo</h3>
+                    <div class="text-slate-400 text-sm mt-1 flex items-center hover:text-trust-400 transition-colors">
+                        <i data-lucide="map-pin" class="w-4 h-4 mr-1 text-trust-400"></i> 
+                        <select id="kecamatan-select" class="bg-transparent outline-none cursor-pointer text-slate-400 hover:text-white font-medium appearance-none">
+                            <option value="aesesa" class="bg-slate-800">Kecamatan Aesesa</option>
+                            <option value="aesesa_selatan" class="bg-slate-800">Kec. Aesesa Selatan</option>
+                            <option value="boawae" class="bg-slate-800">Kecamatan Boawae</option>
+                            <option value="keo_tengah" class="bg-slate-800">Kec. Keo Tengah</option>
+                            <option value="mauponggo" class="bg-slate-800">Kecamatan Mauponggo</option>
+                            <option value="nangaroro" class="bg-slate-800">Kecamatan Nangaroro</option>
+                            <option value="wolowae" class="bg-slate-800">Kecamatan Wolowae</option>
                         </select>
                         <i data-lucide="chevron-down" class="w-3 h-3 ml-1 opacity-50"></i>
                     </div>
                 </div>
-                <div class="bg-trust-50 p-3 rounded-2xl">
-                    <i data-lucide="tent" class="w-8 h-8 text-trust-600"></i>
+                <div class="bg-trust-500/20 border border-trust-500/30 p-3 rounded-2xl">
+                    <i data-lucide="tent" class="w-8 h-8 text-trust-400"></i>
                 </div>
             </div>
         </div>
 
         <!-- Action Grid -->
-        <h3 class="text-lg font-bold text-slate-800 mb-4 px-1">Menu Utama</h3>
+        <h3 class="text-lg font-bold text-white mb-4 px-1">Menu Utama</h3>
         <div class="grid gap-4">
             
             <!-- Action 1: Pendataan Pengungsi -->
-            <a href="form-pengungsi.html" class="w-full bg-gradient-to-r from-white to-trust-50/50 rounded-3xl p-5 shadow-lg shadow-trust-900/5 border border-trust-100 flex items-center group hover:bg-trust-50 hover:border-trust-200 transition-all duration-300 transform active:scale-95">
-                <div class="bg-gradient-to-br from-trust-400 to-trust-600 p-4 rounded-2xl shadow-inner shadow-white/20">
+            <a href="form-pengungsi.html" class="w-full bg-white/5 backdrop-blur-md rounded-3xl p-5 shadow-lg border border-white/10 flex items-center group hover:bg-white/10 hover:border-white/20 transition-all duration-300 transform active:scale-95">
+                <div class="bg-gradient-to-br from-trust-500 to-trust-700 p-4 rounded-2xl shadow-inner shadow-white/10 border border-white/10">
                     <i data-lucide="users" class="w-7 h-7 text-white"></i>
                 </div>
                 <div class="ml-4 text-left flex-1">
-                    <h4 class="text-lg font-bold text-slate-800 group-hover:text-trust-700 transition-colors">Data Pengungsi</h4>
-                    <p class="text-xs text-slate-500 mt-0.5">Input data Kepala Keluarga & Anggota</p>
+                    <h4 class="text-lg font-bold text-white group-hover:text-trust-300 transition-colors">Data Pengungsi</h4>
+                    <p class="text-xs text-slate-400 mt-0.5">Input data Kepala Keluarga & Anggota</p>
                 </div>
-                <i data-lucide="chevron-right" class="w-5 h-5 text-slate-300 group-hover:text-trust-500 transition-colors"></i>
+                <i data-lucide="chevron-right" class="w-5 h-5 text-slate-500 group-hover:text-white transition-colors"></i>
             </a>
 
             <!-- Action 2: Lapor Logistik -->
-            <a href="form-logistik.html" class="w-full bg-gradient-to-r from-white to-alert-50/50 rounded-3xl p-5 shadow-lg shadow-alert-900/5 border border-alert-100 flex items-center group hover:bg-orange-50 hover:border-orange-200 transition-all duration-300 transform active:scale-95">
-                <div class="bg-gradient-to-br from-alert-500 to-alert-600 p-4 rounded-2xl shadow-inner shadow-white/20">
+            <a href="form-logistik.html" class="w-full bg-white/5 backdrop-blur-md rounded-3xl p-5 shadow-lg border border-white/10 flex items-center group hover:bg-white/10 hover:border-white/20 transition-all duration-300 transform active:scale-95">
+                <div class="bg-gradient-to-br from-alert-500 to-orange-700 p-4 rounded-2xl shadow-inner shadow-white/10 border border-white/10">
                     <i data-lucide="package-open" class="w-7 h-7 text-white"></i>
                 </div>
                 <div class="ml-4 text-left flex-1">
-                    <h4 class="text-lg font-bold text-slate-800 group-hover:text-alert-600 transition-colors">Lapor Logistik</h4>
-                    <p class="text-xs text-slate-500 mt-0.5">Update kebutuhan pangan, hunian, medis</p>
+                    <h4 class="text-lg font-bold text-white group-hover:text-alert-400 transition-colors">Lapor Logistik</h4>
+                    <p class="text-xs text-slate-400 mt-0.5">Update kebutuhan pangan, hunian, medis</p>
                 </div>
-                <i data-lucide="chevron-right" class="w-5 h-5 text-slate-300 group-hover:text-alert-500 transition-colors"></i>
+                <i data-lucide="chevron-right" class="w-5 h-5 text-slate-500 group-hover:text-white transition-colors"></i>
             </a>
 
             <!-- Action 3: Dokumentasi -->
-            <a href="form-foto.html" class="w-full bg-gradient-to-r from-white to-slate-100/50 rounded-3xl p-5 shadow-lg shadow-slate-900/5 border border-slate-200/50 flex items-center group hover:bg-slate-100 hover:border-slate-300 transition-all duration-300 transform active:scale-95">
-                <div class="bg-gradient-to-br from-slate-600 to-slate-800 p-4 rounded-2xl shadow-inner shadow-white/20">
+            <a href="form-foto.html" class="w-full bg-white/5 backdrop-blur-md rounded-3xl p-5 shadow-lg border border-white/10 flex items-center group hover:bg-white/10 hover:border-white/20 transition-all duration-300 transform active:scale-95">
+                <div class="bg-gradient-to-br from-slate-600 to-slate-800 p-4 rounded-2xl shadow-inner shadow-white/10 border border-white/10">
                     <i data-lucide="camera" class="w-7 h-7 text-white"></i>
                 </div>
                 <div class="ml-4 text-left flex-1">
-                    <h4 class="text-lg font-bold text-slate-800 group-hover:text-slate-900 transition-colors">Foto Lapangan</h4>
-                    <p class="text-xs text-slate-500 mt-0.5">Unggah bukti visual kondisi posko</p>
+                    <h4 class="text-lg font-bold text-white group-hover:text-slate-300 transition-colors">Foto Lapangan</h4>
+                    <p class="text-xs text-slate-400 mt-0.5">Unggah bukti visual kondisi posko</p>
                 </div>
-                <i data-lucide="chevron-right" class="w-5 h-5 text-slate-300 group-hover:text-slate-500 transition-colors"></i>
+                <i data-lucide="chevron-right" class="w-5 h-5 text-slate-500 group-hover:text-white transition-colors"></i>
             </a>
 
         </div>
     </main>
 
     <!-- Bottom Navigation Bar (Optional for PWA feel) -->
-    <nav class="absolute bottom-0 w-full max-w-md glass border-t border-slate-200 pb-safe pt-2 px-6">
+    <nav class="absolute bottom-0 w-full max-w-md bg-slate-900/80 backdrop-blur-2xl border-t border-white/10 pb-safe pt-2 px-6">
         <div class="flex justify-around items-center h-16">
-            <a href="index.html" class="flex flex-col items-center justify-center w-full text-trust-600 group cursor-default">
-                <div class="p-1.5 bg-trust-100 rounded-xl group-hover:bg-trust-200 transition-colors">
+            <a href="index.html" class="flex flex-col items-center justify-center w-full text-trust-400 group cursor-default">
+                <div class="p-1.5 bg-trust-500/20 border border-trust-500/30 rounded-xl transition-colors shadow-[0_0_15px_rgba(56,189,248,0.2)]">
                     <i data-lucide="home" class="w-5 h-5"></i>
                 </div>
                 <span class="text-[10px] font-semibold mt-1">Beranda</span>
             </a>
-            <a href="riwayat.html" class="flex flex-col items-center justify-center w-full text-slate-400 hover:text-slate-600 transition-colors">
+            <a href="riwayat.html" class="flex flex-col items-center justify-center w-full text-slate-500 hover:text-white transition-colors">
                 <div class="p-1.5">
                     <i data-lucide="history" class="w-5 h-5"></i>
                 </div>
                 <span class="text-[10px] font-medium mt-1">Riwayat</span>
             </a>
-            <a href="profil.html" class="flex flex-col items-center justify-center w-full text-slate-400 hover:text-slate-600 transition-colors">
+            <a href="profil.html" class="flex flex-col items-center justify-center w-full text-slate-500 hover:text-white transition-colors">
                 <div class="p-1.5">
                     <i data-lucide="user" class="w-5 h-5"></i>
                 </div>
