@@ -52,6 +52,27 @@
             <i data-lucide="edit-3" class="w-5 h-5 text-slate-400"></i>
         </div>
 
+        <!-- Sync Map Info -->
+        <div class="bg-white/5 backdrop-blur-md rounded-3xl p-5 shadow-lg border border-white/10 mb-6 shadow-black/20">
+            <h4 class="text-white font-bold mb-3 flex items-center"><i data-lucide="map-pin" class="w-5 h-5 text-trust-400 mr-2"></i> Sinkronisasi Peta Posko</h4>
+            <p class="text-xs text-slate-400 mb-4">Perbarui lokasi dan status logistik Posko Anda ke Peta Sebaran Pusat.</p>
+            
+            <label class="block text-xs font-medium text-slate-300 mb-2 ml-1">Status Logistik & Medis Saat Ini</label>
+            <div class="relative">
+                <select id="posko-status" class="w-full bg-slate-800/80 border border-slate-700/50 rounded-xl px-4 py-3 text-sm text-white mb-4 focus:outline-none focus:ring-2 focus:ring-trust-500 appearance-none">
+                    <option value="Aman">🔵 Stok Logistik Aman</option>
+                    <option value="Menipis">🟠 Stok Menipis</option>
+                    <option value="Kritis">🔴 Darurat Logistik / Medis</option>
+                </select>
+                <i data-lucide="chevron-down" class="w-4 h-4 text-slate-400 absolute right-4 top-3.5 pointer-events-none"></i>
+            </div>
+            
+            <button id="btn-sync-gps" class="w-full bg-trust-600 hover:bg-trust-500 text-white rounded-xl py-3 font-bold flex justify-center items-center transition-all active:scale-95 shadow-lg shadow-trust-900/50">
+                <i data-lucide="navigation" class="w-4 h-4 mr-2"></i> Kirim Titik Koordinat GPS
+            </button>
+            <p id="gps-status-msg" class="text-center text-xs mt-3 hidden font-medium"></p>
+        </div>
+
         <!-- App Info -->
         <div class="bg-white/5 backdrop-blur-md rounded-3xl p-5 shadow-lg border border-white/10 mb-8 flex flex-col items-center text-center shadow-black/20">
             <div class="w-12 h-12 bg-slate-800 rounded-2xl flex items-center justify-center mb-3 border border-white/10">
@@ -100,7 +121,7 @@
     <script type="module">
         import { auth, db } from './src/firebase.js';
         import { onAuthStateChanged, signOut } from 'firebase/auth';
-        import { collection, query, where, getDocs } from 'firebase/firestore';
+        import { collection, query, where, getDocs, doc, setDoc } from 'firebase/firestore';
 
         lucide.createIcons();
 
@@ -111,6 +132,9 @@
         // Load Posko
         const savedPosko = localStorage.getItem('poskoName') || 'Posko Nagekeo';
         poskoNameEl.innerText = savedPosko;
+
+        let currentUserKecamatan = 'pusat';
+        let currentUserEmail = '';
 
         // Auth Guard & Info
         onAuthStateChanged(auth, async (user) => {
@@ -124,14 +148,19 @@
                     const roleEl = document.getElementById('user-role');
                     if (!snap.empty) {
                         const data = snap.docs[0].data();
+                        currentUserKecamatan = data.kecamatan;
+                        currentUserEmail = user.email;
+                        
                         roleEl.innerText = `Relawan Lapangan - Kec. ${data.kecamatan.replace('_', ' ')}`;
                         roleEl.classList.add('bg-trust-500/20', 'text-trust-300', 'border-trust-500/30');
                         roleEl.classList.remove('bg-white/10', 'text-slate-300', 'border-white/20');
                     } else if (user.email.includes("admin")) {
+                        currentUserEmail = user.email;
                         roleEl.innerText = "Administrator";
                         roleEl.classList.add('bg-purple-500/20', 'text-purple-300', 'border-purple-500/30');
                         roleEl.classList.remove('bg-white/10', 'text-slate-300', 'border-white/20');
                     } else {
+                        currentUserEmail = user.email;
                         roleEl.innerText = "Belum Terdaftar di Kecamatan";
                         roleEl.classList.add('bg-red-500/20', 'text-red-300', 'border-red-500/30');
                         roleEl.classList.remove('bg-white/10', 'text-slate-300', 'border-white/20');
@@ -151,6 +180,86 @@
                 localStorage.setItem('poskoName', newName);
                 poskoNameEl.innerText = newName;
             }
+        });
+
+        // Sync GPS Posko
+        const btnSyncGps = document.getElementById('btn-sync-gps');
+        const gpsStatusMsg = document.getElementById('gps-status-msg');
+
+        btnSyncGps.addEventListener('click', () => {
+            if (!navigator.geolocation) {
+                alert("Browser Anda tidak mendukung fitur GPS/Lokasi.");
+                return;
+            }
+
+            btnSyncGps.innerHTML = '<span class="animate-spin mr-2">⏳</span> Mendapatkan Lokasi...';
+            btnSyncGps.disabled = true;
+            btnSyncGps.classList.add('opacity-75', 'cursor-not-allowed');
+            gpsStatusMsg.classList.add('hidden');
+
+            navigator.geolocation.getCurrentPosition(
+                async (position) => {
+                    const lat = position.coords.latitude;
+                    const lng = position.coords.longitude;
+                    const statusVal = document.getElementById('posko-status').value;
+                    const currentPoskoName = poskoNameEl.innerText;
+                    
+                    // ID dokumen berdasarkan nama posko yang di-sanitize
+                    const docId = currentPoskoName.replace(/[^a-zA-Z0-9]/g, '_').toLowerCase();
+
+                    try {
+                        await setDoc(doc(db, "posko", docId), {
+                            nama: currentPoskoName,
+                            kecamatan: currentUserKecamatan,
+                            relawan: currentUserEmail,
+                            status: statusVal,
+                            lat: lat,
+                            lng: lng,
+                            lastUpdate: new Date()
+                        });
+
+                        btnSyncGps.innerHTML = '<i data-lucide="check-circle" class="w-4 h-4 mr-2"></i> Berhasil Terkirim!';
+                        btnSyncGps.classList.replace('bg-trust-600', 'bg-green-600');
+                        btnSyncGps.classList.replace('hover:bg-trust-500', 'hover:bg-green-500');
+                        
+                        gpsStatusMsg.innerText = "Lokasi dan Status berhasil diperbarui di Peta Pusat.";
+                        gpsStatusMsg.classList.remove('hidden', 'text-red-400');
+                        gpsStatusMsg.classList.add('text-green-400');
+
+                    } catch (error) {
+                        console.error("Error sinkronisasi GPS:", error);
+                        gpsStatusMsg.innerText = "Gagal menyimpan ke server.";
+                        gpsStatusMsg.classList.remove('hidden', 'text-green-400');
+                        gpsStatusMsg.classList.add('text-red-400');
+                        
+                        btnSyncGps.innerHTML = '<i data-lucide="navigation" class="w-4 h-4 mr-2"></i> Kirim Titik Koordinat GPS';
+                    } finally {
+                        btnSyncGps.disabled = false;
+                        btnSyncGps.classList.remove('opacity-75', 'cursor-not-allowed');
+                        lucide.createIcons();
+                        
+                        // Kembalikan tombol ke semula setelah 3 detik
+                        setTimeout(() => {
+                            btnSyncGps.innerHTML = '<i data-lucide="navigation" class="w-4 h-4 mr-2"></i> Kirim Titik Koordinat GPS';
+                            btnSyncGps.classList.replace('bg-green-600', 'bg-trust-600');
+                            btnSyncGps.classList.replace('hover:bg-green-500', 'hover:bg-trust-500');
+                            lucide.createIcons();
+                        }, 4000);
+                    }
+                },
+                (error) => {
+                    console.error("Error GPS:", error);
+                    let msg = "Gagal mendapatkan lokasi.";
+                    if (error.code === 1) msg = "Izin akses lokasi/GPS ditolak. Mohon izinkan akses GPS di pengaturan browser/HP Anda.";
+                    
+                    alert(msg);
+                    btnSyncGps.innerHTML = '<i data-lucide="navigation" class="w-4 h-4 mr-2"></i> Kirim Titik Koordinat GPS';
+                    btnSyncGps.disabled = false;
+                    btnSyncGps.classList.remove('opacity-75', 'cursor-not-allowed');
+                    lucide.createIcons();
+                },
+                { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+            );
         });
 
         // Logout
