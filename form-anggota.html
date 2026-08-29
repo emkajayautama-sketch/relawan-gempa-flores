@@ -271,7 +271,8 @@
                         umur: umur,
                         kategoriUmur: badgeUmur.innerText,
                         statusRentan: statusRentan,
-                        createdAt: new Date()
+                        createdAt: new Date(),
+                        kecamatan: localStorage.getItem('kecamatan') || "aesesa"
                     });
 
                     // Update counter diurus oleh onSnapshot di atas

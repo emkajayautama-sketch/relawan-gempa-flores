@@ -320,7 +320,8 @@
                         
                         document.getElementById('stat-kk').innerHTML = `${totalKkCount}<span class="text-lg text-slate-500 font-normal ml-2">KK</span>`;
 
-                        unsubAnggota = onSnapshot(collection(db, "anggota"), (angSnap) => {
+                        let qAnggota = kecaVal === 'pusat' ? query(collection(db, "anggota")) : query(collection(db, "anggota"), where("kecamatan", "==", kecaVal));
+                        unsubAnggota = onSnapshot(qAnggota, (angSnap) => {
                             let totalPengungsi = 0;
                             let totalRentan = 0;
                             

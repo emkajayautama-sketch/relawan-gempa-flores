@@ -302,7 +302,8 @@
                         }
                     });
 
-                    unsubAnggota = onSnapshot(collection(db, "anggota"), (snapshot) => {
+                    let qAnggota = kecaVal === 'pusat' ? query(collection(db, "anggota")) : query(collection(db, "anggota"), where("kecamatan", "==", kecaVal));
+                    unsubAnggota = onSnapshot(qAnggota, (snapshot) => {
                         loading.classList.add('hidden');
                         
                         // Variabel global untuk menampung data
