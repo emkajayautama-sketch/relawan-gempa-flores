@@ -75,16 +75,7 @@
                     <h3 id="posko-name" class="text-2xl font-bold text-white cursor-pointer hover:text-trust-400 transition-colors" title="Klik untuk mengubah Posko">Posko Nagekeo</h3>
                     <div class="text-slate-400 text-sm mt-1 flex items-center hover:text-trust-400 transition-colors">
                         <i data-lucide="map-pin" class="w-4 h-4 mr-1 text-trust-400"></i> 
-                        <select id="kecamatan-select" class="bg-transparent outline-none cursor-pointer text-slate-400 hover:text-white font-medium appearance-none">
-                            <option value="aesesa" class="bg-slate-800">Kecamatan Aesesa</option>
-                            <option value="aesesa_selatan" class="bg-slate-800">Kec. Aesesa Selatan</option>
-                            <option value="boawae" class="bg-slate-800">Kecamatan Boawae</option>
-                            <option value="keo_tengah" class="bg-slate-800">Kec. Keo Tengah</option>
-                            <option value="mauponggo" class="bg-slate-800">Kecamatan Mauponggo</option>
-                            <option value="nangaroro" class="bg-slate-800">Kecamatan Nangaroro</option>
-                            <option value="wolowae" class="bg-slate-800">Kecamatan Wolowae</option>
-                        </select>
-                        <i data-lucide="chevron-down" class="w-3 h-3 ml-1 opacity-50"></i>
+                        <span id="kecamatan-display" class="font-medium capitalize">Kec. Aesesa</span>
                     </div>
                 </div>
                 <div class="bg-white/10 border border-white/20 p-3 rounded-2xl">
@@ -175,8 +166,9 @@
 
     <!-- Initialize Icons -->
     <script type="module">
-        import { auth } from './src/firebase.js';
+        import { auth, db } from './src/firebase.js';
         import { onAuthStateChanged, signOut } from 'firebase/auth';
+        import { collection, query, where, getDocs } from 'firebase/firestore';
 
         lucide.createIcons();
         
@@ -184,17 +176,33 @@
         const poskoNameEl = document.getElementById('posko-name');
         const poskoDistrictEl = document.getElementById('posko-district');
 
-        // Load from Local Storage or default
         const savedPosko = localStorage.getItem('poskoName') || 'Posko Nagekeo';
-        const savedKecamatan = localStorage.getItem('kecamatan') || 'aesesa';
-        
         poskoNameEl.innerText = savedPosko;
         
-        const kecamatanSelect = document.getElementById('kecamatan-select');
-        kecamatanSelect.value = savedKecamatan;
+        const kecamatanDisplay = document.getElementById('kecamatan-display');
+        let currentKec = localStorage.getItem('kecamatan') || 'Belum Ditetapkan';
+        kecamatanDisplay.innerText = currentKec === 'Belum Ditetapkan' ? currentKec : `Kec. ${currentKec.replace('_', ' ')}`;
 
-        kecamatanSelect.addEventListener('change', (e) => {
-            localStorage.setItem('kecamatan', e.target.value);
+        // Verify with Firestore
+        onAuthStateChanged(auth, async (user) => {
+            if (user && user.email) {
+                try {
+                    const q = query(collection(db, "relawan"), where("email", "==", user.email.toLowerCase()));
+                    const snap = await getDocs(q);
+                    if (!snap.empty) {
+                        const data = snap.docs[0].data();
+                        if (data.kecamatan) {
+                            localStorage.setItem('kecamatan', data.kecamatan);
+                            kecamatanDisplay.innerText = `Kec. ${data.kecamatan.replace('_', ' ')}`;
+                        }
+                    } else if (!user.email.includes("admin")) {
+                        // Jika tidak ketemu dan bukan admin, biarkan default atau kasih alert
+                        kecamatanDisplay.innerText = "Belum terdaftar di Tim Relawan";
+                    }
+                } catch (e) {
+                    console.error("Gagal verifikasi kecamatan", e);
+                }
+            }
         });
 
         poskoNameEl.addEventListener('click', () => {
