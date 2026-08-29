@@ -90,6 +90,18 @@
                 <h2 class="text-2xl font-bold text-white tracking-wide">Tim Relawan & Pengaturan</h2>
                 <p class="text-sm text-slate-400 mt-1">Kelola data anggota relawan dan konfigurasi sistem.</p>
             </div>
+            <div id="kecamatan-selector" class="hidden">
+                <select id="filter-kecamatan" class="px-4 py-2 border border-slate-600 rounded-lg text-slate-300 bg-slate-800 focus:outline-none focus:border-trust-500 text-sm cursor-pointer glass-dark appearance-none pr-8">
+                    <option value="pusat">Pusat (Kabupaten)</option>
+                    <option value="aesesa">Kecamatan Aesesa</option>
+                    <option value="aesesa_selatan">Kecamatan Aesesa Selatan</option>
+                    <option value="boawae">Kecamatan Boawae</option>
+                    <option value="keo_tengah">Kecamatan Keo Tengah</option>
+                    <option value="mauponggo">Kecamatan Mauponggo</option>
+                    <option value="nangaroro">Kecamatan Nangaroro</option>
+                    <option value="wolowae">Kecamatan Wolowae</option>
+                </select>
+            </div>
         </header>
 
         <!-- Content Scrollable -->
@@ -215,7 +227,7 @@
 
     <script type="module">
         import { db, auth, storage } from './src/firebase.js';
-        import { collection, onSnapshot, query, orderBy, addDoc, deleteDoc, doc, setDoc, getDoc } from 'firebase/firestore';
+        import { collection, onSnapshot, query, orderBy, where, addDoc, deleteDoc, doc, setDoc, getDoc } from 'firebase/firestore';
         import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
         import { onAuthStateChanged } from 'firebase/auth';
 
@@ -257,24 +269,72 @@
             }
         };
 
+        let currentKecamatan = 'pusat';
+        let unsubscribeRelawan = null;
+
         onAuthStateChanged(auth, async (user) => {
             if (user && user.email.includes('admin')) {
-                // 1. Load Data Relawan
-                const q = query(collection(db, "relawan"), orderBy("nama", "asc"));
-                onSnapshot(q, (snapshot) => {
-                    loading.classList.add('hidden');
-                    if (snapshot.empty) {
-                        emptyState.classList.remove('hidden');
-                        tableContainer.classList.add('hidden');
-                        return;
-                    }
+                
+                const emailPrefix = user.email.split('@')[0];
+                const kecamatanSelector = document.getElementById('kecamatan-selector');
+                const selectKecamatan = document.getElementById('filter-kecamatan');
+                
+                if (emailPrefix === 'admin' || emailPrefix === 'admin_pusat') {
+                    kecamatanSelector.classList.remove('hidden');
+                } else if (emailPrefix.startsWith('admin_')) {
+                    currentKecamatan = emailPrefix.replace('admin_', '');
+                    const opt = Array.from(selectKecamatan.options).find(o => o.value === currentKecamatan);
+                    if (opt) selectKecamatan.value = currentKecamatan;
+                }
 
-                    emptyState.classList.add('hidden');
-                    tableContainer.classList.remove('hidden');
+                const loadDataByKecamatan = async () => {
+                    const kecaVal = (emailPrefix === 'admin' || emailPrefix === 'admin_pusat') ? selectKecamatan.value : currentKecamatan;
+                    currentKecamatan = kecaVal;
+                    const docIdKop = kecaVal === 'pusat' ? 'kopsurat' : `kopsurat_${kecaVal}`;
                     
-                    let html = '';
-                    snapshot.forEach(docSnap => {
-                        const data = docSnap.data();
+                    document.getElementById('form-kop').reset();
+                    document.getElementById('logo-preview').innerHTML = '<i data-lucide="image" class="w-6 h-6 text-slate-500"></i>';
+
+                    // 1. Load Data Relawan
+                    if (unsubscribeRelawan) unsubscribeRelawan();
+                    
+                    let q;
+                    if (kecaVal === 'pusat') {
+                        // Khusus pusat sementara ambil semua relawan agar data lama tidak hilang, lalu disort lokal
+                        q = query(collection(db, "relawan"));
+                    } else {
+                        q = query(collection(db, "relawan"), where("kecamatan", "==", kecaVal));
+                    }
+                    
+                    unsubscribeRelawan = onSnapshot(q, (snapshot) => {
+                        loading.classList.add('hidden');
+                        if (snapshot.empty) {
+                            emptyState.classList.remove('hidden');
+                            tableContainer.classList.add('hidden');
+                            return;
+                        }
+
+                        emptyState.classList.add('hidden');
+                        tableContainer.classList.remove('hidden');
+                        
+                        let html = '';
+                        const dataArray = [];
+                        snapshot.forEach(docSnap => {
+                            dataArray.push({ id: docSnap.id, ...docSnap.data() });
+                        });
+                        
+                        // Khusus filter pusat, kita hide yang memiliki label kecamatan spesifik kecuali kita mau tampilkan semua
+                        const filteredData = kecaVal === 'pusat' ? dataArray.filter(d => !d.kecamatan || d.kecamatan === 'pusat') : dataArray;
+                        
+                        if (filteredData.length === 0) {
+                            emptyState.classList.remove('hidden');
+                            tableContainer.classList.add('hidden');
+                            return;
+                        }
+
+                        filteredData.sort((a, b) => a.nama.localeCompare(b.nama));
+                        
+                        filteredData.forEach(data => {
                         html += `
                         <tr class="hover:bg-slate-800/50 transition-colors border-b border-slate-700/50">
                             <td class="px-6 py-4 align-middle">
@@ -287,7 +347,7 @@
                                 ${data.alamat}
                             </td>
                             <td class="px-6 py-4 align-middle text-center">
-                                <button onclick="deleteRelawan('${docSnap.id}')" class="p-2 text-slate-500 hover:text-red-400 hover:bg-slate-800 rounded-lg transition-colors">
+                                <button onclick="deleteRelawan('${data.id}')" class="p-2 text-slate-500 hover:text-red-400 hover:bg-slate-800 rounded-lg transition-colors">
                                     <i data-lucide="trash-2" class="w-4 h-4"></i>
                                 </button>
                             </td>
@@ -300,7 +360,11 @@
                 });
 
                 // 2. Add Relawan Form Submit
-                document.getElementById('form-relawan').addEventListener('submit', async (e) => {
+                const formRelawan = document.getElementById('form-relawan');
+                const newFormRelawan = formRelawan.cloneNode(true);
+                formRelawan.parentNode.replaceChild(newFormRelawan, formRelawan);
+                
+                newFormRelawan.addEventListener('submit', async (e) => {
                     e.preventDefault();
                     const btn = document.getElementById('btn-save-relawan');
                     btn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 mr-2 animate-spin"></i> Menyimpan...';
@@ -311,6 +375,7 @@
                             nama: document.getElementById('r-nama').value,
                             jabatan: document.getElementById('r-jabatan').value,
                             alamat: document.getElementById('r-alamat').value,
+                            kecamatan: currentKecamatan,
                             createdAt: new Date()
                         });
                         closeModal();
@@ -325,7 +390,7 @@
 
                 // 3. Load Pengaturan Kop Surat
                 try {
-                    const docSnap = await getDoc(doc(db, "pengaturan", "kopsurat"));
+                    const docSnap = await getDoc(doc(db, "pengaturan", docIdKop));
                     if (docSnap.exists()) {
                         const data = docSnap.data();
                         if (data.nama1) document.getElementById('kop-nama1').value = data.nama1;
@@ -340,7 +405,11 @@
                 }
 
                 // 4. Save Pengaturan Kop Surat
-                document.getElementById('form-kop').addEventListener('submit', async (e) => {
+                const formKop = document.getElementById('form-kop');
+                const newFormKop = formKop.cloneNode(true);
+                formKop.parentNode.replaceChild(newFormKop, formKop);
+                
+                newFormKop.addEventListener('submit', async (e) => {
                     e.preventDefault();
                     const btn = document.getElementById('btn-save-kop');
                     const fileInput = document.getElementById('logo-file');
@@ -371,7 +440,7 @@
                             if (img) logoUrl = img.src;
                         }
 
-                        await setDoc(doc(db, "pengaturan", "kopsurat"), {
+                        await setDoc(doc(db, "pengaturan", docIdKop), {
                             nama1: document.getElementById('kop-nama1').value,
                             nama2: document.getElementById('kop-nama2').value,
                             alamat: document.getElementById('kop-alamat').value,
@@ -383,7 +452,7 @@
                             document.getElementById('logo-preview').innerHTML = `<img src="${logoUrl}" class="w-full h-full object-contain">`;
                         }
                         
-                        alert("Pengaturan Kop Surat berhasil disimpan!");
+                        alert(`Pengaturan Kop Surat untuk wilayah ${currentKecamatan.toUpperCase()} berhasil disimpan!`);
                     } catch(err) {
                         alert("Gagal menyimpan pengaturan: " + err.message);
                     } finally {
@@ -391,6 +460,16 @@
                         btn.disabled = false;
                         lucide.createIcons();
                     }
+                });
+                
+                }; // End loadDataByKecamatan
+
+                // Muat data awal
+                loadDataByKecamatan();
+
+                // Trigger reload jika dropdown berubah (hanya admin pusat yang bisa ini)
+                selectKecamatan.addEventListener('change', () => {
+                    loadDataByKecamatan();
                 });
             }
         });
