@@ -10,7 +10,7 @@
         .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
         .pt-safe { padding-top: env(safe-area-inset-top); }
         .skeleton {
-            background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+            background: linear-gradient(90deg, #1e293b 25%, #334155 50%, #1e293b 75%);
             background-size: 200% 100%;
             animation: loading 1.5s infinite;
         }
@@ -20,10 +20,10 @@
         }
     </style>
 </head>
-<body class="bg-gradient-to-br from-blue-50 via-slate-50 to-indigo-100 antialiased overflow-x-hidden selection:bg-trust-500 selection:text-white pb-24">
+<body class="bg-slate-900 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-indigo-900 via-slate-900 to-black antialiased overflow-x-hidden selection:bg-trust-500 selection:text-white pb-24 min-h-screen">
     
     <!-- Background Patterns -->
-    <div class="fixed top-0 left-0 w-full h-[30vh] -z-10 bg-gradient-to-b from-slate-800 to-slate-900 overflow-hidden">
+    <div class="fixed top-0 left-0 w-full h-[30vh] -z-10 bg-gradient-to-b from-trust-900/30 to-slate-900 overflow-hidden">
         <div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(#ffffff 1px, transparent 1px); background-size: 24px 24px;"></div>
     </div>
 
@@ -55,15 +55,15 @@
     <main class="w-full max-w-md mx-auto px-4 mt-4 z-10 relative">
         <div id="loading-state" class="space-y-4">
             <!-- Skeleton items -->
-            <div class="bg-white rounded-3xl p-5 shadow-sm border border-slate-100 flex items-start gap-4">
-                <div class="w-12 h-12 rounded-2xl skeleton shrink-0"></div>
+            <div class="bg-white/5 backdrop-blur-md rounded-3xl p-5 shadow-lg shadow-black/20 border border-white/10 flex items-start gap-4">
+                <div class="w-12 h-12 rounded-2xl skeleton shrink-0 border border-white/5"></div>
                 <div class="w-full space-y-2 py-1">
                     <div class="h-4 w-1/3 skeleton rounded-full"></div>
                     <div class="h-3 w-2/3 skeleton rounded-full"></div>
                 </div>
             </div>
-            <div class="bg-white rounded-3xl p-5 shadow-sm border border-slate-100 flex items-start gap-4">
-                <div class="w-12 h-12 rounded-2xl skeleton shrink-0"></div>
+            <div class="bg-white/5 backdrop-blur-md rounded-3xl p-5 shadow-lg shadow-black/20 border border-white/10 flex items-start gap-4">
+                <div class="w-12 h-12 rounded-2xl skeleton shrink-0 border border-white/5"></div>
                 <div class="w-full space-y-2 py-1">
                     <div class="h-4 w-1/4 skeleton rounded-full"></div>
                     <div class="h-3 w-3/4 skeleton rounded-full"></div>
@@ -72,11 +72,11 @@
         </div>
 
         <div id="empty-state" class="hidden text-center py-10">
-            <div class="w-20 h-20 bg-slate-200 rounded-full flex items-center justify-center mx-auto mb-4">
-                <i data-lucide="inbox" class="w-10 h-10 text-slate-400"></i>
+            <div class="w-20 h-20 bg-white/5 border border-white/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i data-lucide="inbox" class="w-10 h-10 text-slate-500"></i>
             </div>
-            <h3 class="text-slate-700 font-bold text-lg mb-1">Belum Ada Data</h3>
-            <p class="text-slate-500 text-sm px-6">Belum ada pendataan keluarga maupun laporan logistik di Posko ini.</p>
+            <h3 class="text-white font-bold text-lg mb-1">Belum Ada Data</h3>
+            <p class="text-slate-400 text-sm px-6">Belum ada pendataan keluarga maupun laporan logistik di Posko ini.</p>
         </div>
 
         <!-- Feed List -->
@@ -87,21 +87,21 @@
     </main>
 
     <!-- Bottom Navigation Bar -->
-    <nav class="fixed bottom-0 left-0 w-full glass border-t border-slate-200 pb-safe pt-2 px-6 z-50">
+    <nav class="fixed bottom-0 left-0 w-full bg-slate-900/80 backdrop-blur-2xl border-t border-white/10 pb-safe pt-2 px-6 z-50">
         <div class="max-w-md mx-auto flex justify-around items-center h-16">
-            <a href="index.html" class="flex flex-col items-center justify-center w-full text-slate-400 hover:text-slate-600 transition-colors">
+            <a href="index.html" class="flex flex-col items-center justify-center w-full text-slate-500 hover:text-white transition-colors">
                 <div class="p-1.5">
                     <i data-lucide="home" class="w-5 h-5"></i>
                 </div>
                 <span class="text-[10px] font-medium mt-1">Beranda</span>
             </a>
-            <a href="riwayat.html" class="flex flex-col items-center justify-center w-full text-trust-600 group cursor-default">
-                <div class="p-1.5 bg-trust-100 rounded-xl">
+            <a href="riwayat.html" class="flex flex-col items-center justify-center w-full text-trust-400 group cursor-default">
+                <div class="p-1.5 bg-trust-500/20 border border-trust-500/30 rounded-xl transition-colors shadow-[0_0_15px_rgba(56,189,248,0.2)]">
                     <i data-lucide="history" class="w-5 h-5"></i>
                 </div>
                 <span class="text-[10px] font-semibold mt-1">Riwayat</span>
             </a>
-            <a href="profil.html" class="flex flex-col items-center justify-center w-full text-slate-400 hover:text-slate-600 transition-colors">
+            <a href="profil.html" class="flex flex-col items-center justify-center w-full text-slate-500 hover:text-white transition-colors">
                 <div class="p-1.5">
                     <i data-lucide="user" class="w-5 h-5"></i>
                 </div>
@@ -195,36 +195,36 @@
                     const dateString = date.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
 
                     const iconStr = item.type === 'keluarga' 
-                        ? `<div class="w-12 h-12 rounded-2xl bg-trust-100 flex items-center justify-center shrink-0 border border-trust-200"><i data-lucide="users" class="w-6 h-6 text-trust-600"></i></div>`
-                        : `<div class="w-12 h-12 rounded-2xl bg-alert-100 flex items-center justify-center shrink-0 border border-alert-200"><i data-lucide="package" class="w-6 h-6 text-alert-600"></i></div>`;
+                        ? `<div class="w-12 h-12 rounded-2xl bg-trust-500/20 flex items-center justify-center shrink-0 border border-trust-500/30"><i data-lucide="users" class="w-6 h-6 text-trust-400"></i></div>`
+                        : `<div class="w-12 h-12 rounded-2xl bg-alert-500/20 flex items-center justify-center shrink-0 border border-alert-500/30"><i data-lucide="package" class="w-6 h-6 text-alert-400"></i></div>`;
                     
                     const el = document.createElement('div');
                     
                     if (item.type === 'keluarga') {
                         el.innerHTML = `
-                            <div class="bg-white rounded-3xl p-4 shadow-sm border border-slate-100 mb-4 transform transition-transform relative">
+                            <div class="bg-white/5 backdrop-blur-md rounded-3xl p-4 shadow-lg shadow-black/20 border border-white/10 mb-4 transform transition-transform relative">
                                 <div class="flex items-start">
                                     ${iconStr}
                                     <div class="ml-4 flex-1">
                                         <div class="flex justify-between items-start mb-1">
-                                            <h4 class="font-bold text-slate-800 text-sm line-clamp-1 pr-2">${item.title}</h4>
-                                            <span class="text-[10px] text-slate-400 bg-slate-50 px-2 py-1 rounded-lg shrink-0 border border-slate-100">${dateString}, ${timeString}</span>
+                                            <h4 class="font-bold text-white text-sm line-clamp-1 pr-2">${item.title}</h4>
+                                            <span class="text-[10px] text-slate-300 bg-slate-800 px-2 py-1 rounded-lg shrink-0 border border-white/10">${dateString}, ${timeString}</span>
                                         </div>
-                                        <p class="text-xs text-slate-500 mb-2 leading-relaxed">${item.subtitle}</p>
+                                        <p class="text-xs text-slate-400 mb-2 leading-relaxed">${item.subtitle}</p>
                                         <div class="flex items-center mt-2">
-                                            <i data-lucide="user" class="w-3 h-3 text-slate-400 mr-1"></i>
-                                            <span class="text-[10px] text-slate-400">Diinput oleh: ${item.pelapor}</span>
+                                            <i data-lucide="user" class="w-3 h-3 text-slate-500 mr-1"></i>
+                                            <span class="text-[10px] text-slate-500">Diinput oleh: ${item.pelapor}</span>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="mt-4 flex gap-2 border-t border-slate-100 pt-3">
-                                    <button onclick="window.location.href='form-pengungsi.html?editId=${item.id}'" class="flex-1 flex justify-center items-center py-2 bg-slate-50 text-slate-600 rounded-xl text-xs font-bold border border-slate-200 hover:bg-slate-100 active:scale-95 transition-all">
+                                <div class="mt-4 flex gap-2 border-t border-white/10 pt-3">
+                                    <button onclick="window.location.href='form-pengungsi.html?editId=${item.id}'" class="flex-1 flex justify-center items-center py-2 bg-white/5 text-slate-300 rounded-xl text-xs font-bold border border-white/10 hover:bg-white/10 active:scale-95 transition-all">
                                         <i data-lucide="edit" class="w-3.5 h-3.5 mr-1.5"></i> Edit KK
                                     </button>
-                                    <button onclick="hapusData('${item.id}', 'keluarga')" class="flex-1 flex justify-center items-center py-2 bg-red-50 text-red-600 rounded-xl text-xs font-bold border border-red-100 hover:bg-red-100 active:scale-95 transition-all">
+                                    <button onclick="hapusData('${item.id}', 'keluarga')" class="flex-1 flex justify-center items-center py-2 bg-red-500/10 text-red-400 rounded-xl text-xs font-bold border border-red-500/20 hover:bg-red-500/20 active:scale-95 transition-all">
                                         <i data-lucide="trash-2" class="w-3.5 h-3.5 mr-1.5"></i> Hapus
                                     </button>
-                                    <button onclick="window.location.href='form-anggota.html?kkId=${item.id}'" class="flex-[1.5] flex justify-center items-center py-2 bg-trust-50 text-trust-600 rounded-xl text-xs font-bold border border-trust-200 hover:bg-trust-100 active:scale-95 transition-all">
+                                    <button onclick="window.location.href='form-anggota.html?kkId=${item.id}'" class="flex-[1.5] flex justify-center items-center py-2 bg-trust-500/10 text-trust-400 rounded-xl text-xs font-bold border border-trust-500/20 hover:bg-trust-500/20 active:scale-95 transition-all">
                                         <i data-lucide="user-plus" class="w-3.5 h-3.5 mr-1.5"></i> Anggota
                                     </button>
                                 </div>
@@ -232,26 +232,26 @@
                         `;
                     } else {
                         el.innerHTML = `
-                            <div class="bg-white rounded-3xl p-4 shadow-sm border border-slate-100 mb-4 transform transition-transform relative">
+                            <div class="bg-white/5 backdrop-blur-md rounded-3xl p-4 shadow-lg shadow-black/20 border border-white/10 mb-4 transform transition-transform relative">
                                 <div class="flex items-start">
                                     ${iconStr}
                                     <div class="ml-4 flex-1">
                                         <div class="flex justify-between items-start mb-1">
-                                            <h4 class="font-bold text-slate-800 text-sm line-clamp-1 pr-2">${item.title}</h4>
-                                            <span class="text-[10px] text-slate-400 bg-slate-50 px-2 py-1 rounded-lg shrink-0 border border-slate-100">${dateString}, ${timeString}</span>
+                                            <h4 class="font-bold text-white text-sm line-clamp-1 pr-2">${item.title}</h4>
+                                            <span class="text-[10px] text-slate-300 bg-slate-800 px-2 py-1 rounded-lg shrink-0 border border-white/10">${dateString}, ${timeString}</span>
                                         </div>
-                                        <p class="text-xs text-slate-500 mb-2 leading-relaxed">${item.subtitle}</p>
+                                        <p class="text-xs text-slate-400 mb-2 leading-relaxed">${item.subtitle}</p>
                                         <div class="flex items-center mt-2">
-                                            <i data-lucide="user" class="w-3 h-3 text-slate-400 mr-1"></i>
-                                            <span class="text-[10px] text-slate-400">Diinput oleh: ${item.pelapor}</span>
+                                            <i data-lucide="user" class="w-3 h-3 text-slate-500 mr-1"></i>
+                                            <span class="text-[10px] text-slate-500">Diinput oleh: ${item.pelapor}</span>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="mt-4 flex gap-2 border-t border-slate-100 pt-3">
-                                    <button onclick="window.location.href='form-logistik.html?editId=${item.id}'" class="flex-1 flex justify-center items-center py-2 bg-slate-50 text-slate-600 rounded-xl text-xs font-bold border border-slate-200 hover:bg-slate-100 active:scale-95 transition-all">
+                                <div class="mt-4 flex gap-2 border-t border-white/10 pt-3">
+                                    <button onclick="window.location.href='form-logistik.html?editId=${item.id}'" class="flex-1 flex justify-center items-center py-2 bg-white/5 text-slate-300 rounded-xl text-xs font-bold border border-white/10 hover:bg-white/10 active:scale-95 transition-all">
                                         <i data-lucide="edit" class="w-3.5 h-3.5 mr-1.5"></i> Edit
                                     </button>
-                                    <button onclick="hapusData('${item.id}', 'logistik')" class="flex-1 flex justify-center items-center py-2 bg-red-50 text-red-600 rounded-xl text-xs font-bold border border-red-100 hover:bg-red-100 active:scale-95 transition-all">
+                                    <button onclick="hapusData('${item.id}', 'logistik')" class="flex-1 flex justify-center items-center py-2 bg-red-500/10 text-red-400 rounded-xl text-xs font-bold border border-red-500/20 hover:bg-red-500/20 active:scale-95 transition-all">
                                         <i data-lucide="trash-2" class="w-3.5 h-3.5 mr-1.5"></i> Hapus
                                     </button>
                                 </div>

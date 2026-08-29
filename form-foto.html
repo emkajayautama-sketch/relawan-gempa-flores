@@ -10,22 +10,22 @@
         .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
     </style>
 </head>
-<body class="bg-slate-200 antialiased overflow-x-hidden selection:bg-slate-500 selection:text-white">
-    <div class="max-w-md mx-auto min-h-screen relative bg-gradient-to-br from-blue-50 via-slate-50 to-indigo-100 shadow-2xl pb-24 flex flex-col">
+<body class="bg-slate-900 antialiased overflow-x-hidden selection:bg-slate-500 selection:text-white">
+    <div class="max-w-md mx-auto min-h-screen relative bg-slate-900 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-indigo-900 via-slate-900 to-black shadow-2xl pb-24 flex flex-col">
         
         <!-- Header -->
-        <header class="w-full bg-slate-800 z-50 border-b border-slate-900 shrink-0 shadow-md">
+        <header class="w-full bg-slate-800/20 backdrop-blur-xl z-50 border-b border-white/10 shrink-0 shadow-md">
             <div class="px-6 py-4 flex items-center text-white">
-                <a href="index.html" class="p-2 -ml-2 rounded-xl hover:bg-slate-700 transition-colors">
+                <a href="index.html" class="p-2 -ml-2 rounded-xl hover:bg-white/10 transition-colors">
                     <i data-lucide="arrow-left" class="w-6 h-6"></i>
                 </a>
                 <h1 class="font-bold text-lg ml-3">Dokumentasi Lapangan</h1>
             </div>
         </header>
 
-        <div class="bg-slate-700 px-6 py-3 flex items-start text-white border-b border-slate-800">
-            <i data-lucide="info" class="w-4 h-4 text-slate-300 mt-0.5 mr-2 shrink-0"></i>
-            <p class="text-xs text-slate-200 font-medium leading-relaxed">
+        <div class="bg-white/5 px-6 py-3 flex items-start text-white border-b border-white/10">
+            <i data-lucide="info" class="w-4 h-4 text-slate-400 mt-0.5 mr-2 shrink-0"></i>
+            <p class="text-xs text-slate-300 font-medium leading-relaxed">
                 Ambil foto kondisi di lapangan. Foto akan dilengkapi titik lokasi posko Anda secara otomatis.
             </p>
         </div>
@@ -36,19 +36,19 @@
             <form id="formFoto">
                 
                 <!-- Image Picker Area -->
-                <div class="bg-white rounded-3xl p-4 shadow-sm border border-slate-200 mb-6">
-                    <label class="block text-sm font-semibold text-slate-700 mb-3">Foto Kondisi / Bukti Penyaluran</label>
+                <div class="bg-white/5 backdrop-blur-md rounded-3xl p-4 shadow-lg shadow-black/20 border border-white/10 mb-6">
+                    <label class="block text-sm font-semibold text-slate-300 mb-3">Foto Kondisi / Bukti Penyaluran</label>
                     
                     <input type="file" id="foto-input" accept="image/*" capture="environment" class="hidden">
                     
-                    <div id="preview-container" class="w-full aspect-[4/3] bg-slate-100 border-2 border-dashed border-slate-300 rounded-2xl flex flex-col items-center justify-center cursor-pointer hover:bg-slate-200 transition-colors relative overflow-hidden group">
+                    <div id="preview-container" class="w-full aspect-[4/3] bg-slate-800/50 border-2 border-dashed border-white/20 rounded-2xl flex flex-col items-center justify-center cursor-pointer hover:bg-slate-800/80 transition-colors relative overflow-hidden group">
                         <!-- Empty State -->
-                        <div id="empty-preview" class="flex flex-col items-center justify-center text-slate-400 group-hover:text-slate-600 transition-colors pointer-events-none">
-                            <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-sm mb-3">
-                                <i data-lucide="camera" class="w-8 h-8 text-slate-500"></i>
+                        <div id="empty-preview" class="flex flex-col items-center justify-center text-slate-400 group-hover:text-white transition-colors pointer-events-none">
+                            <div class="w-16 h-16 bg-white/10 rounded-full flex items-center justify-center shadow-sm mb-3">
+                                <i data-lucide="camera" class="w-8 h-8 text-slate-400"></i>
                             </div>
                             <p class="font-medium text-sm">Ketuk untuk Ambil Foto</p>
-                            <p class="text-xs mt-1">atau pilih dari galeri</p>
+                            <p class="text-xs mt-1 text-slate-500 group-hover:text-slate-400">atau pilih dari galeri</p>
                         </div>
                         
                         <!-- Image Preview -->
@@ -56,7 +56,7 @@
                         
                         <!-- Overlay when image is selected -->
                         <div id="overlay-preview" class="hidden absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
-                            <span class="bg-white/90 text-slate-800 px-4 py-2 rounded-full font-semibold text-sm shadow-lg flex items-center">
+                            <span class="bg-slate-900/90 text-white px-4 py-2 rounded-full font-semibold text-sm shadow-lg flex items-center border border-white/20">
                                 <i data-lucide="refresh-cw" class="w-4 h-4 mr-2"></i> Ganti Foto
                             </span>
                         </div>
@@ -64,23 +64,23 @@
                 </div>
 
                 <!-- Caption Area -->
-                <div class="bg-white rounded-3xl p-5 shadow-sm border border-slate-200">
-                    <label class="block text-sm font-semibold text-slate-700 mb-2">Keterangan Singkat</label>
-                    <textarea id="caption" rows="3" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-500 resize-none" placeholder="Misal: Tenda warga di RT 02 rubuh karena angin kencang..."></textarea>
+                <div class="bg-white/5 backdrop-blur-md rounded-3xl p-5 shadow-lg shadow-black/20 border border-white/10">
+                    <label class="block text-sm font-semibold text-slate-300 mb-2">Keterangan Singkat</label>
+                    <textarea id="caption" rows="3" class="w-full bg-slate-800/50 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-slate-500 resize-none" placeholder="Misal: Tenda warga di RT 02 rubuh karena angin kencang..."></textarea>
                 </div>
             </form>
         </main>
 
         <!-- Bottom Footer Action -->
-        <div class="p-6 bg-white border-t border-slate-200 shrink-0">
-             <button id="btnUpload" disabled class="w-full bg-slate-300 text-white font-bold rounded-2xl py-4 flex justify-center items-center transition-all cursor-not-allowed">
+        <div class="p-6 bg-slate-900/80 backdrop-blur-xl border-t border-white/10 shrink-0">
+             <button id="btnUpload" disabled class="w-full bg-white/5 text-slate-500 border border-white/10 font-bold rounded-2xl py-4 flex justify-center items-center transition-all cursor-not-allowed">
                 Unggah Foto <i data-lucide="upload-cloud" class="w-5 h-5 ml-2"></i>
             </button>
             <div id="progress-container" class="hidden mt-3">
-                <div class="w-full bg-slate-100 rounded-full h-2.5">
-                    <div id="progress-bar" class="bg-slate-800 h-2.5 rounded-full" style="width: 0%"></div>
+                <div class="w-full bg-slate-800 rounded-full h-2.5">
+                    <div id="progress-bar" class="bg-trust-500 h-2.5 rounded-full shadow-[0_0_8px_rgba(56,189,248,0.8)]" style="width: 0%"></div>
                 </div>
-                <p id="progress-text" class="text-xs text-center text-slate-500 mt-2 font-medium">0%</p>
+                <p id="progress-text" class="text-xs text-center text-slate-400 mt-2 font-medium">0%</p>
             </div>
         </div>
     </div>
@@ -166,8 +166,8 @@
                     
                     // Enable button
                     btnUpload.disabled = false;
-                    btnUpload.classList.remove('bg-slate-300', 'cursor-not-allowed');
-                    btnUpload.classList.add('bg-slate-800', 'hover:bg-slate-900', 'active:scale-95', 'shadow-lg', 'shadow-slate-800/30');
+                    btnUpload.classList.remove('bg-white/5', 'text-slate-500', 'cursor-not-allowed');
+                    btnUpload.classList.add('bg-white/20', 'text-white', 'hover:bg-white/30', 'active:scale-95', 'shadow-lg', 'shadow-black/50', 'border-white/30');
                 }
                 reader.readAsDataURL(file);
             }
@@ -184,7 +184,7 @@
             btnUpload.disabled = true;
             btnUpload.innerHTML = '<span class="animate-spin mr-2">⏳</span> Mengunggah...';
             btnUpload.classList.add('opacity-75', 'cursor-not-allowed');
-            btnUpload.classList.remove('active:scale-95', 'hover:bg-slate-900');
+            btnUpload.classList.remove('active:scale-95', 'hover:bg-white/30');
             fotoInput.disabled = true;
             captionInput.disabled = true;
             
@@ -250,10 +250,11 @@
             btnUpload.disabled = false;
             btnUpload.innerHTML = 'Unggah Foto <i data-lucide="upload-cloud" class="w-5 h-5 ml-2"></i>';
             btnUpload.classList.remove('opacity-75', 'cursor-not-allowed');
-            btnUpload.classList.add('active:scale-95', 'hover:bg-slate-900');
+            btnUpload.classList.add('active:scale-95', 'hover:bg-white/30');
             fotoInput.disabled = false;
             captionInput.disabled = false;
             progressContainer.classList.add('hidden');
+            progressBar.style.width = '0%';
             lucide.createIcons();
         }
     </script>

@@ -7,22 +7,22 @@
     <link href="/src/style.css" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
 </head>
-<body class="bg-slate-200 antialiased overflow-x-hidden selection:bg-alert-500 selection:text-white">
-    <div class="max-w-md mx-auto min-h-screen relative bg-gradient-to-br from-blue-50 via-slate-50 to-indigo-100 shadow-2xl pb-24 overflow-hidden flex flex-col">
+<body class="bg-slate-900 antialiased overflow-x-hidden selection:bg-alert-500 selection:text-white">
+    <div class="max-w-md mx-auto min-h-screen relative bg-slate-900 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-indigo-900 via-slate-900 to-black shadow-2xl pb-24 overflow-hidden flex flex-col">
         
         <!-- Header -->
-        <header class="w-full bg-alert-600 z-50 border-b border-alert-700 shrink-0 shadow-md">
+        <header class="w-full bg-alert-500/20 backdrop-blur-xl z-50 border-b border-alert-500/30 shrink-0 shadow-md">
             <div class="px-6 py-4 flex items-center text-white">
-                <a href="index.html" class="p-2 -ml-2 rounded-xl hover:bg-alert-700 transition-colors">
+                <a href="index.html" class="p-2 -ml-2 rounded-xl hover:bg-alert-500/30 transition-colors">
                     <i data-lucide="arrow-left" class="w-6 h-6"></i>
                 </a>
                 <h1 class="font-bold text-lg ml-3">Form Kebutuhan Logistik</h1>
             </div>
         </header>
 
-        <div class="bg-alert-50 border-b border-alert-200 px-6 py-3 flex items-start">
-            <i data-lucide="info" class="w-4 h-4 text-alert-600 mt-0.5 mr-2 shrink-0"></i>
-            <p class="text-xs text-alert-800 font-medium leading-relaxed">
+        <div class="bg-alert-500/10 border-b border-alert-500/30 px-6 py-3 flex items-start">
+            <i data-lucide="info" class="w-4 h-4 text-alert-400 mt-0.5 mr-2 shrink-0"></i>
+            <p class="text-xs text-alert-200 font-medium leading-relaxed">
                 Silakan isi kuantitas riil yang dibutuhkan di posko Anda saat ini. Kosongkan jika stok masih aman.
             </p>
         </div>
@@ -32,70 +32,70 @@
             
             <form id="formLogistik">
                 <!-- Klaster Pangan & Air -->
-                <div class="bg-white rounded-3xl p-5 shadow-sm border border-slate-200 mb-5">
-                    <div class="flex items-center mb-4 pb-3 border-b border-slate-100">
-                        <div class="bg-blue-100 p-2 rounded-lg mr-3">
-                            <i data-lucide="wheat" class="w-5 h-5 text-blue-600"></i>
+                <div class="bg-white/5 backdrop-blur-md rounded-3xl p-5 shadow-lg shadow-black/20 border border-white/10 mb-5">
+                    <div class="flex items-center mb-4 pb-3 border-b border-white/10">
+                        <div class="bg-blue-500/20 p-2 rounded-lg mr-3 border border-blue-500/30">
+                            <i data-lucide="wheat" class="w-5 h-5 text-blue-400"></i>
                         </div>
-                        <h2 class="font-bold text-slate-800">Klaster Pangan & Air</h2>
+                        <h2 class="font-bold text-white">Klaster Pangan & Air</h2>
                     </div>
                     
                     <div id="klaster-pangan" class="space-y-4">
                         <div class="flex items-center justify-between default-item">
-                            <label class="text-sm font-semibold text-slate-700 w-2/5">Beras</label>
+                            <label class="text-sm font-semibold text-slate-300 w-2/5">Beras</label>
                             <div class="w-3/5 flex items-center gap-2">
-                                <input type="number" data-name="Beras" data-unit="Kg" min="0" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-center text-slate-800 focus:outline-none focus:ring-2 focus:ring-alert-500" placeholder="0">
-                                <span class="text-xs font-semibold text-slate-500 w-12 text-center">Kg</span>
+                                <input type="number" data-name="Beras" data-unit="Kg" min="0" class="w-full bg-slate-800/50 border border-white/10 rounded-xl px-3 py-2 text-center text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-alert-500" placeholder="0">
+                                <span class="text-xs font-semibold text-slate-400 w-12 text-center">Kg</span>
                             </div>
                         </div>
                     </div>
-                    <button type="button" onclick="tambahItem('klaster-pangan')" class="mt-4 w-full border border-dashed border-blue-300 text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-xl py-3 text-sm font-semibold flex items-center justify-center transition-colors active:scale-95">
+                    <button type="button" onclick="tambahItem('klaster-pangan')" class="mt-4 w-full border border-dashed border-blue-500/50 text-blue-400 bg-blue-500/10 hover:bg-blue-500/20 rounded-xl py-3 text-sm font-semibold flex items-center justify-center transition-colors active:scale-95">
                         <i data-lucide="plus" class="w-4 h-4 mr-2"></i> Tambah Item Lainnya
                     </button>
                 </div>
 
                 <!-- Klaster Hunian -->
-                <div class="bg-white rounded-3xl p-5 shadow-sm border border-slate-200 mb-5">
-                    <div class="flex items-center mb-4 pb-3 border-b border-slate-100">
-                        <div class="bg-orange-100 p-2 rounded-lg mr-3">
-                            <i data-lucide="tent" class="w-5 h-5 text-orange-600"></i>
+                <div class="bg-white/5 backdrop-blur-md rounded-3xl p-5 shadow-lg shadow-black/20 border border-white/10 mb-5">
+                    <div class="flex items-center mb-4 pb-3 border-b border-white/10">
+                        <div class="bg-orange-500/20 p-2 rounded-lg mr-3 border border-orange-500/30">
+                            <i data-lucide="tent" class="w-5 h-5 text-orange-400"></i>
                         </div>
-                        <h2 class="font-bold text-slate-800">Klaster Hunian (Shelter)</h2>
+                        <h2 class="font-bold text-white">Klaster Hunian (Shelter)</h2>
                     </div>
                     
                     <div id="klaster-hunian" class="space-y-4">
                         <div class="flex items-center justify-between default-item">
-                            <label class="text-sm font-semibold text-slate-700 w-2/5">Tenda Kel.</label>
+                            <label class="text-sm font-semibold text-slate-300 w-2/5">Tenda Kel.</label>
                             <div class="w-3/5 flex items-center gap-2">
-                                <input type="number" data-name="Tenda Keluarga" data-unit="Unit" min="0" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-center text-slate-800 focus:outline-none focus:ring-2 focus:ring-alert-500" placeholder="0">
-                                <span class="text-xs font-semibold text-slate-500 w-12 text-center">Unit</span>
+                                <input type="number" data-name="Tenda Keluarga" data-unit="Unit" min="0" class="w-full bg-slate-800/50 border border-white/10 rounded-xl px-3 py-2 text-center text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-alert-500" placeholder="0">
+                                <span class="text-xs font-semibold text-slate-400 w-12 text-center">Unit</span>
                             </div>
                         </div>
                     </div>
-                    <button type="button" onclick="tambahItem('klaster-hunian')" class="mt-4 w-full border border-dashed border-orange-300 text-orange-600 bg-orange-50 hover:bg-orange-100 rounded-xl py-3 text-sm font-semibold flex items-center justify-center transition-colors active:scale-95">
+                    <button type="button" onclick="tambahItem('klaster-hunian')" class="mt-4 w-full border border-dashed border-orange-500/50 text-orange-400 bg-orange-500/10 hover:bg-orange-500/20 rounded-xl py-3 text-sm font-semibold flex items-center justify-center transition-colors active:scale-95">
                         <i data-lucide="plus" class="w-4 h-4 mr-2"></i> Tambah Item Lainnya
                     </button>
                 </div>
 
                 <!-- Klaster Kesehatan -->
-                <div class="bg-white rounded-3xl p-5 shadow-sm border border-slate-200 mb-5">
-                    <div class="flex items-center mb-4 pb-3 border-b border-slate-100">
-                        <div class="bg-pink-100 p-2 rounded-lg mr-3">
-                            <i data-lucide="heart-pulse" class="w-5 h-5 text-pink-600"></i>
+                <div class="bg-white/5 backdrop-blur-md rounded-3xl p-5 shadow-lg shadow-black/20 border border-white/10 mb-5">
+                    <div class="flex items-center mb-4 pb-3 border-b border-white/10">
+                        <div class="bg-pink-500/20 p-2 rounded-lg mr-3 border border-pink-500/30">
+                            <i data-lucide="heart-pulse" class="w-5 h-5 text-pink-400"></i>
                         </div>
-                        <h2 class="font-bold text-slate-800">Klaster Medis & Sanitasi</h2>
+                        <h2 class="font-bold text-white">Klaster Medis & Sanitasi</h2>
                     </div>
                     
                     <div id="klaster-medis" class="space-y-4">
                         <div class="flex items-center justify-between default-item">
-                            <label class="text-sm font-semibold text-slate-700 w-2/5">Kotak P3K</label>
+                            <label class="text-sm font-semibold text-slate-300 w-2/5">Kotak P3K</label>
                             <div class="w-3/5 flex items-center gap-2">
-                                <input type="number" data-name="Kotak P3K" data-unit="Kotak" min="0" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-center text-slate-800 focus:outline-none focus:ring-2 focus:ring-alert-500" placeholder="0">
-                                <span class="text-xs font-semibold text-slate-500 w-12 text-center">Kotak</span>
+                                <input type="number" data-name="Kotak P3K" data-unit="Kotak" min="0" class="w-full bg-slate-800/50 border border-white/10 rounded-xl px-3 py-2 text-center text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-alert-500" placeholder="0">
+                                <span class="text-xs font-semibold text-slate-400 w-12 text-center">Kotak</span>
                             </div>
                         </div>
                     </div>
-                    <button type="button" onclick="tambahItem('klaster-medis')" class="mt-4 w-full border border-dashed border-pink-300 text-pink-600 bg-pink-50 hover:bg-pink-100 rounded-xl py-3 text-sm font-semibold flex items-center justify-center transition-colors active:scale-95">
+                    <button type="button" onclick="tambahItem('klaster-medis')" class="mt-4 w-full border border-dashed border-pink-500/50 text-pink-400 bg-pink-500/10 hover:bg-pink-500/20 rounded-xl py-3 text-sm font-semibold flex items-center justify-center transition-colors active:scale-95">
                         <i data-lucide="plus" class="w-4 h-4 mr-2"></i> Tambah Item Lainnya
                     </button>
                 </div>
@@ -103,8 +103,8 @@
         </main>
 
         <!-- Bottom Footer Action -->
-        <div class="p-6 bg-white border-t border-slate-200 shrink-0">
-             <button id="btnKirim" class="w-full bg-alert-600 hover:bg-alert-700 text-white font-bold rounded-2xl py-4 shadow-lg shadow-alert-600/30 flex justify-center items-center transition-transform active:scale-95">
+        <div class="p-6 bg-slate-900/80 backdrop-blur-xl border-t border-white/10 shrink-0">
+             <button id="btnKirim" class="w-full bg-alert-600 hover:bg-alert-500 text-white font-bold rounded-2xl py-4 shadow-lg shadow-alert-600/30 flex justify-center items-center transition-transform active:scale-95">
                 Kirim Laporan Posko <i data-lucide="send" class="w-5 h-5 ml-2"></i>
             </button>
         </div>
@@ -122,12 +122,12 @@
             const div = document.createElement('div');
             div.className = "flex items-center gap-1 dynamic-item mt-2 animate-fade-in-up";
             div.innerHTML = `
-                <button type="button" onclick="this.parentElement.remove()" class="text-red-400 hover:text-red-600 p-1 shrink-0 transition-colors">
+                <button type="button" onclick="this.parentElement.remove()" class="text-red-400 hover:text-red-300 p-1 shrink-0 transition-colors">
                     <i data-lucide="x-circle" class="w-5 h-5"></i>
                 </button>
-                <input type="text" class="item-name flex-1 bg-slate-50 border border-slate-300 rounded-xl px-2 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-alert-500" placeholder="Brg (Misal: Sarden)">
-                <input type="number" min="1" class="item-qty w-16 bg-slate-50 border border-slate-300 rounded-xl px-2 py-2 text-center text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-alert-500" placeholder="Jml">
-                <input type="text" class="item-unit w-16 bg-slate-50 border border-slate-300 rounded-xl px-2 py-2 text-center text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-alert-500" placeholder="Satuan">
+                <input type="text" class="item-name flex-1 bg-slate-800/50 border border-white/10 rounded-xl px-2 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-alert-500" placeholder="Brg (Misal: Sarden)">
+                <input type="number" min="1" class="item-qty w-16 bg-slate-800/50 border border-white/10 rounded-xl px-2 py-2 text-center text-sm text-white focus:outline-none focus:ring-2 focus:ring-alert-500" placeholder="Jml">
+                <input type="text" class="item-unit w-16 bg-slate-800/50 border border-white/10 rounded-xl px-2 py-2 text-center text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-alert-500" placeholder="Satuan">
             `;
             container.appendChild(div);
             lucide.createIcons();
