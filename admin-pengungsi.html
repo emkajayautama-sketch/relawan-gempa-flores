@@ -109,6 +109,12 @@
                     <option value="all">Semua Posko (Rekap Keseluruhan)</option>
                     <!-- Options populated by JS -->
                 </select>
+                <select id="filter-periode" class="px-4 py-2 border border-slate-600 rounded-lg text-slate-300 bg-slate-800 focus:outline-none focus:border-trust-500 text-sm cursor-pointer glass-dark appearance-none pr-8">
+                    <option value="Harian, Mingguan atau Bulanan">Pilih Periode</option>
+                    <option value="Harian">Harian</option>
+                    <option value="Mingguan">Mingguan</option>
+                    <option value="Bulanan">Bulanan</option>
+                </select>
                 <button onclick="document.getElementById('print-date').innerText = new Date().toLocaleDateString('id-ID', {day: 'numeric', month: 'long', year: 'numeric'}); window.print()" class="px-4 py-2 border border-slate-600 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800 font-medium flex items-center text-sm transition-colors cursor-pointer shadow-sm glass-dark">
                     <i data-lucide="printer" class="w-4 h-4 mr-2"></i> Cetak PDF
                 </button>
@@ -145,7 +151,7 @@
                     <div>Pelapor</div><div>:</div><div id="print-meta-pelapor" class="uppercase">Pusat Data Relawan Kabupaten</div>
                 </div>
                 <div class="grid grid-cols-[150px_10px_1fr] gap-1">
-                    <div>Periode Laporan</div><div>:</div><div>Harian, Mingguan atau Bulanan</div>
+                    <div>Periode Laporan</div><div>:</div><div id="print-meta-periode">Harian, Mingguan atau Bulanan</div>
                 </div>
             </div>
         </div>
@@ -153,7 +159,7 @@
             <!-- Recap Table Container -->
             <div id="recap-container" class="hidden mb-8">
                 <h3 class="text-xl font-bold text-white mb-4 flex items-center print:hidden">
-                    <i data-lucide="bar-chart-2" class="w-6 h-6 mr-2 text-trust-400"></i> Rekapitulasi per Kecamatan
+                    <i data-lucide="bar-chart-2" class="w-6 h-6 mr-2 text-trust-400"></i> <span id="recap-table-title">Rekapitulasi per Kecamatan</span>
                 </h3>
                 <div class="glass-dark border border-slate-700/80 rounded-3xl shadow-2xl overflow-hidden relative print:border-none print:shadow-none print:bg-transparent">
                     <div class="overflow-x-auto">
@@ -255,6 +261,9 @@
                 return;
             }
             emptyState.classList.add('hidden');
+
+            const selectKecamatan = document.getElementById('filter-kecamatan');
+            let baseTitle = selectKecamatan.value === 'pusat' ? '' : selectKecamatan.options[selectKecamatan.selectedIndex].text.toUpperCase();
             
             if (currentTab === 'rekap') {
                 tabRekap.classList.add('bg-trust-500', 'text-white', 'shadow-lg');
@@ -265,7 +274,7 @@
                 recapContainer.classList.remove('hidden');
                 tableContainer.classList.add('hidden');
                 
-                document.getElementById('print-sub-title').innerText = 'REKAPITULASI';
+                document.getElementById('print-sub-title').innerText = baseTitle ? `REKAPITULASI ${baseTitle}` : 'REKAPITULASI PER KECAMATAN';
             } else {
                 tabDetail.classList.add('bg-trust-500', 'text-white', 'shadow-lg');
                 tabDetail.classList.remove('text-slate-400', 'hover:text-slate-200');
@@ -275,7 +284,7 @@
                 tableContainer.classList.remove('hidden');
                 recapContainer.classList.add('hidden');
                 
-                document.getElementById('print-sub-title').innerText = 'LAPORAN DETAIL';
+                document.getElementById('print-sub-title').innerText = baseTitle ? `LAPORAN DETAIL ${baseTitle}` : 'LAPORAN DETAIL KESELURUHAN';
             }
         }
 
@@ -347,6 +356,14 @@
                 const loadData = () => {
                     const kecaVal = (emailPrefix === 'admin' || emailPrefix === 'admin_pusat') ? selectKecamatan.value : currentKecamatan;
                     currentKecamatan = kecaVal;
+
+                    // Update Table Title
+                    const kecText = selectKecamatan.options[selectKecamatan.selectedIndex].text;
+                    if (kecaVal === 'pusat') {
+                        document.getElementById('recap-table-title').innerText = 'Rekapitulasi per Kecamatan';
+                    } else {
+                        document.getElementById('recap-table-title').innerText = `Rekapitulasi ${kecText}`;
+                    }
 
                     if (unsubKK) unsubKK();
                     if (unsubAnggota) unsubAnggota();
@@ -424,9 +441,16 @@
                         let totalSemuaHamil = 0;
                         let totalSemuaRentan = 0;
 
-                        // Ubah Metadata Pelapor dan Posko
-                        document.getElementById('print-meta-posko').innerText = selectedPosko === 'all' ? 'Semua Kecamatan' : selectedPosko;
+                        // Ubah Metadata Pelapor, Posko, dan Periode
+                        const poskoText = selectedPosko === 'all' 
+                            ? (currentKecamatan === 'pusat' ? 'Semua Kecamatan' : selectKecamatan.options[selectKecamatan.selectedIndex].text)
+                            : selectedPosko;
+                        document.getElementById('print-meta-posko').innerText = poskoText;
                         document.getElementById('print-meta-pelapor').innerText = document.getElementById('admin-identity-name').innerText;
+                        
+                        const periodeSelect = document.getElementById('filter-periode');
+                        const periodeVal = periodeSelect.value;
+                        document.getElementById('print-meta-periode').innerText = periodeVal === 'Harian, Mingguan atau Bulanan' ? 'Harian, Mingguan atau Bulanan' : periodeVal;
 
                         // Filter data array
                         const filteredData = selectedPosko === 'all' 
@@ -554,10 +578,13 @@
                 
                 selectKecamatan.addEventListener('change', () => {
                     loadData();
+                    // Update print title immediately when select changes if data is cached
+                    if(window.pengungsiData) applyTabVisibility();
                 });
                 
                 // Event listener filter
                 document.getElementById('filter-posko').addEventListener('change', window.renderData);
+                document.getElementById('filter-periode').addEventListener('change', window.renderData);
             }
         });
     </script>
