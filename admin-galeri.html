@@ -163,7 +163,25 @@
             </div>
         </div>
         
-        <h3 class="text-center text-xl font-bold uppercase mb-8">LAMPIRAN DOKUMENTASI LAPANGAN</h3>
+        <h3 class="text-center text-xl font-bold uppercase mb-6">LAMPIRAN DOKUMENTASI LAPANGAN</h3>
+        
+        <table class="mb-6 w-full text-sm">
+            <tr>
+                <td class="w-32 py-1">Nama Posko</td>
+                <td class="w-4 text-center">:</td>
+                <td id="print-posko-galeri" class="font-bold">Posko Utama</td>
+            </tr>
+            <tr>
+                <td class="py-1">Pelapor</td>
+                <td class="text-center">:</td>
+                <td id="print-pelapor-galeri">Relawan1</td>
+            </tr>
+            <tr>
+                <td class="py-1">Waktu Laporan</td>
+                <td class="text-center">:</td>
+                <td id="print-waktu-galeri">28 Agustus 2026</td>
+            </tr>
+        </table>
         
         <!-- Grid for Photos (2 Columns) -->
         <div id="print-gallery-grid" class="grid grid-cols-2 gap-6">
@@ -464,10 +482,18 @@
             
             document.getElementById('print-date-ttd').innerText = new Date().toLocaleDateString('id-ID', {day: 'numeric', month: 'long', year: 'numeric'});
 
-            Array.from(selectedPhotos).forEach(photo => {
-                const timeStr = photo.createdAt ? photo.createdAt.toDate().toLocaleString('id-ID', {
-                    day: 'numeric', month: 'short', hour: '2-digit', minute:'2-digit'
-                }) : '';
+            // Ambil data dari foto pertama untuk header
+            const photosArray = Array.from(selectedPhotos);
+            const firstPhoto = photosArray[0];
+            const firstTimeStr = firstPhoto.createdAt ? firstPhoto.createdAt.toDate().toLocaleDateString('id-ID', {
+                day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute:'2-digit'
+            }) : new Date().toLocaleDateString('id-ID');
+
+            document.getElementById('print-posko-galeri').innerText = firstPhoto.posko || 'Posko Utama';
+            document.getElementById('print-pelapor-galeri').innerText = firstPhoto.pelapor || 'Relawan';
+            document.getElementById('print-waktu-galeri').innerText = firstTimeStr;
+
+            photosArray.forEach(photo => {
                 const imgSrc = photo.imageUrl || 'https://via.placeholder.com/400x300/1e293b/64748b?text=No+Image';
                 const safeCaption = photo.caption || 'Tanpa keterangan';
                 
@@ -477,12 +503,7 @@
                     <div class="h-64 w-full bg-gray-100 mb-2 overflow-hidden flex items-center justify-center rounded border border-gray-200">
                         <img src="${imgSrc}" class="max-w-full max-h-full object-contain">
                     </div>
-                    <div class="text-base font-bold text-gray-900">${photo.posko}</div>
-                    <div class="text-sm text-gray-700 italic mb-2">"${safeCaption}"</div>
-                    <div class="text-xs text-gray-500 mt-auto pt-2 border-t border-gray-300 flex justify-between">
-                        <span><i data-lucide="user" class="inline w-3 h-3"></i> ${photo.pelapor || 'Relawan'}</span>
-                        <span><i data-lucide="clock" class="inline w-3 h-3"></i> ${timeStr}</span>
-                    </div>
+                    <div class="text-sm font-medium text-gray-800 text-center italic mt-auto">"${safeCaption}"</div>
                 `;
                 gridPrint.appendChild(itemDiv);
             });
