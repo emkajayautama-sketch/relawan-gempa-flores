@@ -75,7 +75,7 @@
             <div class="flex items-center px-2 py-2 rounded-xl hover:bg-slate-800 cursor-pointer transition-colors" onclick="logout()">
                 <img src="https://i.pravatar.cc/150?img=11" alt="Admin" class="w-10 h-10 rounded-full border-2 border-slate-600">
                 <div class="ml-3">
-                    <p class="text-sm font-bold text-white">Admin Relawan Gempa</p>
+                    <p id="admin-identity-name" class="text-sm font-bold text-white">Admin Relawan Gempa</p>
                     <p class="text-xs text-red-400 flex items-center hover:text-red-300 font-medium">
                         <i data-lucide="log-out" class="w-3.5 h-3.5 mr-1.5"></i> Logout
                     </p>
@@ -357,6 +357,17 @@
                     const opt = Array.from(selectKecamatan.options).find(o => o.value === currentKecamatan);
                     if (opt) selectKecamatan.value = currentKecamatan;
                 }
+                
+                let displayName = "Admin Relawan Gempa";
+                if (emailPrefix === 'admin' || emailPrefix === 'admin_pusat') {
+                    displayName = "Admin Utama (Pusat)";
+                } else if (emailPrefix.startsWith('admin_')) {
+                    const parts = currentKecamatan.split('_');
+                    const capitalized = parts.map(p => p.charAt(0).toUpperCase() + p.slice(1)).join(' ');
+                    displayName = `Admin Kec. ${capitalized}`;
+                }
+                const identityEl = document.getElementById('admin-identity-name');
+                if(identityEl) identityEl.innerText = displayName;
 
                 window.logistikData = {};
 
