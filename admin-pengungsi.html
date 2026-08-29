@@ -145,10 +145,10 @@
             
             <div class="mb-4 text-sm font-semibold">
                 <div class="grid grid-cols-[150px_10px_1fr] gap-1 mb-1">
-                    <div>Nama Posko</div><div>:</div><div id="print-meta-posko" class="uppercase">Semua Kecamatan</div>
+                    <div>Nama Posko</div><div>:</div><div id="print-meta-posko" class="capitalize">Semua Kecamatan</div>
                 </div>
                 <div class="grid grid-cols-[150px_10px_1fr] gap-1 mb-1">
-                    <div>Pelapor</div><div>:</div><div id="print-meta-pelapor" class="uppercase">Pusat Data Relawan Kabupaten</div>
+                    <div>Pelapor</div><div>:</div><div id="print-meta-pelapor" class="capitalize">Pusat Data Relawan Kabupaten</div>
                 </div>
                 <div class="grid grid-cols-[150px_10px_1fr] gap-1">
                     <div>Periode Laporan</div><div>:</div><div id="print-meta-periode">Harian, Mingguan atau Bulanan</div>
@@ -583,8 +583,8 @@
                 });
                 
                 // Event listener filter
-                document.getElementById('filter-posko').addEventListener('change', window.renderData);
-                document.getElementById('filter-periode').addEventListener('change', window.renderData);
+                document.getElementById('filter-posko').addEventListener('change', () => { if(window.renderData) window.renderData(); });
+                document.getElementById('filter-periode').addEventListener('change', () => { if(window.renderData) window.renderData(); });
             }
         });
     </script>
