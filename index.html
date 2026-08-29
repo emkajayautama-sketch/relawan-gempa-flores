@@ -21,7 +21,8 @@
                 const name = email.split('@')[0];
                 const capitalizedName = name.charAt(0).toUpperCase() + name.slice(1);
                 
-                document.getElementById('user-greeting').innerText = `Halo, ${capitalizedName}!`;
+                const greetingEl = document.getElementById('user-greeting');
+                if (greetingEl) greetingEl.innerText = `Halo, ${capitalizedName}!`;
                 document.getElementById('user-avatar').src = `https://api.dicebear.com/7.x/initials/svg?seed=${email}`;
             }
         });
@@ -65,9 +66,9 @@
     <!-- Main Content -->
     <main class="pt-28 px-6">
         <!-- Greeting Section -->
-        <div class="mb-8 animate-fade-in-up relative z-10">
-            <h2 id="user-greeting" class="text-3xl font-extrabold text-white mb-1 drop-shadow-lg">Halo, Relawan!</h2>
-            <p class="text-trust-100 text-sm drop-shadow-md">Tetap aman dan semangat bertugas di lapangan.</p>
+        <div class="mb-8 animate-fade-in-up relative z-10 text-center flex flex-col items-center">
+            <img src="/hero-bencana.jpg" alt="Bencana Gempa Flores" class="w-full h-40 object-cover rounded-2xl shadow-xl shadow-black/20 border-2 border-white/30 mb-3">
+            <p class="text-white text-sm drop-shadow-md font-medium tracking-wide">Tetap aman dan semangat bertugas di lapangan.</p>
         </div>
 
         <!-- Quick Stats Card -->
