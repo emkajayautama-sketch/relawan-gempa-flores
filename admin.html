@@ -137,7 +137,7 @@
                         <span class="px-2.5 py-1 rounded-full bg-green-500/20 text-green-400 text-xs font-bold">+2 Hari ini</span>
                     </div>
                     <p class="text-slate-400 text-sm font-medium mb-1">Total Posko Aktif</p>
-                    <h3 id="stat-posko" class="text-4xl font-extrabold text-white">48<span class="text-lg text-slate-500 font-normal ml-2">Lokasi</span></h3>
+                    <h3 id="stat-posko" class="text-4xl font-extrabold text-white">0<span class="text-lg text-slate-500 font-normal ml-2">Lokasi</span></h3>
                 </div>
                 
                 <!-- Card 1.5 -->
@@ -157,7 +157,7 @@
                         <span class="px-2.5 py-1 rounded-full bg-trust-500/20 text-trust-400 text-xs font-bold">+124 Jiwa</span>
                     </div>
                     <p class="text-slate-400 text-sm font-medium mb-1">Total Pengungsi</p>
-                    <h3 id="stat-pengungsi" class="text-4xl font-extrabold text-white">5.432<span class="text-lg text-slate-500 font-normal ml-2">Orang</span></h3>
+                    <h3 id="stat-pengungsi" class="text-4xl font-extrabold text-white">0<span class="text-lg text-slate-500 font-normal ml-2">Orang</span></h3>
                 </div>
 
                 <!-- Card 3 -->
@@ -167,7 +167,7 @@
                         <span class="px-2.5 py-1 rounded-full bg-pink-500/20 text-pink-400 text-xs font-bold">Rentan</span>
                     </div>
                     <p class="text-slate-400 text-sm font-medium mb-1">Balita & Lansia</p>
-                    <h3 id="stat-rentan" class="text-4xl font-extrabold text-white">1.205<span class="text-lg text-slate-500 font-normal ml-2">Jiwa</span></h3>
+                    <h3 id="stat-rentan" class="text-4xl font-extrabold text-white">0<span class="text-lg text-slate-500 font-normal ml-2">Jiwa</span></h3>
                 </div>
 
                 <!-- Card 4 -->
@@ -177,8 +177,8 @@
                         <div class="p-3 bg-red-500/20 rounded-2xl text-red-400"><i data-lucide="alert-triangle" class="w-6 h-6"></i></div>
                         <span class="px-2.5 py-1 rounded-full bg-red-500/20 text-red-400 text-xs font-bold animate-pulse">Kritis</span>
                     </div>
-                    <p class="text-slate-400 text-sm font-medium mb-1 relative z-10">Kekurangan Pangan</p>
-                    <h3 class="text-4xl font-extrabold text-white relative z-10">3<span class="text-lg text-slate-500 font-normal ml-2">Posko</span></h3>
+                    <p class="text-slate-400 text-sm font-medium mb-1 relative z-10">Kekurangan Logistik</p>
+                    <h3 id="stat-kritis" class="text-4xl font-extrabold text-white relative z-10">0<span class="text-lg text-slate-500 font-normal ml-2">Posko</span></h3>
                 </div>
             </div>
 
@@ -296,7 +296,6 @@
                         });
                         
                         document.getElementById('stat-kk').innerHTML = `${totalKkCount}<span class="text-lg text-slate-500 font-normal ml-2">KK</span>`;
-                        document.getElementById('stat-posko').innerHTML = `${Math.max(1, Math.ceil(totalKkCount / 10))}<span class="text-lg text-slate-500 font-normal ml-2">Lokasi</span>`;
 
                         unsubAnggota = onSnapshot(collection(db, "anggota"), (angSnap) => {
                             let totalPengungsi = 0;
@@ -322,13 +321,48 @@
                     let qLog = kecaVal === 'pusat' ? query(collection(db, "laporan_logistik")) : query(collection(db, "laporan_logistik"), where("kecamatan", "==", kecaVal));
                     unsubLogistik = onSnapshot(qLog, (snapshot) => {
                         const feedContainer = document.getElementById('live-feed-container');
+                        
+                        let totalPangan = 0;
+                        let totalHunian = 0;
+                        let totalKesehatan = 0;
+                        const poskoUnik = new Set();
+                        const poskoKritis = new Set();
+
                         if(snapshot.empty) {
-                            feedContainer.innerHTML = '<p class="text-slate-500 text-sm mt-4">Belum ada update logistik untuk wilayah ini.</p>';
+                            feedContainer.innerHTML = '<p class="text-slate-500 text-sm mt-4">Belum ada laporan logistik untuk wilayah ini.</p>';
+                            document.getElementById('stat-posko').innerHTML = `0<span class="text-lg text-slate-500 font-normal ml-2">Lokasi</span>`;
+                            document.getElementById('stat-kritis').innerHTML = `0<span class="text-lg text-slate-500 font-normal ml-2">Posko</span>`;
+                            updateChart([0, 0, 0], kecaVal);
                             return;
                         }
                         
                         const arr = [];
-                        snapshot.forEach(doc => arr.push(doc.data()));
+                        snapshot.forEach(doc => {
+                            const data = doc.data();
+                            arr.push(data);
+                            if (data.posko) poskoUnik.add(data.posko);
+                            
+                            let hasKritis = false;
+                            for (const [key, qty] of Object.entries(data.kebutuhan || {})) {
+                                if (qty > 0) hasKritis = true;
+                                if (key.includes('[Pangan & Air]')) totalPangan += qty;
+                                else if (key.includes('[Hunian (Shelter)]')) totalHunian += qty;
+                                else if (key.includes('[Medis & Sanitasi]')) totalKesehatan += qty;
+                                else totalPangan += qty; // fallback
+                            }
+                            if (hasKritis && data.posko) poskoKritis.add(data.posko);
+                        });
+                        
+                        document.getElementById('stat-posko').innerHTML = `${poskoUnik.size}<span class="text-lg text-slate-500 font-normal ml-2">Lokasi</span>`;
+                        document.getElementById('stat-kritis').innerHTML = `${poskoKritis.size}<span class="text-lg text-slate-500 font-normal ml-2">Posko</span>`;
+                        
+                        // Hitung persentase relatif untuk chart (maks 100)
+                        const maxLog = Math.max(totalPangan, totalHunian, totalKesehatan, 1);
+                        const pPangan = Math.round((totalPangan / maxLog) * 100);
+                        const pHunian = Math.round((totalHunian / maxLog) * 100);
+                        const pKesehatan = Math.round((totalKesehatan / maxLog) * 100);
+                        updateChart([pPangan, pHunian, pKesehatan], kecaVal);
+
                         arr.sort((a,b) => {
                             const tA = a.createdAt ? a.createdAt.toMillis() : 0;
                             const tB = b.createdAt ? b.createdAt.toMillis() : 0;
@@ -342,11 +376,11 @@
                             let itemMendesak = 'Logistik';
                             let maxQty = 0;
                             for (const [key, value] of Object.entries(data.kebutuhan || {})) {
-                                if (value > maxQty) { maxQty = value; itemMendesak = key; }
+                                if (value > maxQty) { maxQty = value; itemMendesak = key.replace(/\[.*?\]\s*/, ''); }
                             }
 
                             html += `
-                            <div class="flex border-b border-slate-800 pb-3">
+                            <div class="flex border-b border-slate-800 pb-3 mt-3">
                                 <div class="w-10 h-10 rounded-full bg-orange-900/50 flex justify-center items-center text-alert-500 shrink-0">
                                     <i data-lucide="package" class="w-5 h-5"></i>
                                 </div>
@@ -385,67 +419,81 @@
         gradientHealth.addColorStop(0, 'rgba(236, 72, 153, 0.8)'); // Pink
         gradientHealth.addColorStop(1, 'rgba(236, 72, 153, 0.1)');
 
-        new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: ['Kab. Nagekeo'],
-                datasets: [
-                    {
-                        label: 'Pangan & Air',
-                        data: [85],
-                        backgroundColor: gradientFood,
-                        borderColor: '#3b82f6',
-                        borderWidth: 2,
-                        borderRadius: 6,
-                        maxBarThickness: 80
-                    },
-                    {
-                        label: 'Hunian (Shelter)',
-                        data: [65],
-                        backgroundColor: gradientShelter,
-                        borderColor: '#f97316',
-                        borderWidth: 2,
-                        borderRadius: 6,
-                        maxBarThickness: 80
-                    },
-                    {
-                        label: 'Kesehatan (Obat/Sanitasi)',
-                        data: [40],
-                        backgroundColor: gradientHealth,
-                        borderColor: '#ec4899',
-                        borderWidth: 2,
-                        borderRadius: 6,
-                        maxBarThickness: 80
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'top',
-                        labels: { color: '#94a3b8', font: { family: 'Inter', size: 12 } }
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        max: 100,
-                        grid: { color: 'rgba(51, 65, 85, 0.5)', drawBorder: false },
-                        ticks: { color: '#64748b', callback: function(value) { return value + "%" } }
-                    },
-                    x: {
-                        grid: { display: false, drawBorder: false },
-                        ticks: { color: '#94a3b8', font: { family: 'Inter' } }
-                    }
-                },
-                interaction: {
-                    mode: 'index',
-                    intersect: false,
-                },
+        let chartInstance = null;
+        function updateChart(dataArr, labelPrefix) {
+            const labelText = labelPrefix === 'pusat' ? 'Kabupaten Nagekeo' : 'Kecamatan ' + labelPrefix.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
+            
+            if (chartInstance) {
+                chartInstance.data.datasets[0].data = [dataArr[0]];
+                chartInstance.data.datasets[1].data = [dataArr[1]];
+                chartInstance.data.datasets[2].data = [dataArr[2]];
+                chartInstance.data.labels = [labelText];
+                chartInstance.update();
+                return;
             }
-        });
+
+            chartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: [labelText],
+                    datasets: [
+                        {
+                            label: 'Pangan & Air',
+                            data: [dataArr[0]],
+                            backgroundColor: gradientFood,
+                            borderColor: '#3b82f6',
+                            borderWidth: 2,
+                            borderRadius: 6,
+                            maxBarThickness: 80
+                        },
+                        {
+                            label: 'Hunian (Shelter)',
+                            data: [dataArr[1]],
+                            backgroundColor: gradientShelter,
+                            borderColor: '#f97316',
+                            borderWidth: 2,
+                            borderRadius: 6,
+                            maxBarThickness: 80
+                        },
+                        {
+                            label: 'Kesehatan (Obat/Sanitasi)',
+                            data: [dataArr[2]],
+                            backgroundColor: gradientHealth,
+                            borderColor: '#ec4899',
+                            borderWidth: 2,
+                            borderRadius: 6,
+                            maxBarThickness: 80
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: { color: '#94a3b8', font: { family: 'Inter', size: 12 } }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            grid: { color: 'rgba(51, 65, 85, 0.5)', drawBorder: false },
+                            ticks: { color: '#64748b', callback: function(value) { return value + "%" } }
+                        },
+                        x: {
+                            grid: { display: false, drawBorder: false },
+                            ticks: { color: '#94a3b8', font: { family: 'Inter' } }
+                        }
+                    },
+                    interaction: {
+                        mode: 'index',
+                        intersect: false,
+                    },
+                }
+            });
+        }
 
         // Real-time clock update
         setInterval(() => {
