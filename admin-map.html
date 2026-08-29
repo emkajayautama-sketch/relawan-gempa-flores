@@ -236,16 +236,7 @@
                         // Hapus marker lama jika ada perubahan
                         markerLayer.clearLayers();
                         
-                        // Jika kosong (database baru), tampilkan dummy untuk demo
                         if (snapshot.empty) {
-                            if (kecaVal === 'pusat') {
-                                L.marker([-8.35, 122.95], {icon: redIcon}).addTo(markerLayer).bindPopup(`
-                                    <div class='p-1'>
-                                        <h3 class='font-bold text-slate-800'>Posko Desa Ile Bura (Demo Pusat)</h3>
-                                        <p class='text-xs text-red-600 font-medium mb-1'>Status: KRITIS PANGAN</p>
-                                        <p class='text-xs text-slate-500'>*Data riil Firebase belum ada</p>
-                                    </div>`);
-                            }
                             return;
                         }
 
