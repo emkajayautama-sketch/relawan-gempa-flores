@@ -39,7 +39,7 @@
                 <div class="bg-gradient-to-tr from-trust-600 to-trust-400 p-2 rounded-lg mr-3 shadow-lg shadow-trust-600/30">
                     <i data-lucide="activity" class="text-white w-5 h-5"></i>
                 </div>
-                <h1 class="text-lg font-bold tracking-wide text-white">Relawan Gempa</h1>
+                <h1 id="sidebar-app-title" class="text-lg font-bold tracking-wide text-white leading-tight">Relawan Gempa</h1>
             </div>
             
             <nav class="p-4 space-y-2 mt-4">
@@ -139,7 +139,7 @@
 
     <script type="module">
         import { db, auth } from './src/firebase.js';
-        import { collection, onSnapshot, query, where } from 'firebase/firestore';
+        import { collection, onSnapshot, query, where, doc, getDoc } from 'firebase/firestore';
         import { onAuthStateChanged } from 'firebase/auth';
         
         lucide.createIcons();
@@ -210,7 +210,7 @@
         let unsubPosko;
 
         // Listen ke koleksi "posko" di Firestore
-        onAuthStateChanged(auth, (user) => {
+        onAuthStateChanged(auth, async (user) => {
             if (user && user.email.includes('admin')) {
                 const emailPrefix = user.email.split('@')[0];
                 const kecamatanSelector = document.getElementById('kecamatan-selector');
@@ -234,6 +234,18 @@
                 }
                 const identityEl = document.getElementById('admin-identity-name');
                 if(identityEl) identityEl.innerText = displayName;
+
+                const docIdKop = currentKecamatan === 'pusat' ? 'kopsurat' : `kopsurat_${currentKecamatan}`;
+                try {
+                    const docSnap = await getDoc(doc(db, "pengaturan", docIdKop));
+                    if (docSnap.exists()) {
+                        const data = docSnap.data();
+                        const appTitleEl = document.getElementById('sidebar-app-title');
+                        if (appTitleEl && data.nama1) {
+                            appTitleEl.innerHTML = `${data.nama1}<span class="block text-xs font-normal text-trust-300 mt-0.5">${data.nama2 || ''}</span>`;
+                        }
+                    }
+                } catch(e) { console.error("Gagal load kop surat", e); }
 
                 const loadMapData = () => {
                     const kecaVal = (emailPrefix === 'admin' || emailPrefix === 'admin_pusat') ? selectKecamatan.value : currentKecamatan;
