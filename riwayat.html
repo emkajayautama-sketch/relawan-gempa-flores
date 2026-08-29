@@ -95,8 +95,8 @@
                 </div>
                 <span class="text-[10px] font-medium mt-1">Beranda</span>
             </a>
-            <a href="riwayat.html" class="flex flex-col items-center justify-center w-full text-trust-400 group cursor-default">
-                <div class="p-1.5 bg-trust-500/20 border border-trust-500/30 rounded-xl transition-colors shadow-[0_0_15px_rgba(56,189,248,0.2)]">
+            <a href="riwayat.html" class="flex flex-col items-center justify-center w-full text-white group cursor-default">
+                <div class="p-1.5 bg-white/10 border border-white/20 rounded-xl transition-colors">
                     <i data-lucide="history" class="w-5 h-5"></i>
                 </div>
                 <span class="text-[10px] font-semibold mt-1">Riwayat</span>
@@ -195,8 +195,8 @@
                     const dateString = date.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
 
                     const iconStr = item.type === 'keluarga' 
-                        ? `<div class="w-12 h-12 rounded-2xl bg-trust-500/20 flex items-center justify-center shrink-0 border border-trust-500/30"><i data-lucide="users" class="w-6 h-6 text-trust-400"></i></div>`
-                        : `<div class="w-12 h-12 rounded-2xl bg-alert-500/20 flex items-center justify-center shrink-0 border border-alert-500/30"><i data-lucide="package" class="w-6 h-6 text-alert-400"></i></div>`;
+                        ? `<div class="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center shrink-0 border border-white/10"><i data-lucide="users" class="w-6 h-6 text-trust-400"></i></div>`
+                        : `<div class="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center shrink-0 border border-white/10"><i data-lucide="package" class="w-6 h-6 text-alert-400"></i></div>`;
                     
                     const el = document.createElement('div');
                     
@@ -221,10 +221,10 @@
                                     <button onclick="window.location.href='form-pengungsi.html?editId=${item.id}'" class="flex-1 flex justify-center items-center py-2 bg-white/5 text-slate-300 rounded-xl text-xs font-bold border border-white/10 hover:bg-white/10 active:scale-95 transition-all">
                                         <i data-lucide="edit" class="w-3.5 h-3.5 mr-1.5"></i> Edit KK
                                     </button>
-                                    <button onclick="hapusData('${item.id}', 'keluarga')" class="flex-1 flex justify-center items-center py-2 bg-red-500/10 text-red-400 rounded-xl text-xs font-bold border border-red-500/20 hover:bg-red-500/20 active:scale-95 transition-all">
+                                    <button onclick="hapusData('${item.id}', 'keluarga')" class="flex-1 flex justify-center items-center py-2 bg-white/5 text-red-400 rounded-xl text-xs font-bold border border-white/10 hover:bg-white/10 active:scale-95 transition-all">
                                         <i data-lucide="trash-2" class="w-3.5 h-3.5 mr-1.5"></i> Hapus
                                     </button>
-                                    <button onclick="window.location.href='form-anggota.html?kkId=${item.id}'" class="flex-[1.5] flex justify-center items-center py-2 bg-trust-500/10 text-trust-400 rounded-xl text-xs font-bold border border-trust-500/20 hover:bg-trust-500/20 active:scale-95 transition-all">
+                                    <button onclick="window.location.href='form-anggota.html?kkId=${item.id}'" class="flex-[1.5] flex justify-center items-center py-2 bg-white/5 text-trust-400 rounded-xl text-xs font-bold border border-white/10 hover:bg-white/10 active:scale-95 transition-all">
                                         <i data-lucide="user-plus" class="w-3.5 h-3.5 mr-1.5"></i> Anggota
                                     </button>
                                 </div>
@@ -251,7 +251,7 @@
                                     <button onclick="window.location.href='form-logistik.html?editId=${item.id}'" class="flex-1 flex justify-center items-center py-2 bg-white/5 text-slate-300 rounded-xl text-xs font-bold border border-white/10 hover:bg-white/10 active:scale-95 transition-all">
                                         <i data-lucide="edit" class="w-3.5 h-3.5 mr-1.5"></i> Edit
                                     </button>
-                                    <button onclick="hapusData('${item.id}', 'logistik')" class="flex-1 flex justify-center items-center py-2 bg-red-500/10 text-red-400 rounded-xl text-xs font-bold border border-red-500/20 hover:bg-red-500/20 active:scale-95 transition-all">
+                                    <button onclick="hapusData('${item.id}', 'logistik')" class="flex-1 flex justify-center items-center py-2 bg-white/5 text-red-400 rounded-xl text-xs font-bold border border-white/10 hover:bg-white/10 active:scale-95 transition-all">
                                         <i data-lucide="trash-2" class="w-3.5 h-3.5 mr-1.5"></i> Hapus
                                     </button>
                                 </div>
