@@ -96,6 +96,18 @@
             </div>
             
             <div class="flex items-center space-x-4">
+                <div id="kecamatan-selector" class="hidden">
+                    <select id="filter-kecamatan" class="px-4 py-2 border border-slate-700 rounded-full text-slate-300 bg-slate-800 focus:outline-none focus:border-trust-500 text-sm cursor-pointer glass-dark appearance-none pr-8">
+                        <option value="pusat">Pusat (Semua Data)</option>
+                        <option value="aesesa">Kecamatan Aesesa</option>
+                        <option value="aesesa_selatan">Kecamatan Aesesa Selatan</option>
+                        <option value="boawae">Kecamatan Boawae</option>
+                        <option value="keo_tengah">Kecamatan Keo Tengah</option>
+                        <option value="mauponggo">Kecamatan Mauponggo</option>
+                        <option value="nangaroro">Kecamatan Nangaroro</option>
+                        <option value="wolowae">Kecamatan Wolowae</option>
+                    </select>
+                </div>
                 <button id="btn-toggle-select" class="flex items-center px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-full transition-colors border border-slate-700 text-sm font-medium">
                     <i data-lucide="check-square" class="w-4 h-4 mr-2"></i> Pilih Foto
                 </button>
@@ -232,6 +244,9 @@
             main, aside, #bulk-action-bar, #image-modal { display: none !important; }
             #print-area-galeri { position: relative !important; display: block !important; overflow: visible !important; }
             .page-break { page-break-inside: avoid; break-inside: avoid; }
+            /* Memaksa grid print 2 kolom dan mencegah item terpotong */
+            #print-gallery-grid { display: grid !important; grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 1rem !important; }
+            .print-item { page-break-inside: avoid; break-inside: avoid; height: 350px; }
         }
         .custom-scrollbar::-webkit-scrollbar { width: 6px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
@@ -241,7 +256,7 @@
 
     <script type="module">
         import { db, auth } from './src/firebase.js';
-        import { collection, onSnapshot, query, orderBy, limit, doc, deleteDoc, getDoc, doc as fDoc } from 'firebase/firestore';
+        import { collection, onSnapshot, query, orderBy, limit, doc, deleteDoc, getDoc, doc as fDoc, where } from 'firebase/firestore';
         import { onAuthStateChanged } from 'firebase/auth';
 
         lucide.createIcons();
@@ -267,14 +282,29 @@
         
         let isSelectionMode = false;
         let selectedPhotos = new Set();
+        let currentKecamatan = 'pusat';
+        let unsubGaleri;
 
         // Fetch dari Firestore (collection 'dokumentasi')
         // Kita harus menunggu status login (token) dari Firebase siap sebelum menarik data
         onAuthStateChanged(auth, async (user) => {
-            if (user) {
+            if (user && user.email.includes('admin')) {
+                const emailPrefix = user.email.split('@')[0];
+                const kecamatanSelector = document.getElementById('kecamatan-selector');
+                const selectKecamatan = document.getElementById('filter-kecamatan');
+
+                if (emailPrefix === 'admin' || emailPrefix === 'admin_pusat') {
+                    kecamatanSelector.classList.remove('hidden');
+                } else if (emailPrefix.startsWith('admin_')) {
+                    currentKecamatan = emailPrefix.replace('admin_', '');
+                    const opt = Array.from(selectKecamatan.options).find(o => o.value === currentKecamatan);
+                    if (opt) selectKecamatan.value = currentKecamatan;
+                }
+
                 // Fetch Kop Surat
                 try {
-                    const docSnap = await getDoc(fDoc(db, "pengaturan", "kopsurat"));
+                    const docIdKop = currentKecamatan === 'pusat' ? 'kopsurat' : `kopsurat_${currentKecamatan}`;
+                    const docSnap = await getDoc(fDoc(db, "pengaturan", docIdKop));
                     if (docSnap.exists()) {
                         const d = docSnap.data();
                         if (d.nama1) document.getElementById('print-nama1').innerText = d.nama1;
@@ -291,30 +321,52 @@
                     console.error("Gagal load pengaturan kop surat", e);
                 }
 
-                const q = query(collection(db, "dokumentasi"), orderBy("createdAt", "desc"), limit(50));
-                
-                onSnapshot(q, (snapshot) => {
-                    loading.classList.add('hidden');
+                const loadGaleriData = () => {
+                    const kecaVal = (emailPrefix === 'admin' || emailPrefix === 'admin_pusat') ? selectKecamatan.value : currentKecamatan;
+                    currentKecamatan = kecaVal;
                     
-                    if (snapshot.empty) {
-                        emptyState.classList.remove('hidden');
-                        grid.classList.add('hidden');
-                        return;
-                    }
-
+                    if (unsubGaleri) unsubGaleri();
+                    
+                    loading.classList.remove('hidden');
+                    grid.classList.add('hidden');
                     emptyState.classList.add('hidden');
-                    grid.classList.remove('hidden');
+
+                    let q = kecaVal === 'pusat' ? query(collection(db, "dokumentasi"), orderBy("createdAt", "desc"), limit(100)) : query(collection(db, "dokumentasi"), where("kecamatan", "==", kecaVal));
                     
-                    allPhotos = [];
-                    snapshot.forEach(doc => {
-                        allPhotos.push({ id: doc.id, ...doc.data() });
+                    unsubGaleri = onSnapshot(q, (snapshot) => {
+                        loading.classList.add('hidden');
+                        
+                        if (snapshot.empty) {
+                            emptyState.classList.remove('hidden');
+                            grid.classList.add('hidden');
+                            return;
+                        }
+
+                        emptyState.classList.add('hidden');
+                        grid.classList.remove('hidden');
+                        
+                        allPhotos = [];
+                        snapshot.forEach(doc => {
+                            allPhotos.push({ id: doc.id, ...doc.data() });
+                        });
+                        
+                        if (kecaVal !== 'pusat') {
+                            allPhotos.sort((a,b) => {
+                                const tA = a.createdAt ? a.createdAt.toMillis() : 0;
+                                const tB = b.createdAt ? b.createdAt.toMillis() : 0;
+                                return tB - tA;
+                            });
+                        }
+                        
+                        renderGallery(allPhotos);
+                    }, (error) => {
+                        console.error("Error fetching photos:", error);
+                        loading.innerHTML = `<p class="text-red-400">Gagal memuat foto: ${error.message}</p>`;
                     });
-                    
-                    renderGallery(allPhotos);
-                }, (error) => {
-                    console.error("Error fetching photos:", error);
-                    loading.innerHTML = `<p class="text-red-400">Gagal memuat foto: ${error.message}</p>`;
-                });
+                };
+
+                loadGaleriData();
+                selectKecamatan.addEventListener('change', loadGaleriData);
             }
         });
 
@@ -498,7 +550,7 @@
                 const safeCaption = photo.caption || 'Tanpa keterangan';
                 
                 const itemDiv = document.createElement('div');
-                itemDiv.className = "flex flex-col border border-gray-400 p-2 rounded-lg page-break bg-gray-50/50 shadow-sm";
+                itemDiv.className = "print-item flex flex-col border border-gray-400 p-2 rounded-lg bg-gray-50/50 shadow-sm";
                 itemDiv.innerHTML = `
                     <div class="h-64 w-full bg-gray-100 mb-2 overflow-hidden flex items-center justify-center rounded border border-gray-200">
                         <img src="${imgSrc}" class="max-w-full max-h-full object-contain">

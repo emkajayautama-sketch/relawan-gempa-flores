@@ -99,6 +99,18 @@
             </div>
             
             <div class="flex items-center space-x-4">
+                <div id="kecamatan-selector" class="hidden">
+                    <select id="filter-kecamatan" class="px-4 py-2 border border-slate-700 rounded-full text-slate-300 bg-slate-800 focus:outline-none focus:border-trust-500 text-sm cursor-pointer appearance-none pr-8 relative glass-dark">
+                        <option value="pusat">Pusat (Semua Data)</option>
+                        <option value="aesesa">Kecamatan Aesesa</option>
+                        <option value="aesesa_selatan">Kecamatan Aesesa Selatan</option>
+                        <option value="boawae">Kecamatan Boawae</option>
+                        <option value="keo_tengah">Kecamatan Keo Tengah</option>
+                        <option value="mauponggo">Kecamatan Mauponggo</option>
+                        <option value="nangaroro">Kecamatan Nangaroro</option>
+                        <option value="wolowae">Kecamatan Wolowae</option>
+                    </select>
+                </div>
                 <div class="relative">
                     <i data-lucide="search" class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400"></i>
                     <input type="text" placeholder="Cari NIK / Nama Posko..." class="bg-slate-950/50 border border-slate-700 text-sm rounded-full pl-10 pr-4 py-2 text-white focus:outline-none focus:border-trust-500 focus:ring-1 focus:ring-trust-500 w-64 transition-all">
@@ -242,65 +254,117 @@
 
     <script type="module">
         import { db, auth } from './src/firebase.js';
-        import { collection, onSnapshot, query, orderBy, limit } from 'firebase/firestore';
+        import { collection, onSnapshot, query, orderBy, limit, where } from 'firebase/firestore';
         import { onAuthStateChanged } from 'firebase/auth';
 
         lucide.createIcons();
 
-        // 1. Listen Total Pengungsi & Rentan
+        let currentKecamatan = 'pusat';
+        let unsubKK, unsubAnggota, unsubLogistik;
+
         onAuthStateChanged(auth, (user) => {
             if (user) {
-                // Listen Total KK
-                onSnapshot(collection(db, "keluarga"), (snapshot) => {
-                    document.getElementById('stat-kk').innerHTML = `${snapshot.size}<span class="text-lg text-slate-500 font-normal ml-2">KK</span>`;
-                });
+                const emailPrefix = user.email.split('@')[0];
+                const kecamatanSelector = document.getElementById('kecamatan-selector');
+                const selectKecamatan = document.getElementById('filter-kecamatan');
+                
+                if (emailPrefix === 'admin' || emailPrefix === 'admin_pusat') {
+                    kecamatanSelector.classList.remove('hidden');
+                } else if (emailPrefix.startsWith('admin_')) {
+                    currentKecamatan = emailPrefix.replace('admin_', '');
+                    const opt = Array.from(selectKecamatan.options).find(o => o.value === currentKecamatan);
+                    if (opt) selectKecamatan.value = currentKecamatan;
+                }
 
-                onSnapshot(collection(db, "anggota"), (snapshot) => {
-                    let totalPengungsi = snapshot.size;
-                    let totalRentan = 0;
+                const loadDashboard = () => {
+                    const kecaVal = (emailPrefix === 'admin' || emailPrefix === 'admin_pusat') ? selectKecamatan.value : currentKecamatan;
+                    currentKecamatan = kecaVal;
+
+                    if (unsubKK) unsubKK();
+                    if (unsubAnggota) unsubAnggota();
+                    if (unsubLogistik) unsubLogistik();
+
+                    // 1. Listen Total KK & Pengungsi
+                    let qKK = kecaVal === 'pusat' ? query(collection(db, "keluarga")) : query(collection(db, "keluarga"), where("kecamatan", "==", kecaVal));
                     
-                    snapshot.forEach(doc => {
-                        const data = doc.data();
-                        if (data.umur < 5 || data.umur >= 60 || (data.statusRentan && data.statusRentan.length > 0)) {
-                            totalRentan++;
-                        }
-                    });
-
-                    document.getElementById('stat-pengungsi').innerHTML = `${totalPengungsi}<span class="text-lg text-slate-500 font-normal ml-2">Orang</span>`;
-                    document.getElementById('stat-rentan').innerHTML = `${totalRentan}<span class="text-lg text-slate-500 font-normal ml-2">Jiwa</span>`;
-                });
-
-                // 2. Listen Laporan Logistik (Live Feed)
-                const qLogistik = query(collection(db, "laporan_logistik"), orderBy("createdAt", "desc"), limit(5));
-                onSnapshot(qLogistik, (snapshot) => {
-                    const feedContainer = document.getElementById('live-feed-container');
-                    if(snapshot.empty) return;
-                    
-                    let html = '';
-                    snapshot.forEach(doc => {
-                        const data = doc.data();
-                        const timeStr = data.createdAt ? data.createdAt.toDate().toLocaleTimeString('id-ID', {hour: '2-digit', minute:'2-digit'}) : 'Baru saja';
+                    unsubKK = onSnapshot(qKK, (snapshot) => {
+                        const validKkIds = new Set();
+                        let totalKkCount = 0;
+                        snapshot.forEach(doc => {
+                            validKkIds.add(doc.id);
+                            totalKkCount++;
+                        });
                         
-                        // Cek kebutuhan (pilih salah satu yang paling banyak diminta)
-                        let itemMendesak = 'Logistik';
-                        let maxQty = 0;
-                        for (const [key, value] of Object.entries(data.kebutuhan || {})) {
-                            if (value > maxQty) { maxQty = value; itemMendesak = key; }
-                        }
+                        document.getElementById('stat-kk').innerHTML = `${totalKkCount}<span class="text-lg text-slate-500 font-normal ml-2">KK</span>`;
+                        document.getElementById('stat-posko').innerHTML = `${Math.max(1, Math.ceil(totalKkCount / 10))}<span class="text-lg text-slate-500 font-normal ml-2">Lokasi</span>`;
 
-                        html += `
-                        <div class="flex border-b border-slate-800 pb-3">
-                            <div class="w-10 h-10 rounded-full bg-orange-900/50 flex justify-center items-center text-alert-500 shrink-0">
-                                <i data-lucide="package" class="w-5 h-5"></i>
-                            </div>
-                            <div class="ml-3">
-                                <p class="text-sm text-white font-medium">Laporan: Butuh ${maxQty} ${itemMendesak.toUpperCase()} di ${data.posko}</p>
-                                <p class="text-xs text-slate-500 mt-1">Oleh: ${data.pelapor} • ${timeStr}</p>
-                            </div>
-                        </div>`;
+                        unsubAnggota = onSnapshot(collection(db, "anggota"), (angSnap) => {
+                            let totalPengungsi = 0;
+                            let totalRentan = 0;
+                            
+                            angSnap.forEach(docAng => {
+                                const data = docAng.data();
+                                // Filter by valid KK Ids
+                                if (validKkIds.has(data.kkId)) {
+                                    totalPengungsi++;
+                                    if (data.umur < 5 || data.umur >= 60 || (data.statusRentan && data.statusRentan.length > 0)) {
+                                        totalRentan++;
+                                    }
+                                }
+                            });
+
+                            document.getElementById('stat-pengungsi').innerHTML = `${totalPengungsi}<span class="text-lg text-slate-500 font-normal ml-2">Orang</span>`;
+                            document.getElementById('stat-rentan').innerHTML = `${totalRentan}<span class="text-lg text-slate-500 font-normal ml-2">Jiwa</span>`;
+                        });
                     });
-                    feedContainer.innerHTML = html;
-                    lucide.createIcons(); // refresh icons newly added
+
+                    // 2. Listen Laporan Logistik (Live Feed)
+                    let qLog = kecaVal === 'pusat' ? query(collection(db, "laporan_logistik")) : query(collection(db, "laporan_logistik"), where("kecamatan", "==", kecaVal));
+                    unsubLogistik = onSnapshot(qLog, (snapshot) => {
+                        const feedContainer = document.getElementById('live-feed-container');
+                        if(snapshot.empty) {
+                            feedContainer.innerHTML = '<p class="text-slate-500 text-sm mt-4">Belum ada update logistik untuk wilayah ini.</p>';
+                            return;
+                        }
+                        
+                        const arr = [];
+                        snapshot.forEach(doc => arr.push(doc.data()));
+                        arr.sort((a,b) => {
+                            const tA = a.createdAt ? a.createdAt.toMillis() : 0;
+                            const tB = b.createdAt ? b.createdAt.toMillis() : 0;
+                            return tB - tA;
+                        });
+                        
+                        let html = '';
+                        arr.slice(0, 5).forEach(data => {
+                            const timeStr = data.createdAt ? data.createdAt.toDate().toLocaleTimeString('id-ID', {hour: '2-digit', minute:'2-digit'}) : 'Baru saja';
+                            
+                            let itemMendesak = 'Logistik';
+                            let maxQty = 0;
+                            for (const [key, value] of Object.entries(data.kebutuhan || {})) {
+                                if (value > maxQty) { maxQty = value; itemMendesak = key; }
+                            }
+
+                            html += `
+                            <div class="flex border-b border-slate-800 pb-3">
+                                <div class="w-10 h-10 rounded-full bg-orange-900/50 flex justify-center items-center text-alert-500 shrink-0">
+                                    <i data-lucide="package" class="w-5 h-5"></i>
+                                </div>
+                                <div class="ml-3">
+                                    <p class="text-sm text-white font-medium">Laporan: Butuh ${maxQty} ${itemMendesak.toUpperCase()} di ${data.posko}</p>
+                                    <p class="text-xs text-slate-500 mt-1">Oleh: ${data.pelapor} • ${timeStr}</p>
+                                </div>
+                            </div>`;
+                        });
+                        feedContainer.innerHTML = html;
+                        lucide.createIcons();
+                    });
+                };
+
+                loadDashboard();
+                
+                selectKecamatan.addEventListener('change', () => {
+                    loadDashboard();
                 });
             }
         });

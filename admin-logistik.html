@@ -94,6 +94,18 @@
                 <p class="text-sm text-slate-400 mt-1">Daftar permohonan bantuan dari seluruh posko relawan.</p>
             </div>
             <div class="flex gap-3">
+                <div id="kecamatan-selector" class="hidden">
+                    <select id="filter-kecamatan" class="px-4 py-2 border border-slate-600 rounded-lg text-slate-300 bg-slate-800 focus:outline-none focus:border-trust-500 text-sm cursor-pointer glass-dark appearance-none pr-8">
+                        <option value="pusat">Pusat (Semua Data)</option>
+                        <option value="aesesa">Kecamatan Aesesa</option>
+                        <option value="aesesa_selatan">Kecamatan Aesesa Selatan</option>
+                        <option value="boawae">Kecamatan Boawae</option>
+                        <option value="keo_tengah">Kecamatan Keo Tengah</option>
+                        <option value="mauponggo">Kecamatan Mauponggo</option>
+                        <option value="nangaroro">Kecamatan Nangaroro</option>
+                        <option value="wolowae">Kecamatan Wolowae</option>
+                    </select>
+                </div>
                 <select id="filter-klaster" class="px-4 py-2 border border-slate-600 rounded-lg text-slate-300 bg-slate-800 focus:outline-none focus:border-trust-500 text-sm cursor-pointer glass-dark appearance-none pr-8">
                     <option value="all">Semua Klaster</option>
                     <option value="Pangan & Air">Pangan & Air</option>
@@ -319,7 +331,7 @@
 
     <script type="module">
         import { db, auth } from './src/firebase.js';
-        import { collection, onSnapshot, query, orderBy, doc as fDoc, getDoc } from 'firebase/firestore';
+        import { collection, onSnapshot, query, orderBy, doc as fDoc, getDoc, where } from 'firebase/firestore';
         import { onAuthStateChanged } from 'firebase/auth';
 
         lucide.createIcons();
@@ -328,14 +340,30 @@
         const loading = document.getElementById('loading');
         const emptyState = document.getElementById('empty-state');
         const tableContainer = document.getElementById('table-container');
+        
+        let currentKecamatan = 'pusat';
+        let unsubLogistik;
 
         onAuthStateChanged(auth, async (user) => {
             if (user && user.email.includes('admin')) {
+                const emailPrefix = user.email.split('@')[0];
+                const kecamatanSelector = document.getElementById('kecamatan-selector');
+                const selectKecamatan = document.getElementById('filter-kecamatan');
+
+                if (emailPrefix === 'admin' || emailPrefix === 'admin_pusat') {
+                    kecamatanSelector.classList.remove('hidden');
+                } else if (emailPrefix.startsWith('admin_')) {
+                    currentKecamatan = emailPrefix.replace('admin_', '');
+                    const opt = Array.from(selectKecamatan.options).find(o => o.value === currentKecamatan);
+                    if (opt) selectKecamatan.value = currentKecamatan;
+                }
+
                 window.logistikData = {};
 
                 // Fetch Kop Surat
                 try {
-                    const docSnap = await getDoc(fDoc(db, "pengaturan", "kopsurat"));
+                    const docIdKop = currentKecamatan === 'pusat' ? 'kopsurat' : `kopsurat_${currentKecamatan}`;
+                    const docSnap = await getDoc(fDoc(db, "pengaturan", docIdKop));
                     if (docSnap.exists()) {
                         const d = docSnap.data();
                         if (d.nama1) { document.getElementById('print-nama1').innerText = d.nama1; document.getElementById('print-nama1-rekap').innerText = d.nama1; }
@@ -356,29 +384,45 @@
                     console.error("Gagal load pengaturan kop surat", e);
                 }
 
-                const q = query(collection(db, "laporan_logistik"), orderBy("createdAt", "desc"));
-                
-                onSnapshot(q, (snapshot) => {
-                    loading.classList.add('hidden');
+                const loadLogistikData = () => {
+                    const kecaVal = (emailPrefix === 'admin' || emailPrefix === 'admin_pusat') ? selectKecamatan.value : currentKecamatan;
+                    currentKecamatan = kecaVal;
                     
-                    window.allLogistikDocs = [];
-                    snapshot.forEach(doc => {
-                        window.allLogistikDocs.push({ id: doc.id, data: doc.data() });
+                    if (unsubLogistik) unsubLogistik();
+                    
+                    loading.classList.remove('hidden');
+
+                    let q = kecaVal === 'pusat' ? query(collection(db, "laporan_logistik"), orderBy("createdAt", "desc")) : query(collection(db, "laporan_logistik"), where("kecamatan", "==", kecaVal));
+                    
+                    unsubLogistik = onSnapshot(q, (snapshot) => {
+                        loading.classList.add('hidden');
+                        
+                        window.allLogistikDocs = [];
+                        snapshot.forEach(doc => {
+                            window.allLogistikDocs.push({ id: doc.id, data: doc.data() });
+                        });
+                        
+                        // Sort if using where without orderBy
+                        if (kecaVal !== 'pusat') {
+                            window.allLogistikDocs.sort((a,b) => {
+                                const tA = a.data.createdAt ? a.data.createdAt.toMillis() : 0;
+                                const tB = b.data.createdAt ? b.data.createdAt.toMillis() : 0;
+                                return tB - tA;
+                            });
+                        }
+                        
+                        window.renderLogistikData();
+                    }, (error) => {
+                        console.error("Error fetching logistik:", error);
+                        loading.innerHTML = `<p class="text-red-500">Gagal memuat data: ${error.message}</p>`;
                     });
-                    
-                    window.renderLogistikData();
-                }, (error) => {
-                    console.error("Error fetching logistik:", error);
-                    loading.innerHTML = `<p class="text-red-500">Gagal memuat data: ${error.message}</p>`;
-                });
+                };
                 
-                document.getElementById('filter-waktu').addEventListener('change', () => {
-                    window.renderLogistikData();
-                });
+                loadLogistikData();
+                selectKecamatan.addEventListener('change', loadLogistikData);
                 
-                document.getElementById('filter-klaster').addEventListener('change', () => {
-                    window.renderLogistikData();
-                });
+                document.getElementById('filter-waktu').addEventListener('change', window.renderLogistikData);
+                document.getElementById('filter-klaster').addEventListener('change', window.renderLogistikData);
 
                 window.renderLogistikData = function() {
                     const filter = document.getElementById('filter-waktu').value;

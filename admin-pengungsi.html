@@ -93,6 +93,18 @@
                 <p class="text-sm text-slate-400 mt-1">Rekapan anggota jiwa dari berbagai posko.</p>
             </div>
             <div class="flex gap-3">
+                <div id="kecamatan-selector" class="hidden">
+                    <select id="filter-kecamatan" class="px-4 py-2 border border-slate-600 rounded-lg text-slate-300 bg-slate-800 focus:outline-none focus:border-trust-500 text-sm cursor-pointer glass-dark appearance-none pr-8">
+                        <option value="pusat">Pusat (Semua Data)</option>
+                        <option value="aesesa">Kecamatan Aesesa</option>
+                        <option value="aesesa_selatan">Kecamatan Aesesa Selatan</option>
+                        <option value="boawae">Kecamatan Boawae</option>
+                        <option value="keo_tengah">Kecamatan Keo Tengah</option>
+                        <option value="mauponggo">Kecamatan Mauponggo</option>
+                        <option value="nangaroro">Kecamatan Nangaroro</option>
+                        <option value="wolowae">Kecamatan Wolowae</option>
+                    </select>
+                </div>
                 <select id="filter-posko" class="px-4 py-2 border border-slate-600 rounded-lg text-slate-300 bg-slate-800 focus:outline-none focus:border-trust-500 text-sm cursor-pointer glass-dark appearance-none pr-8">
                     <option value="all">Semua Posko (Rekap Keseluruhan)</option>
                     <!-- Options populated by JS -->
@@ -195,7 +207,7 @@
 
     <script type="module">
         import { db, auth } from './src/firebase.js';
-        import { collection, onSnapshot, query, orderBy, doc, getDoc } from 'firebase/firestore';
+        import { collection, onSnapshot, query, orderBy, doc, getDoc, where } from 'firebase/firestore';
         import { onAuthStateChanged } from 'firebase/auth';
 
         lucide.createIcons();
@@ -207,11 +219,28 @@
         const tableContainer = document.getElementById('table-container');
         const recapContainer = document.getElementById('recap-container');
 
+        let currentKecamatan = 'pusat';
+        let unsubKK, unsubAnggota;
+
         onAuthStateChanged(auth, async (user) => {
             if (user && user.email.includes('admin')) {
+                const emailPrefix = user.email.split('@')[0];
+                const kecamatanSelector = document.getElementById('kecamatan-selector');
+                const selectKecamatan = document.getElementById('filter-kecamatan');
+
+                if (emailPrefix === 'admin' || emailPrefix === 'admin_pusat') {
+                    kecamatanSelector.classList.remove('hidden');
+                } else if (emailPrefix.startsWith('admin_')) {
+                    currentKecamatan = emailPrefix.replace('admin_', '');
+                    const opt = Array.from(selectKecamatan.options).find(o => o.value === currentKecamatan);
+                    if (opt) selectKecamatan.value = currentKecamatan;
+                }
+
                 // Load Kop Surat Configuration
                 try {
-                    const docSnap = await getDoc(doc(db, "pengaturan", "kopsurat"));
+                    // Karena id dokumen menggunakan prefix kopsurat_aesesa dll
+                    const docIdKop = currentKecamatan === 'pusat' ? 'kopsurat' : `kopsurat_${currentKecamatan}`;
+                    const docSnap = await getDoc(doc(db, "pengaturan", docIdKop));
                     if (docSnap.exists()) {
                         const data = docSnap.data();
                         if (data.nama1) document.getElementById('print-nama1').innerText = data.nama1;
@@ -229,66 +258,80 @@
                     console.error("Gagal load pengaturan kop surat", e);
                 }
 
-                // Listen Total KK & Build Map Data Keluarga
-                onSnapshot(collection(db, "keluarga"), (snapshot) => {
-                    document.getElementById('stat-kk-pengungsi').innerText = snapshot.size;
-                    
-                    window.keluargaMap = {};
-                    snapshot.forEach(doc => {
-                        window.keluargaMap[doc.id] = doc.data();
-                    });
-                    
-                    // Render ulang tabel jika data pengungsi sudah ter-load
-                    if (window.pengungsiData) {
-                        window.renderData();
-                    }
-                });
+                const loadData = () => {
+                    const kecaVal = (emailPrefix === 'admin' || emailPrefix === 'admin_pusat') ? selectKecamatan.value : currentKecamatan;
+                    currentKecamatan = kecaVal;
 
-                const q = query(collection(db, "anggota"));
-                
-                onSnapshot(q, (snapshot) => {
-                    loading.classList.add('hidden');
-                    
-                    if (snapshot.empty) {
-                        emptyState.classList.remove('hidden');
-                        tableContainer.classList.add('hidden');
-                        recapContainer.classList.add('hidden');
-                        return;
-                    }
+                    if (unsubKK) unsubKK();
+                    if (unsubAnggota) unsubAnggota();
 
+                    loading.classList.remove('hidden');
                     emptyState.classList.add('hidden');
-                    tableContainer.classList.remove('hidden');
-                    recapContainer.classList.remove('hidden');
-                    
-                    // Variabel global untuk menampung data
-                    window.pengungsiData = [];
-                    
-                    snapshot.forEach(doc => {
-                        window.pengungsiData.push(doc.data());
-                    });
-                    
-                    // Render Dropdown Posko
-                    const poskoSet = new Set(window.pengungsiData.map(d => d.poskoAktif || 'Tidak Diketahui'));
-                    const filterSelect = document.getElementById('filter-posko');
-                    // Simpan opsi "Semua Posko"
-                    const defaultOption = '<option value="all">Semua Posko (Rekap Keseluruhan)</option>';
-                    let optionsHtml = defaultOption;
-                    poskoSet.forEach(posko => {
-                        optionsHtml += `<option value="${posko}">${posko}</option>`;
-                    });
-                    
-                    // Hanya update options jika jumlahnya berubah untuk mencegah reset saat data real-time masuk
-                    if(filterSelect.options.length - 1 !== poskoSet.size) {
-                        const currentValue = filterSelect.value;
-                        filterSelect.innerHTML = optionsHtml;
-                        if(Array.from(filterSelect.options).some(opt => opt.value === currentValue)) {
-                            filterSelect.value = currentValue;
-                        }
-                    }
+                    tableContainer.classList.add('hidden');
+                    recapContainer.classList.add('hidden');
 
-                    // Fungsi Render Tabel berdasarkan Filter
-                    window.renderData = function() {
-                        const selectedPosko = filterSelect.value;
+                    let qKK = kecaVal === 'pusat' ? query(collection(db, "keluarga")) : query(collection(db, "keluarga"), where("kecamatan", "==", kecaVal));
+
+                    // Listen Total KK & Build Map Data Keluarga
+                    unsubKK = onSnapshot(qKK, (snapshot) => {
+                        window.keluargaMap = {};
+                        snapshot.forEach(doc => {
+                            window.keluargaMap[doc.id] = doc.data();
+                        });
+                        
+                        // Render ulang tabel jika data pengungsi sudah ter-load
+                        if (window.pengungsiData) {
+                            window.renderData();
+                        }
+                    });
+
+                    unsubAnggota = onSnapshot(collection(db, "anggota"), (snapshot) => {
+                        loading.classList.add('hidden');
+                        
+                        // Variabel global untuk menampung data
+                        window.pengungsiData = [];
+                        
+                        snapshot.forEach(doc => {
+                            const data = doc.data();
+                            // HANYA MASUKKAN JIKA KELUARGANYA ADA DI MAP
+                            if (window.keluargaMap && window.keluargaMap[data.kkId]) {
+                                window.pengungsiData.push(data);
+                            }
+                        });
+
+                        if (window.pengungsiData.length === 0) {
+                            emptyState.classList.remove('hidden');
+                            tableContainer.classList.add('hidden');
+                            recapContainer.classList.add('hidden');
+                            return;
+                        }
+
+                        emptyState.classList.add('hidden');
+                        tableContainer.classList.remove('hidden');
+                        recapContainer.classList.remove('hidden');
+                        
+                        // Render Dropdown Posko
+                        const poskoSet = new Set(window.pengungsiData.map(d => d.poskoAktif || 'Tidak Diketahui'));
+                        const filterSelect = document.getElementById('filter-posko');
+                        // Simpan opsi "Semua Posko"
+                        const defaultOption = '<option value="all">Semua Posko (Rekap Keseluruhan)</option>';
+                        let optionsHtml = defaultOption;
+                        poskoSet.forEach(posko => {
+                            optionsHtml += `<option value="${posko}">${posko}</option>`;
+                        });
+                        
+                        // Hanya update options jika jumlahnya berubah untuk mencegah reset saat data real-time masuk
+                        if(filterSelect.options.length - 1 !== poskoSet.size) {
+                            const currentValue = filterSelect.value;
+                            filterSelect.innerHTML = optionsHtml;
+                            if(Array.from(filterSelect.options).some(opt => opt.value === currentValue)) {
+                                filterSelect.value = currentValue;
+                            }
+                        }
+
+                        // Fungsi Render Tabel berdasarkan Filter
+                        window.renderData = function() {
+                            const selectedPosko = filterSelect.value;
                         let html = '';
                         let recapHtml = '';
                         const poskoStats = {};
@@ -413,13 +456,16 @@
 
                     // Panggil render data pertama kali
                     window.renderData();
-                    
-                    // Event listener filter
-                    filterSelect.addEventListener('change', window.renderData);
-                }, (error) => {
-                    console.error("Error fetching pengungsi:", error);
-                    loading.innerHTML = `<p class="text-red-500">Gagal memuat data: ${error.message}</p>`;
+                };
+
+                loadData();
+                
+                selectKecamatan.addEventListener('change', () => {
+                    loadData();
                 });
+                
+                // Event listener filter
+                document.getElementById('filter-posko').addEventListener('change', window.renderData);
             }
         });
     </script>

@@ -223,7 +223,8 @@
                     imageUrl: base64Image,
                     storagePath: fileName,
                     caption: caption,
-                    createdAt: serverTimestamp()
+                    createdAt: serverTimestamp(),
+                    kecamatan: localStorage.getItem('kecamatan') || "aesesa"
                 });
 
                 progressBar.style.width = '100%';

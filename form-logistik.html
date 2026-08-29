@@ -259,7 +259,8 @@
                         posko: localStorage.getItem('poskoName') || "Posko Nagekeo",
                         pelapor: auth.currentUser?.email || "Relawan Anonim",
                         kebutuhan: kebutuhanData,
-                        createdAt: serverTimestamp()
+                        createdAt: serverTimestamp(),
+                        kecamatan: localStorage.getItem('kecamatan') || "aesesa"
                     });
                     alert("Laporan logistik berhasil dikirim ke Command Center!");
                 }

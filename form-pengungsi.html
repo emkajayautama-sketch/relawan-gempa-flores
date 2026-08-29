@@ -176,7 +176,8 @@
                             desaAsal: desa,
                             createdAt: new Date(),
                             pelapor: user.email || "Relawan Anonim",
-                            poskoAktif: localStorage.getItem('poskoName') || "Posko Nagekeo"
+                            poskoAktif: localStorage.getItem('poskoName') || "Posko Nagekeo",
+                            kecamatan: localStorage.getItem('kecamatan') || "aesesa"
                         });
                         nextId = docRef.id;
                         alert("Data KK berhasil disimpan (Offline Mode Aktif). Lanjut ke pengisian data anggota!");
