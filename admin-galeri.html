@@ -136,6 +136,9 @@
                 <span id="selected-count" class="text-trust-400 font-bold text-xl mr-1">0</span> Foto Terpilih
             </div>
             <div class="h-6 w-px bg-slate-600"></div>
+            <button id="btn-bulk-cetak" class="flex items-center text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-500 px-4 py-2 rounded-xl transition-colors">
+                <i data-lucide="printer" class="w-4 h-4 mr-2"></i> Cetak Foto
+            </button>
             <button id="btn-bulk-download" class="flex items-center text-sm font-medium text-white bg-trust-600 hover:bg-trust-500 px-4 py-2 rounded-xl transition-colors">
                 <i data-lucide="download" class="w-4 h-4 mr-2"></i> Download Semua
             </button>
@@ -147,6 +150,38 @@
             </button>
         </div>
     </main>
+
+    <!-- PRINT AREA GALERI -->
+    <div id="print-area-galeri" class="hidden print:block text-black bg-white absolute inset-0 z-[100] p-8 w-full min-h-screen">
+        <!-- Kop Surat Header -->
+        <div class="border-b-4 border-double border-black pb-4 text-center mb-6">
+            <img id="print-logo" src="" class="w-full max-h-32 object-contain mx-auto mb-2 hidden">
+            <div id="print-text-container">
+                <h1 id="print-nama1" class="text-2xl font-bold uppercase tracking-widest">Tim Relawan Kemanusiaan</h1>
+                <h2 id="print-nama2" class="text-xl font-bold uppercase">Posko Utama Relawan Gempa Flores</h2>
+                <p id="print-alamat" class="text-sm">Jalan Raya Trans Flores, Kabupaten Nagekeo, Nusa Tenggara Timur</p>
+            </div>
+        </div>
+        
+        <h3 class="text-center text-xl font-bold uppercase mb-8">LAMPIRAN DOKUMENTASI LAPANGAN</h3>
+        
+        <!-- Grid for Photos (2 Columns) -->
+        <div id="print-gallery-grid" class="grid grid-cols-2 gap-6">
+            <!-- Photos will be injected here -->
+        </div>
+
+        <!-- Footer Signature -->
+        <div class="flex justify-end pr-8 mt-12 break-inside-avoid">
+            <div class="text-center">
+                <p class="mb-1">Mbay, <span id="print-date-ttd"></span></p>
+                <p class="font-bold uppercase">KORDINATOR RELAWAN GEMPA FLORES</p>
+                <p class="font-bold uppercase mb-24">POSKO UTAMA</p>
+                
+                <p class="font-bold underline uppercase">( ........................................ )</p>
+                <p class="text-left">Ketua</p>
+            </div>
+        </div>
+    </div>
 
     <!-- Fullscreen Image Modal -->
     <div id="image-modal" class="hidden fixed inset-0 z-50 bg-slate-950/95 backdrop-blur-md flex flex-col items-center justify-center p-4 transition-opacity">
@@ -174,6 +209,12 @@
     </div>
 
     <style>
+        @media print {
+            body { overflow: visible !important; height: auto !important; display: block !important; }
+            main, aside, #bulk-action-bar, #image-modal { display: none !important; }
+            #print-area-galeri { position: relative !important; display: block !important; overflow: visible !important; }
+            .page-break { page-break-inside: avoid; break-inside: avoid; }
+        }
         .custom-scrollbar::-webkit-scrollbar { width: 6px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
@@ -182,7 +223,7 @@
 
     <script type="module">
         import { db, auth } from './src/firebase.js';
-        import { collection, onSnapshot, query, orderBy, limit, doc, deleteDoc } from 'firebase/firestore';
+        import { collection, onSnapshot, query, orderBy, limit, doc, deleteDoc, getDoc, doc as fDoc } from 'firebase/firestore';
         import { onAuthStateChanged } from 'firebase/auth';
 
         lucide.createIcons();
@@ -211,8 +252,27 @@
 
         // Fetch dari Firestore (collection 'dokumentasi')
         // Kita harus menunggu status login (token) dari Firebase siap sebelum menarik data
-        onAuthStateChanged(auth, (user) => {
+        onAuthStateChanged(auth, async (user) => {
             if (user) {
+                // Fetch Kop Surat
+                try {
+                    const docSnap = await getDoc(fDoc(db, "pengaturan", "kopsurat"));
+                    if (docSnap.exists()) {
+                        const d = docSnap.data();
+                        if (d.nama1) document.getElementById('print-nama1').innerText = d.nama1;
+                        if (d.nama2) document.getElementById('print-nama2').innerText = d.nama2;
+                        if (d.alamat) document.getElementById('print-alamat').innerText = d.alamat;
+                        if (d.logoUrl) {
+                            const logoImg = document.getElementById('print-logo');
+                            logoImg.src = d.logoUrl;
+                            logoImg.classList.remove('hidden');
+                            document.getElementById('print-text-container').classList.add('hidden');
+                        }
+                    }
+                } catch(e) {
+                    console.error("Gagal load pengaturan kop surat", e);
+                }
+
                 const q = query(collection(db, "dokumentasi"), orderBy("createdAt", "desc"), limit(50));
                 
                 onSnapshot(q, (snapshot) => {
@@ -387,6 +447,52 @@
 
         document.getElementById('btn-toggle-select').addEventListener('click', toggleSelectionMode);
         document.getElementById('btn-cancel-select').addEventListener('click', toggleSelectionMode);
+
+        document.getElementById('btn-bulk-cetak').addEventListener('click', () => {
+            if (selectedPhotos.size === 0) {
+                alert("Pilih foto terlebih dahulu.");
+                return;
+            }
+            if (selectedPhotos.size > 12) {
+                if(!confirm(`Anda memilih ${selectedPhotos.size} foto. Lanjutkan?`)) {
+                    return;
+                }
+            }
+
+            const gridPrint = document.getElementById('print-gallery-grid');
+            gridPrint.innerHTML = '';
+            
+            document.getElementById('print-date-ttd').innerText = new Date().toLocaleDateString('id-ID', {day: 'numeric', month: 'long', year: 'numeric'});
+
+            Array.from(selectedPhotos).forEach(photo => {
+                const timeStr = photo.createdAt ? photo.createdAt.toDate().toLocaleString('id-ID', {
+                    day: 'numeric', month: 'short', hour: '2-digit', minute:'2-digit'
+                }) : '';
+                const imgSrc = photo.imageUrl || 'https://via.placeholder.com/400x300/1e293b/64748b?text=No+Image';
+                const safeCaption = photo.caption || 'Tanpa keterangan';
+                
+                const itemDiv = document.createElement('div');
+                itemDiv.className = "flex flex-col border border-gray-400 p-2 rounded-lg page-break bg-gray-50/50 shadow-sm";
+                itemDiv.innerHTML = `
+                    <div class="h-64 w-full bg-gray-100 mb-2 overflow-hidden flex items-center justify-center rounded border border-gray-200">
+                        <img src="${imgSrc}" class="max-w-full max-h-full object-contain">
+                    </div>
+                    <div class="text-base font-bold text-gray-900">${photo.posko}</div>
+                    <div class="text-sm text-gray-700 italic mb-2">"${safeCaption}"</div>
+                    <div class="text-xs text-gray-500 mt-auto pt-2 border-t border-gray-300 flex justify-between">
+                        <span><i data-lucide="user" class="inline w-3 h-3"></i> ${photo.pelapor || 'Relawan'}</span>
+                        <span><i data-lucide="clock" class="inline w-3 h-3"></i> ${timeStr}</span>
+                    </div>
+                `;
+                gridPrint.appendChild(itemDiv);
+            });
+            lucide.createIcons();
+            
+            setTimeout(() => {
+                window.print();
+                toggleSelectionMode();
+            }, 500);
+        });
 
         document.getElementById('btn-bulk-delete').addEventListener('click', async () => {
             if (confirm(`Yakin ingin menghapus ${selectedPhotos.size} foto? Tindakan ini tidak dapat dibatalkan.`)) {
